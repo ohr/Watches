@@ -2,7 +2,9 @@ package com.ear.watches.data.model
 
 import androidx.annotation.StringRes
 import com.ear.watches.R
+import kotlinx.serialization.Serializable
 
+@Serializable
 enum class AppLanguage(
     val languageTag: String,
     @StringRes val labelResId: Int

@@ -1,5 +1,8 @@
 package com.ear.watches.data.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 enum class AppPrecision(
     val displayName: String,
     val decimalDigits: Int

@@ -4,8 +4,8 @@ import com.ear.watches.data.model.AppPrecision
 import com.ear.watches.data.model.LapRecord
 import com.ear.watches.data.model.RunSession
 import com.ear.watches.data.model.StopwatchItem
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 
 class RaceResultsFormatterTest {
 

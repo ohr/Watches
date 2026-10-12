@@ -38,6 +38,10 @@ android {
     }
 }
 
+tasks.withType<Test> {
+    useJUnitPlatform()
+}
+
 androidComponents {
     onVariants { variant ->
         variant.outputs.forEach { output ->
@@ -78,6 +82,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.core)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.logging.interceptor)
     implementation(libs.moshi.kotlin)
     implementation(libs.okhttp)
@@ -85,7 +90,10 @@ dependencies {
     implementation(libs.retrofit)
     testImplementation(libs.androidx.core)
     testImplementation(libs.androidx.junit)
-    testImplementation(libs.junit)
+    testImplementation(libs.junit.jupiter.api)
+    testRuntimeOnly(libs.junit.jupiter.engine)
+    testImplementation(libs.junit.jupiter.params)
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)

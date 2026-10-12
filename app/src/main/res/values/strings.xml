@@ -53,6 +53,18 @@
     <string name="language_english">English</string>
     <string name="language_german">German</string>
 
+    <!-- Theme Options -->
+    <string name="setting_theme_mode">Theme</string>
+    <string name="theme_system_default">System Default</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+
+    <!-- Font Size Options -->
+    <string name="setting_font_size">Text Size</string>
+    <string name="font_size_small">Small</string>
+    <string name="font_size_normal">Normal</string>
+    <string name="font_size_large">Large</string>
+
     <!-- Stopwatch Tile & Focus Badge -->
     <string name="badge_focus">FOCUS</string>
     <string name="label_last_lap">Last Lap</string>

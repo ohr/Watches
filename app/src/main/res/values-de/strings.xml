@@ -53,6 +53,18 @@
     <string name="language_english">Englisch</string>
     <string name="language_german">Deutsch</string>
 
+    <!-- Theme Options -->
+    <string name="setting_theme_mode">Design</string>
+    <string name="theme_system_default">System</string>
+    <string name="theme_light">Hell</string>
+    <string name="theme_dark">Dunkel</string>
+
+    <!-- Font Size Options -->
+    <string name="setting_font_size">Textgröße</string>
+    <string name="font_size_small">Klein</string>
+    <string name="font_size_normal">Normal</string>
+    <string name="font_size_large">Groß</string>
+
     <!-- Stopwatch Tile & Focus Badge -->
     <string name="badge_focus">FOKUS</string>
     <string name="label_last_lap">Letzte Runde</string>
@@ -84,7 +96,7 @@
 
     <!-- Empty State & Share Toast -->
     <string name="empty_state_title">Keine Stoppuhren aktiv</string>
-    <string name="empty_state_message">Fügen Sie einzelne Stoppuhren für Athleten hinzu oder nutzen Sie Mehrere Hinzufügen für Ihr gesamtes Team.</string>
+    <string name="empty_state_message">Fügen Sie einzelne Stoppuhren für Athleten hinzu oder nutzen Sie "Mehrere Uhren" für Ihr gesamtes Team.</string>
     <string name="share_subject">Mehrfach-Stoppuhr Rennergebnisse</string>
     <string name="share_chooser_title">Ergebnisse teilen über</string>
     <string name="share_error_toast">Keine App zum Teilen von Ergebnissen verfügbar</string>

@@ -5,8 +5,9 @@ import com.ear.watches.data.model.LapRecord
 import com.ear.watches.data.model.RunSession
 import com.ear.watches.data.model.StopwatchItem
 import com.ear.watches.data.util.TimeFormatter
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 
 class StopwatchTileLogicTest {
 
@@ -84,8 +85,8 @@ class StopwatchTileLogicTest {
         )
 
         // Reset button handles short click and long click for both running and stopped states
-        org.junit.Assert.assertTrue(runningWatch.id.isNotBlank())
-        org.junit.Assert.assertTrue(stoppedWatch.id.isNotBlank())
+        assertTrue(runningWatch.id.isNotBlank())
+        assertTrue(stoppedWatch.id.isNotBlank())
     }
 
     @Test

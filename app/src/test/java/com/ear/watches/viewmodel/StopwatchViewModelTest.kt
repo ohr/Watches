@@ -1,9 +1,11 @@
 package com.ear.watches.viewmodel
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import com.ear.watches.data.model.AppFontSize
 import com.ear.watches.data.model.AppLanguage
 import com.ear.watches.data.model.AppPrecision
 import com.ear.watches.data.model.AppSettings
+import com.ear.watches.data.model.AppThemeMode
 import com.ear.watches.data.repository.SettingsRepository
 import com.ear.watches.data.util.TimeProvider
 import com.ear.watches.ui.viewmodel.StopwatchViewModel
@@ -14,14 +16,14 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
+import java.io.File
 
 class TestTimeProvider(var currentTime: Long = 1000L) : TimeProvider {
     override fun currentTimeMillis(): Long = currentTime
@@ -34,14 +36,14 @@ class TestTimeProvider(var currentTime: Long = 1000L) : TimeProvider {
 @OptIn(ExperimentalCoroutinesApi::class)
 class StopwatchViewModelTest {
 
-    @get:Rule
-    val tmpFolder = TemporaryFolder()
+    @TempDir
+    lateinit var tempDir: File
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var timeProvider: TestTimeProvider
     private lateinit var viewModel: StopwatchViewModel
 
-    @Before
+    @BeforeEach
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         timeProvider = TestTimeProvider(1000L)
@@ -51,7 +53,7 @@ class StopwatchViewModelTest {
         )
     }
 
-    @After
+    @AfterEach
     fun tearDown() {
         Dispatchers.resetMain()
     }
@@ -325,7 +327,7 @@ class StopwatchViewModelTest {
         viewModel.lapStopwatch(id1)
 
         // Lap watch2 at 20,000ms total relative to lap 1, so 60,000ms total (expected next = 120,000ms)
-        // Let's manually add lap at 20,000ms total for watch2 to test exact ordering:
+        // Let me manually add lap at 20,000ms total for watch2 to test exact ordering:
         // watch0: 0 laps
         // watch1: 1 lap (40,000ms, expected next = 80,000ms)
         // watch2: 1 lap (20,000ms, expected next = 40,000ms)
@@ -576,7 +578,7 @@ class StopwatchViewModelTest {
 
     @Test
     fun viewModel_withSettingsRepository_togglesAndPersistsSettings() = runTest(testDispatcher) {
-        val testFile = tmpFolder.newFile("vm_test_settings.preferences_pb")
+        val testFile = File(tempDir, "vm_test_settings.preferences_pb")
         val dataStore = PreferenceDataStoreFactory.create(
             scope = this,
             produceFile = { testFile }
@@ -615,11 +617,20 @@ class StopwatchViewModelTest {
         vm.toggleAutoSort()
         assertTrue(vm.uiState.value.settings.autoSortEnabled)
         assertTrue(settingsRepository.settingsFlow.first().autoSortEnabled)
+
+        // Set theme mode & font size scale
+        vm.setThemeMode(AppThemeMode.DARK)
+        assertEquals(AppThemeMode.DARK, vm.uiState.value.settings.themeMode)
+        assertEquals(AppThemeMode.DARK, settingsRepository.settingsFlow.first().themeMode)
+
+        vm.setFontSizeScale(AppFontSize.LARGE)
+        assertEquals(AppFontSize.LARGE, vm.uiState.value.settings.fontSizeScale)
+        assertEquals(AppFontSize.LARGE, settingsRepository.settingsFlow.first().fontSizeScale)
     }
 
     @Test
     fun viewModel_observesSettingsRepositoryFlowUpdates() = runTest(testDispatcher) {
-        val testFile = tmpFolder.newFile("vm_observe_settings.preferences_pb")
+        val testFile = File(tempDir, "vm_observe_settings.preferences_pb")
         val dataStore = PreferenceDataStoreFactory.create(
             scope = this,
             produceFile = { testFile }

@@ -2,9 +2,11 @@ package com.ear.watches.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ear.watches.data.model.AppFontSize
 import com.ear.watches.data.model.AppLanguage
 import com.ear.watches.data.model.AppPrecision
 import com.ear.watches.data.model.AppSettings
+import com.ear.watches.data.model.AppThemeMode
 import com.ear.watches.data.model.LapRecord
 import com.ear.watches.data.model.RunSession
 import com.ear.watches.data.model.StopwatchItem
@@ -530,6 +532,24 @@ class StopwatchViewModel(
         }
         viewModelScope.launch(dispatcher) {
             settingsRepository?.setAppLanguage(language)
+        }
+    }
+
+    fun setThemeMode(themeMode: AppThemeMode) {
+        _uiState.update { state ->
+            state.copy(settings = state.settings.copy(themeMode = themeMode))
+        }
+        viewModelScope.launch(dispatcher) {
+            settingsRepository?.setThemeMode(themeMode)
+        }
+    }
+
+    fun setFontSizeScale(fontSizeScale: AppFontSize) {
+        _uiState.update { state ->
+            state.copy(settings = state.settings.copy(fontSizeScale = fontSizeScale))
+        }
+        viewModelScope.launch(dispatcher) {
+            settingsRepository?.setFontSizeScale(fontSizeScale)
         }
     }
 

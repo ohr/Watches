@@ -2,8 +2,8 @@ package com.ear.watches.data
 
 import com.ear.watches.data.model.AppPrecision
 import com.ear.watches.data.util.TimeFormatter
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
 class TimeFormatterTest {
 

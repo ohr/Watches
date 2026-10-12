@@ -307,6 +307,8 @@ fun MainStopwatchScreen(
             onToggleAutoSort = { viewModel.toggleAutoSort() },
             onSetPrecision = { viewModel.setPrecision(it) },
             onSetLanguage = { viewModel.setLanguage(it) },
+            onSetThemeMode = { viewModel.setThemeMode(it) },
+            onSetFontSizeScale = { viewModel.setFontSizeScale(it) },
             onDismiss = { showSettingsDialog = false }
         )
     }

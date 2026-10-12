@@ -51,7 +51,10 @@ class MainActivity : ComponentActivity() {
                 updateAppLocale(uiState.settings.language)
             }
 
-            WatchesTheme {
+            WatchesTheme(
+                themeMode = uiState.settings.themeMode,
+                fontSizeScale = uiState.settings.fontSizeScale
+            ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     MainStopwatchScreen(
                         viewModel = viewModel,
