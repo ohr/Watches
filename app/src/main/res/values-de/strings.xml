@@ -1,0 +1,134 @@
+<resources>
+    <string name="app_name">Coach Stoppuhr</string>
+
+    <!-- Buttons -->
+    <string name="btn_start">Start</string>
+    <string name="btn_stop">Stopp</string>
+    <string name="btn_pause">Pause</string>
+    <string name="btn_lap">Runde</string>
+    <string name="btn_reset">Zurück</string>
+    <string name="btn_delete">Löschen</string>
+    <string name="btn_edit">Bearbeiten</string>
+    <string name="btn_save">Speichern</string>
+    <string name="btn_cancel">Abbrechen</string>
+    <string name="btn_done">Fertig</string>
+    <string name="btn_share">Teilen</string>
+
+    <!-- Global Bar Actions -->
+    <string name="action_start_all">Starten</string>
+    <string name="action_stop_all">Stoppen</string>
+    <string name="action_reset_all">Alle Zurück</string>
+    <string name="action_add_watch">Neue Uhr</string>
+    <string name="action_batch_add">Mehrere Uhren</string>
+    <string name="action_share">Teilen</string>
+    <string name="action_settings">Einstellungen</string>
+
+    <!-- Dialog Titles & Labels -->
+    <string name="dialog_edit_watch_title">Stoppuhr Bearbeiten</string>
+    <string name="dialog_edit_watch_name_label">Name</string>
+    <string name="dialog_edit_watch_color_label">Farbe</string>
+
+    <string name="dialog_batch_add_title">Mehrere Stoppuhren Hinzufügen</string>
+    <string name="dialog_batch_add_count_label">Anzahl</string>
+    <string name="dialog_batch_add_prefix_label">Namenspräfix</string>
+    <string name="dialog_batch_add_number_athletes">Anzahl der Athleten (1 – 12)</string>
+    <string name="dialog_batch_add_confirm">%1$d Stoppuhren Hinzufügen</string>
+
+    <string name="dialog_settings_title">Einstellungen</string>
+    <string name="setting_sound_haptics">Ton &amp; Haptik</string>
+    <string name="setting_sound_haptics_desc">Vibrations-/Tonsignale bei Tastendruck</string>
+    <string name="setting_hardware_keys">Lautstärketasten</string>
+    <string name="setting_hardware_keys_desc">Lauter = Start/Runde (Fokus), Leiser = Stopp/Zurücksetzen</string>
+    <string name="setting_auto_sort">Automatisches Sortieren nach nächster Runde</string>
+    <string name="setting_time_precision">Zeitgenauigkeit</string>
+
+    <!-- Precision Options -->
+    <string name="precision_tenths">Zehntel (0,1s)</string>
+    <string name="precision_hundredths">Hundertstel (0,01s)</string>
+    <string name="precision_seconds">Sekunden (1s)</string>
+
+    <!-- Language Options -->
+    <string name="setting_language">Sprache</string>
+    <string name="language_system_default">Systemstandard</string>
+    <string name="language_english">Englisch</string>
+    <string name="language_german">Deutsch</string>
+
+    <!-- Stopwatch Tile & Focus Badge -->
+    <string name="badge_focus">FOKUS</string>
+    <string name="label_last_lap">Letzte Runde</string>
+    <string name="label_last_lap_format">Letzte Runde: %1$s (%2$d)</string>
+    <string name="status_running">LÄUFT</string>
+    <string name="status_stopped">GESTOPPT</string>
+    <string name="cd_toggle_time_display">Zwischen Rundenzeit und Gesamtzeit umschalten</string>
+    <string name="label_current_lap">Aktuelle Runde</string>
+    <string name="label_overall_time">Gesamtzeit</string>
+    <string name="label_lap_tag">RUNDE</string>
+
+    <!-- Race Results Exporter Text Labels -->
+    <string name="report_title">Rennergebnisse Übersicht</string>
+    <string name="report_header_banner">MEHRFACH-STOPPUHR ERGEBNISSE</string>
+    <string name="report_total_athletes">Gesamtzahl Athleten/Stoppuhren: %1$d</string>
+    <string name="report_runner">Läufer</string>
+    <string name="report_runner_format">%1$d. Läufer: %2$s</string>
+    <string name="report_status">Status</string>
+    <string name="report_total_time">Gesamtzeit</string>
+    <string name="report_total_elapsed_time_format">Gesamtzeit: %1$s</string>
+    <string name="report_best_lap">Beste Runde</string>
+    <string name="report_best_lap_format">Beste Runde: %1$s (Runde %2$d)</string>
+    <string name="report_best_lap_na">Beste Runde: N/A</string>
+    <string name="report_laps">Runden</string>
+    <string name="report_lap_breakdown_format">Rundenaufschlüsselung (%1$d Runden):</string>
+    <string name="report_lap_entry_format">- Runde %1$d: %2$s | Kumuliert: %3$s</string>
+    <string name="report_laps_none">Runden: Keine aufgezeichnet</string>
+    <string name="report_no_data">Mehrfach-Stoppuhr Trainer Bericht\nKeine Stoppuhr-Daten verfügbar.</string>
+
+    <!-- Empty State & Share Toast -->
+    <string name="empty_state_title">Keine Stoppuhren aktiv</string>
+    <string name="empty_state_message">Fügen Sie einzelne Stoppuhren für Athleten hinzu oder nutzen Sie Mehrere Hinzufügen für Ihr gesamtes Team.</string>
+    <string name="share_subject">Mehrfach-Stoppuhr Rennergebnisse</string>
+    <string name="share_chooser_title">Ergebnisse teilen über</string>
+    <string name="share_error_toast">Keine App zum Teilen von Ergebnissen verfügbar</string>
+
+    <!-- Stopwatch Detail Modal -->
+    <string name="title_stopwatch_details">Stoppuhr Details</string>
+    <string name="label_start_time">Startzeit</string>
+    <string name="label_end_time">Ende</string>
+    <string name="label_total_time">Gesamtzeit</string>
+    <string name="btn_share_stopwatch">Stoppuhr Teilen</string>
+    <string name="btn_close">Schließen</string>
+    <string name="label_lap_breakdown">Runden-Aufschlüsselung</string>
+    <string name="header_lap_num">Runde</string>
+    <string name="header_lap_time">Rundenzeit</string>
+    <string name="header_total_time">Gesamtzeit</string>
+    <string name="cd_stopwatch_details">Stoppuhr-Details anzeigen</string>
+    <string name="cd_close_details">Details schließen</string>
+
+    <!-- Accessibility / Content Descriptions -->
+    <string name="cd_decrease_count">Anzahl verringern</string>
+    <string name="cd_increase_count">Anzahl erhöhen</string>
+    <string name="cd_edit_watch">Stoppuhr-Namen bearbeiten</string>
+    <string name="cd_delete_watch">Stoppuhr löschen</string>
+    <string name="cd_selected">Ausgewählt</string>
+    <string name="default_athlete_prefix">Athlet</string>
+
+    <string name="subsecond_separator">,</string>
+
+    <!-- Multi-Run Strings -->
+    <string name="label_run">Lauf %1$d</string>
+    <string name="hint_hold_to_reset_all">0,5s gedrückt halten zum Zurücksetzen aller Läufe</string>
+    <string name="label_hold_to_reset_all">Zum vollständigen Zurücksetzen gedrückt halten</string>
+    <string name="label_total_all_runs">Gesamt</string>
+    <string name="label_run_duration">Laufdauer</string>
+
+    <!-- Help Dialog & Tooltips -->
+    <string name="cd_help">Hilfe</string>
+    <string name="dialog_help_title">Hilfe &amp; Kurzanleitung</string>
+    <string name="help_hardware_keys_title">Hardware-Lautstärketasten</string>
+    <string name="help_hardware_keys_desc">Lauter = Alle starten / Rundenzeit für fokussierte Stoppuhr\nLeiser = Fokussierte Stoppuhr stoppen / Alle zurücksetzen, wenn gestoppt</string>
+    <string name="help_reset_button_title">Zurücksetzen-Taste</string>
+    <string name="help_reset_button_desc">Kurz drücken (&lt;0,5s) = Anzeigezeit zurücksetzen &amp; beim nächsten Mal neuen Lauf starten\nLange drücken (&gt;0,5s) = Vollständiges Löschen aller Läufe und Runden</string>
+    <string name="help_detail_view_title">Detailansicht</string>
+    <string name="help_detail_view_desc">Tippen Sie auf das Info-Symbol einer Stoppuhr, um den Verlauf der Läufe anzuzeigen und Einzelergebnisse zu exportieren.</string>
+    <string name="help_precision_sort_title">Zeitgenauigkeit &amp; Auto-Sortierung</string>
+    <string name="help_precision_sort_desc">In den Einstellungen konfigurieren (Standard Zehntel 0,1s).</string>
+</resources>

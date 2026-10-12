@@ -1,0 +1,28 @@
+# Build outputs
+build/
+app/build/
+.gradle/
+*.apk
+*.aab
+*.aar
+*.dex
+*.class
+bin/
+gen/
+out/
+
+# IDE & environment settings
+.idea/
+*.iml
+local.properties
+.navigation/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# OS & temporary files
+.DS_Store
+Thumbs.db
+*.log
+.agent/
+.artifacts/

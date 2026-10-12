@@ -1,0 +1,134 @@
+<resources>
+    <string name="app_name">Coach Stopwatch</string>
+
+    <!-- Buttons -->
+    <string name="btn_start">Start</string>
+    <string name="btn_stop">Stop</string>
+    <string name="btn_pause">Pause</string>
+    <string name="btn_lap">Lap</string>
+    <string name="btn_reset">Reset</string>
+    <string name="btn_delete">Delete</string>
+    <string name="btn_edit">Edit</string>
+    <string name="btn_save">Save</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_done">Done</string>
+    <string name="btn_share">Share</string>
+
+    <!-- Global Bar Actions -->
+    <string name="action_start_all">Start All</string>
+    <string name="action_stop_all">Stop All</string>
+    <string name="action_reset_all">Reset All</string>
+    <string name="action_add_watch">Add Watch</string>
+    <string name="action_batch_add">Batch Add</string>
+    <string name="action_share">Share Results</string>
+    <string name="action_settings">Settings</string>
+
+    <!-- Dialog Titles & Labels -->
+    <string name="dialog_edit_watch_title">Edit Stopwatch</string>
+    <string name="dialog_edit_watch_name_label">Name</string>
+    <string name="dialog_edit_watch_color_label">Color</string>
+
+    <string name="dialog_batch_add_title">Batch Add Stopwatches</string>
+    <string name="dialog_batch_add_count_label">Count</string>
+    <string name="dialog_batch_add_prefix_label">Name Prefix</string>
+    <string name="dialog_batch_add_number_athletes">Number of Athletes (1 – 12)</string>
+    <string name="dialog_batch_add_confirm">Add %1$d Stopwatches</string>
+
+    <string name="dialog_settings_title">Settings</string>
+    <string name="setting_sound_haptics">Sound &amp; Haptics</string>
+    <string name="setting_sound_haptics_desc">Provide vibration/audio cues on button presses</string>
+    <string name="setting_hardware_keys">Hardware Volume Keys</string>
+    <string name="setting_hardware_keys_desc">Vol Up = Start/Lap (Focus), Vol Down = Stop/Reset</string>
+    <string name="setting_auto_sort">Auto-sort tiles by fastest/next lap</string>
+    <string name="setting_time_precision">Time Precision</string>
+
+    <!-- Precision Options -->
+    <string name="precision_tenths">Tenths (0.1s)</string>
+    <string name="precision_hundredths">Hundredths (0.01s)</string>
+    <string name="precision_seconds">Seconds (1s)</string>
+
+    <!-- Language Options -->
+    <string name="setting_language">Language</string>
+    <string name="language_system_default">System Default</string>
+    <string name="language_english">English</string>
+    <string name="language_german">German</string>
+
+    <!-- Stopwatch Tile & Focus Badge -->
+    <string name="badge_focus">FOCUS</string>
+    <string name="label_last_lap">Last Lap</string>
+    <string name="label_last_lap_format">Last Lap: %1$s (%2$d)</string>
+    <string name="status_running">RUNNING</string>
+    <string name="status_stopped">STOPPED</string>
+    <string name="cd_toggle_time_display">Toggle Current Lap / Overall Time</string>
+    <string name="label_current_lap">Current Lap</string>
+    <string name="label_overall_time">Overall Time</string>
+    <string name="label_lap_tag">LAP</string>
+
+    <!-- Race Results Exporter Text Labels -->
+    <string name="report_title">Race Results Summary</string>
+    <string name="report_header_banner">MULTI-STOPWATCH RESULTS</string>
+    <string name="report_total_athletes">Total Athletes/Stopwatches: %1$d</string>
+    <string name="report_runner">Runner</string>
+    <string name="report_runner_format">%1$d. Runner: %2$s</string>
+    <string name="report_status">Status</string>
+    <string name="report_total_time">Total Time</string>
+    <string name="report_total_elapsed_time_format">Total Elapsed Time: %1$s</string>
+    <string name="report_best_lap">Best Lap</string>
+    <string name="report_best_lap_format">Best Lap: %1$s (Lap %2$d)</string>
+    <string name="report_best_lap_na">Best Lap: N/A</string>
+    <string name="report_laps">Laps</string>
+    <string name="report_lap_breakdown_format">Lap Breakdown (%1$d laps):</string>
+    <string name="report_lap_entry_format">- Lap %1$d: %2$s | Cumulative: %3$s</string>
+    <string name="report_laps_none">Laps: None recorded</string>
+    <string name="report_no_data">Multi-Stopwatch Coach Report\nNo stopwatch data available.</string>
+
+    <!-- Empty State & Share Toast -->
+    <string name="empty_state_title">No Stopwatches Active</string>
+    <string name="empty_state_message">Add individual stopwatches for athletes or use Batch Add to set up your entire squad instantly.</string>
+    <string name="share_subject">Multi-Stopwatch Race Results</string>
+    <string name="share_chooser_title">Share Results via</string>
+    <string name="share_error_toast">No app available to share results</string>
+
+    <!-- Stopwatch Detail Modal -->
+    <string name="title_stopwatch_details">Stopwatch Details</string>
+    <string name="label_start_time">Start Time</string>
+    <string name="label_end_time">End</string>
+    <string name="label_total_time">Total Time</string>
+    <string name="btn_share_stopwatch">Share Stopwatch</string>
+    <string name="btn_close">Close</string>
+    <string name="label_lap_breakdown">Lap Breakdown</string>
+    <string name="header_lap_num">Lap</string>
+    <string name="header_lap_time">Lap Time</string>
+    <string name="header_total_time">Total Time</string>
+    <string name="cd_stopwatch_details">View Stopwatch Details</string>
+    <string name="cd_close_details">Close Details</string>
+
+    <!-- Accessibility / Content Descriptions -->
+    <string name="cd_decrease_count">Decrease count</string>
+    <string name="cd_increase_count">Increase count</string>
+    <string name="cd_edit_watch">Edit Watch Name</string>
+    <string name="cd_delete_watch">Delete Stopwatch</string>
+    <string name="cd_selected">Selected</string>
+    <string name="default_athlete_prefix">Athlete</string>
+
+    <string name="subsecond_separator">.</string>
+
+    <!-- Multi-Run Strings -->
+    <string name="label_run">Run %1$d</string>
+    <string name="hint_hold_to_reset_all">Hold 0.5s to reset all runs for all watches</string>
+    <string name="label_hold_to_reset_all">Hold to Reset All</string>
+    <string name="label_total_all_runs">Total</string>
+    <string name="label_run_duration">Run Duration</string>
+
+    <!-- Help Dialog & Tooltips -->
+    <string name="cd_help">Help</string>
+    <string name="dialog_help_title">Help &amp; Quick Guide</string>
+    <string name="help_hardware_keys_title">Hardware Volume Buttons</string>
+    <string name="help_hardware_keys_desc">Volume+ = Start All / Lap split for focused watch\nVolume- = Stop focused watch / Reset all when stopped</string>
+    <string name="help_reset_button_title">Reset Button</string>
+    <string name="help_reset_button_desc">Short press (&lt;0.5s) = reset display time &amp; start new run session next time\nLong press (&gt;0.5s) = full wipe of all runs and laps</string>
+    <string name="help_detail_view_title">Detail View</string>
+    <string name="help_detail_view_desc">Tap info icon on any watch tile to view run session history and export individual results.</string>
+    <string name="help_precision_sort_title">Time Precision &amp; Auto-Sort</string>
+    <string name="help_precision_sort_desc">Configure in Settings (Tenths 0.1s default).</string>
+</resources>
