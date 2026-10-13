@@ -49,6 +49,7 @@ class SettingsRepositoryTest {
         val settings = repository.settingsFlow.first()
         assertTrue(settings.soundAndHapticsEnabled)
         assertTrue(settings.hardwareVolumeKeysEnabled)
+        assertEquals(AppPrecision.TENTHS, settings.runningDisplayPrecision)
         assertEquals(AppPrecision.TENTHS, settings.timePrecision)
         assertEquals(AppLanguage.SYSTEM, settings.language)
         assertFalse(settings.autoSortEnabled)
@@ -68,6 +69,13 @@ class SettingsRepositoryTest {
         repository.setHardwareKeysEnabled(false)
         val settings = repository.settingsFlow.first()
         assertFalse(settings.hardwareVolumeKeysEnabled)
+    }
+
+    @Test
+    fun setRunningDisplayPrecision_updatesDataStoreAndFlow() = testScope.runTest {
+        repository.setRunningDisplayPrecision(AppPrecision.SECONDS)
+        val settings = repository.settingsFlow.first()
+        assertEquals(AppPrecision.SECONDS, settings.runningDisplayPrecision)
     }
 
     @Test
@@ -110,6 +118,7 @@ class SettingsRepositoryTest {
         val customSettings = AppSettings(
             soundAndHapticsEnabled = false,
             hardwareVolumeKeysEnabled = false,
+            runningDisplayPrecision = AppPrecision.HUNDREDTHS,
             timePrecision = AppPrecision.SECONDS,
             language = AppLanguage.ENGLISH,
             autoSortEnabled = true,
@@ -126,6 +135,7 @@ class SettingsRepositoryTest {
         dataStore.edit { preferences ->
             preferences[SettingsRepository.SOUND_HAPTICS_ENABLED] = false
             preferences[SettingsRepository.HARDWARE_KEYS_ENABLED] = true
+            preferences[SettingsRepository.RUNNING_DISPLAY_PRECISION] = AppPrecision.SECONDS.name
             preferences[SettingsRepository.TIME_PRECISION] = AppPrecision.HUNDREDTHS.name
             preferences[SettingsRepository.AUTO_SORT_ENABLED] = true
             preferences[SettingsRepository.APP_LANGUAGE] = AppLanguage.GERMAN.name
@@ -134,6 +144,7 @@ class SettingsRepositoryTest {
         val settings = repository.settingsFlow.first()
         assertFalse(settings.soundAndHapticsEnabled)
         assertTrue(settings.hardwareVolumeKeysEnabled)
+        assertEquals(AppPrecision.SECONDS, settings.runningDisplayPrecision)
         assertEquals(AppPrecision.HUNDREDTHS, settings.timePrecision)
         assertTrue(settings.autoSortEnabled)
         assertEquals(AppLanguage.GERMAN, settings.language)

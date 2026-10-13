@@ -130,10 +130,57 @@ class StopwatchViewModelTest {
         assertEquals(1, watch.currentRunLaps[0].lapNumber)
         assertEquals(4000L, watch.currentRunLaps[0].lapTimeMillis)
         assertEquals(4000L, watch.currentRunLaps[0].totalTimeMillis)
+        assertEquals(null, watch.currentRunLaps[0].lapDeltaMillis)
 
         assertEquals(2, watch.currentRunLaps[1].lapNumber)
         assertEquals(6000L, watch.currentRunLaps[1].lapTimeMillis)
         assertEquals(10000L, watch.currentRunLaps[1].totalTimeMillis)
+        assertEquals(2000L, watch.currentRunLaps[1].lapDeltaMillis)
+    }
+
+    @Test
+    fun lapStopwatch_calculatesLapDeltaMillis_fasterSlowerEqualAndNewSession() {
+        viewModel.addStopwatch("Runner Delta")
+        val watchId = viewModel.uiState.value.stopwatches.first().id
+
+        viewModel.startStopwatch(watchId)
+
+        // Lap 1: 14,2s (14200ms) -> no preceding lap -> lapDeltaMillis = null
+        timeProvider.advanceTimeBy(14200L)
+        viewModel.lapStopwatch(watchId)
+
+        // Lap 2: 13,0s (13000ms) -> faster by 1,2s (-1200ms)
+        timeProvider.advanceTimeBy(13000L)
+        viewModel.lapStopwatch(watchId)
+
+        // Lap 3: 13,8s (13800ms) -> slower by 0,8s (+800ms)
+        timeProvider.advanceTimeBy(13800L)
+        viewModel.lapStopwatch(watchId)
+
+        // Lap 4: 13,8s (13800ms) -> equal (0ms)
+        timeProvider.advanceTimeBy(13800L)
+        viewModel.lapStopwatch(watchId)
+
+        val watch = viewModel.uiState.value.stopwatches.first()
+        val laps = watch.currentRunLaps
+        assertEquals(4, laps.size)
+
+        assertEquals(null, laps[0].lapDeltaMillis)
+        assertEquals(-1200L, laps[1].lapDeltaMillis)
+        assertEquals(800L, laps[2].lapDeltaMillis)
+        assertEquals(0L, laps[3].lapDeltaMillis)
+
+        // Start Run 2 (New Session)
+        viewModel.pauseStopwatch(watchId)
+        viewModel.startStopwatch(watchId)
+
+        // Lap 1 of Run 2: 10000ms -> 1st lap in active run session -> lapDeltaMillis = null
+        timeProvider.advanceTimeBy(10000L)
+        viewModel.lapStopwatch(watchId)
+
+        val run2Laps = viewModel.uiState.value.stopwatches.first().currentRunLaps
+        assertEquals(1, run2Laps.size)
+        assertEquals(null, run2Laps[0].lapDeltaMillis)
     }
 
     @Test
@@ -395,6 +442,9 @@ class StopwatchViewModelTest {
         viewModel.toggleAutoSort()
         assertTrue(viewModel.uiState.value.settings.autoSortEnabled)
 
+        viewModel.setRunningDisplayPrecision(AppPrecision.SECONDS)
+        assertEquals(AppPrecision.SECONDS, viewModel.uiState.value.settings.runningDisplayPrecision)
+
         viewModel.setPrecision(AppPrecision.HUNDREDTHS)
         assertEquals(AppPrecision.HUNDREDTHS, viewModel.uiState.value.settings.timePrecision)
 
@@ -604,7 +654,11 @@ class StopwatchViewModelTest {
         assertFalse(vm.uiState.value.settings.hardwareVolumeKeysEnabled)
         assertFalse(settingsRepository.settingsFlow.first().hardwareVolumeKeysEnabled)
 
-        // Set precision & language
+        // Set running display precision & time precision & language
+        vm.setRunningDisplayPrecision(AppPrecision.SECONDS)
+        assertEquals(AppPrecision.SECONDS, vm.uiState.value.settings.runningDisplayPrecision)
+        assertEquals(AppPrecision.SECONDS, settingsRepository.settingsFlow.first().runningDisplayPrecision)
+
         vm.setPrecision(AppPrecision.HUNDREDTHS)
         assertEquals(AppPrecision.HUNDREDTHS, vm.uiState.value.settings.timePrecision)
         assertEquals(AppPrecision.HUNDREDTHS, settingsRepository.settingsFlow.first().timePrecision)
@@ -646,7 +700,8 @@ class StopwatchViewModelTest {
         val updatedSettings = AppSettings(
             soundAndHapticsEnabled = false,
             hardwareVolumeKeysEnabled = false,
-            timePrecision = AppPrecision.SECONDS,
+            runningDisplayPrecision = AppPrecision.SECONDS,
+            timePrecision = AppPrecision.HUNDREDTHS,
             language = AppLanguage.ENGLISH,
             autoSortEnabled = true
         )

@@ -40,7 +40,8 @@
     <string name="setting_hardware_keys">Hardware Volume Keys</string>
     <string name="setting_hardware_keys_desc">Vol Up = Start/Lap (Focus), Vol Down = Stop/Reset</string>
     <string name="setting_auto_sort">Auto-sort tiles by fastest/next lap</string>
-    <string name="setting_time_precision">Time Precision</string>
+    <string name="setting_running_display_precision">Running Time Precision</string>
+    <string name="setting_time_precision">Result &amp; Lap Precision</string>
 
     <!-- Precision Options -->
     <string name="precision_tenths">Tenths (0.1s)</string>
@@ -61,9 +62,9 @@
 
     <!-- Font Size Options -->
     <string name="setting_font_size">Text Size</string>
-    <string name="font_size_small">Small</string>
-    <string name="font_size_normal">Normal</string>
-    <string name="font_size_large">Large</string>
+    <string name="font_size_small">Small (85%)</string>
+    <string name="font_size_normal">Normal (100%)</string>
+    <string name="font_size_large">Large (115%)</string>
 
     <!-- Stopwatch Tile & Focus Badge -->
     <string name="badge_focus">FOCUS</string>
@@ -143,4 +144,9 @@
     <string name="help_detail_view_desc">Tap info icon on any watch tile to view run session history and export individual results.</string>
     <string name="help_precision_sort_title">Time Precision &amp; Auto-Sort</string>
     <string name="help_precision_sort_desc">Configure in Settings (Tenths 0.1s default).</string>
+
+    <!-- Pace Trend & Delta Strings -->
+    <string name="cd_pace_faster">Faster</string>
+    <string name="cd_pace_slower">Slower</string>
+    <string name="header_pace_delta">Delta</string>
 </resources>

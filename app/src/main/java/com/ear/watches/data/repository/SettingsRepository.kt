@@ -30,6 +30,7 @@ class SettingsRepository(
         val APP_SETTINGS_JSON = stringPreferencesKey("app_settings_json")
         val SOUND_HAPTICS_ENABLED = booleanPreferencesKey("sound_haptics_enabled")
         val HARDWARE_KEYS_ENABLED = booleanPreferencesKey("hardware_keys_enabled")
+        val RUNNING_DISPLAY_PRECISION = stringPreferencesKey("running_display_precision")
         val TIME_PRECISION = stringPreferencesKey("time_precision")
         val AUTO_SORT_ENABLED = booleanPreferencesKey("auto_sort_enabled")
         val APP_LANGUAGE = stringPreferencesKey("app_language")
@@ -64,6 +65,10 @@ class SettingsRepository(
     private fun fallbackFromPreferences(preferences: Preferences): AppSettings {
         val soundHaptics = preferences[SOUND_HAPTICS_ENABLED] ?: true
         val hardwareKeys = preferences[HARDWARE_KEYS_ENABLED] ?: true
+        val runningPrecisionStr = preferences[RUNNING_DISPLAY_PRECISION]
+        val runningPrecision = runningPrecisionStr?.let { str ->
+            AppPrecision.entries.find { it.name == str }
+        } ?: AppPrecision.TENTHS
         val precisionStr = preferences[TIME_PRECISION]
         val precision = precisionStr?.let { str ->
             AppPrecision.entries.find { it.name == str }
@@ -77,6 +82,7 @@ class SettingsRepository(
         return AppSettings(
             soundAndHapticsEnabled = soundHaptics,
             hardwareVolumeKeysEnabled = hardwareKeys,
+            runningDisplayPrecision = runningPrecision,
             timePrecision = precision,
             language = language,
             autoSortEnabled = autoSort,
@@ -101,6 +107,7 @@ class SettingsRepository(
             preferences[APP_SETTINGS_JSON] = json.encodeToString(updated)
             preferences[SOUND_HAPTICS_ENABLED] = updated.soundAndHapticsEnabled
             preferences[HARDWARE_KEYS_ENABLED] = updated.hardwareVolumeKeysEnabled
+            preferences[RUNNING_DISPLAY_PRECISION] = updated.runningDisplayPrecision.name
             preferences[TIME_PRECISION] = updated.timePrecision.name
             preferences[AUTO_SORT_ENABLED] = updated.autoSortEnabled
             preferences[APP_LANGUAGE] = updated.language.name
@@ -112,6 +119,7 @@ class SettingsRepository(
             preferences[APP_SETTINGS_JSON] = json.encodeToString(settings)
             preferences[SOUND_HAPTICS_ENABLED] = settings.soundAndHapticsEnabled
             preferences[HARDWARE_KEYS_ENABLED] = settings.hardwareVolumeKeysEnabled
+            preferences[RUNNING_DISPLAY_PRECISION] = settings.runningDisplayPrecision.name
             preferences[TIME_PRECISION] = settings.timePrecision.name
             preferences[AUTO_SORT_ENABLED] = settings.autoSortEnabled
             preferences[APP_LANGUAGE] = settings.language.name
@@ -124,6 +132,10 @@ class SettingsRepository(
 
     suspend fun setHardwareKeysEnabled(enabled: Boolean) {
         updateSettings { it.copy(hardwareVolumeKeysEnabled = enabled) }
+    }
+
+    suspend fun setRunningDisplayPrecision(precision: AppPrecision) {
+        updateSettings { it.copy(runningDisplayPrecision = precision) }
     }
 
     suspend fun setTimePrecision(precision: AppPrecision) {

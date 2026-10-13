@@ -235,7 +235,8 @@ fun MainStopwatchScreen(
                     ) { watch ->
                         StopwatchTile(
                             watch = watch,
-                            precision = uiState.settings.timePrecision,
+                            timePrecision = uiState.settings.timePrecision,
+                            runningDisplayPrecision = uiState.settings.runningDisplayPrecision,
                             nowMillis = uiState.lastTickMillis,
                             onStart = { id ->
                                 viewModel.startStopwatch(id)
@@ -306,7 +307,8 @@ fun MainStopwatchScreen(
             onToggleHardwareKeys = { viewModel.toggleHardwareKeys() },
             onToggleAutoSort = { viewModel.toggleAutoSort() },
             onSetPrecision = { viewModel.setPrecision(it) },
-            onSetLanguage = { viewModel.setLanguage(it) },
+            onSetRunningDisplayPrecision = { viewModel.setRunningDisplayPrecision(it) },
+            onLanguageSelected = { viewModel.setLanguage(it) },
             onSetThemeMode = { viewModel.setThemeMode(it) },
             onSetFontSizeScale = { viewModel.setFontSizeScale(it) },
             onDismiss = { showSettingsDialog = false }

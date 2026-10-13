@@ -104,6 +104,7 @@ class MainStopwatchUiTest {
         val initial = viewModel.uiState.value.settings
         assertTrue(initial.soundAndHapticsEnabled)
         assertTrue(initial.hardwareVolumeKeysEnabled)
+        assertEquals(AppPrecision.TENTHS, initial.runningDisplayPrecision)
         assertEquals(AppPrecision.TENTHS, initial.timePrecision)
         assertEquals(AppLanguage.SYSTEM, initial.language)
 
@@ -114,6 +115,10 @@ class MainStopwatchUiTest {
         // Toggle hardware keys
         viewModel.toggleHardwareKeys()
         assertFalse(viewModel.uiState.value.settings.hardwareVolumeKeysEnabled)
+
+        // Change running display precision
+        viewModel.setRunningDisplayPrecision(AppPrecision.SECONDS)
+        assertEquals(AppPrecision.SECONDS, viewModel.uiState.value.settings.runningDisplayPrecision)
 
         // Change precision
         viewModel.setPrecision(AppPrecision.HUNDREDTHS)

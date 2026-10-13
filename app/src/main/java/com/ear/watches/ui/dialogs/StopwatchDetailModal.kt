@@ -282,7 +282,7 @@ fun StopwatchDetailModal(
                                             modifier = Modifier.fillMaxWidth(),
                                             verticalArrangement = Arrangement.spacedBy(4.dp)
                                         ) {
-                                            // Lap table header row: [Lap #]   [Lap Time]   [Total Time]
+                                            // Lap table header row: [Lap #]   [Lap Time]   [Total Time]   [Delta]
                                             Row(
                                                 modifier = Modifier.fillMaxWidth(),
                                                 verticalAlignment = Alignment.CenterVertically
@@ -293,7 +293,7 @@ fun StopwatchDetailModal(
                                                         fontWeight = FontWeight.Bold,
                                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                                     ),
-                                                    modifier = Modifier.weight(0.2f),
+                                                    modifier = Modifier.weight(0.15f),
                                                     maxLines = 1,
                                                     overflow = TextOverflow.Ellipsis
                                                 )
@@ -303,7 +303,7 @@ fun StopwatchDetailModal(
                                                         fontWeight = FontWeight.Bold,
                                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                                     ),
-                                                    modifier = Modifier.weight(0.4f),
+                                                    modifier = Modifier.weight(0.30f),
                                                     textAlign = TextAlign.End,
                                                     maxLines = 1,
                                                     overflow = TextOverflow.Ellipsis
@@ -314,14 +314,37 @@ fun StopwatchDetailModal(
                                                         fontWeight = FontWeight.Bold,
                                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                                     ),
-                                                    modifier = Modifier.weight(0.4f),
+                                                    modifier = Modifier.weight(0.30f),
+                                                    textAlign = TextAlign.End,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                                Text(
+                                                    text = stringResource(R.string.header_pace_delta),
+                                                    style = MaterialTheme.typography.labelSmall.copy(
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    ),
+                                                    modifier = Modifier.weight(0.25f),
                                                     textAlign = TextAlign.End,
                                                     maxLines = 1,
                                                     overflow = TextOverflow.Ellipsis
                                                 )
                                             }
 
-                                            run.laps.forEach { lap ->
+                                            run.laps.forEachIndexed { index, lap ->
+                                                val deltaMillis = lap.lapDeltaMillis ?: if (index > 0) lap.lapTimeMillis - run.laps[index - 1].lapTimeMillis else null
+                                                val deltaText = if (deltaMillis != null) {
+                                                    TimeFormatter.formatDeltaTime(deltaMillis, precision, subsecondSeparator)
+                                                } else {
+                                                    "-"
+                                                }
+                                                val deltaColor = when {
+                                                    deltaMillis != null && deltaMillis < 0 -> Color(0xFF2E7D32)
+                                                    deltaMillis != null && deltaMillis > 0 -> Color(0xFFD32F2F)
+                                                    else -> MaterialTheme.colorScheme.onSurfaceVariant
+                                                }
+
                                                 Row(
                                                     modifier = Modifier.fillMaxWidth(),
                                                     verticalAlignment = Alignment.CenterVertically
@@ -332,7 +355,7 @@ fun StopwatchDetailModal(
                                                             fontWeight = FontWeight.Medium,
                                                             fontFamily = FontFamily.Monospace
                                                         ),
-                                                        modifier = Modifier.weight(0.2f),
+                                                        modifier = Modifier.weight(0.15f),
                                                         maxLines = 1,
                                                         overflow = TextOverflow.Ellipsis
                                                     )
@@ -341,7 +364,7 @@ fun StopwatchDetailModal(
                                                         style = MaterialTheme.typography.bodySmall.copy(
                                                             fontFamily = FontFamily.Monospace
                                                         ),
-                                                        modifier = Modifier.weight(0.4f),
+                                                        modifier = Modifier.weight(0.30f),
                                                         textAlign = TextAlign.End,
                                                         maxLines = 1,
                                                         overflow = TextOverflow.Ellipsis
@@ -351,7 +374,19 @@ fun StopwatchDetailModal(
                                                         style = MaterialTheme.typography.bodySmall.copy(
                                                             fontFamily = FontFamily.Monospace
                                                         ),
-                                                        modifier = Modifier.weight(0.4f),
+                                                        modifier = Modifier.weight(0.30f),
+                                                        textAlign = TextAlign.End,
+                                                        maxLines = 1,
+                                                        overflow = TextOverflow.Ellipsis
+                                                    )
+                                                    Text(
+                                                        text = deltaText,
+                                                        style = MaterialTheme.typography.bodySmall.copy(
+                                                            fontFamily = FontFamily.Monospace,
+                                                            fontWeight = if (deltaMillis != null && deltaMillis != 0L) FontWeight.Bold else FontWeight.Normal,
+                                                            color = deltaColor
+                                                        ),
+                                                        modifier = Modifier.weight(0.25f),
                                                         textAlign = TextAlign.End,
                                                         maxLines = 1,
                                                         overflow = TextOverflow.Ellipsis

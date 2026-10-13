@@ -113,4 +113,93 @@ class StopwatchTileLogicTest {
         onFullReset()
         assertEquals(1, fullResetCount)
     }
+
+    @Test
+    fun lastLapPaceTrendLogic_extractsDeltaAndFormatsCorrectly() {
+        val laps = listOf(
+            LapRecord(lapNumber = 1, lapTimeMillis = 14200L, totalTimeMillis = 14200L, lapDeltaMillis = null),
+            LapRecord(lapNumber = 2, lapTimeMillis = 13000L, totalTimeMillis = 27200L, lapDeltaMillis = -1200L)
+        )
+        val watch = StopwatchItem(
+            name = "Runner",
+            pastelColorHex = 0xFF90CAF9L,
+            isRunning = true,
+            runs = listOf(
+                RunSession(
+                    runIndex = 1,
+                    startTimeMillis = 0L,
+                    laps = laps
+                )
+            )
+        )
+
+        val lastLap = watch.currentRunLaps.lastOrNull()
+        assertEquals(2, lastLap?.lapNumber)
+        val delta = lastLap?.lapDeltaMillis
+        assertEquals(-1200L, delta)
+
+        val formattedDeltaComma = TimeFormatter.formatDeltaTime(delta!!, ",")
+        assertEquals("-1,2s", formattedDeltaComma)
+
+        val formattedDeltaDot = TimeFormatter.formatDeltaTime(delta, ".")
+        assertEquals("-1.2s", formattedDeltaDot)
+    }
+
+    @Test
+    fun runningAndResultPrecisionSeparation_formattingRules() {
+        val runningDisplayPrecision = AppPrecision.SECONDS
+        val timePrecision = AppPrecision.HUNDREDTHS
+
+        val runningWatch = StopwatchItem(
+            name = "Runner",
+            pastelColorHex = 0xFF90CAF9L,
+            isRunning = true,
+            runs = listOf(
+                RunSession(
+                    runIndex = 1,
+                    startTimeMillis = 1000L,
+                    laps = listOf(
+                        LapRecord(lapNumber = 1, lapTimeMillis = 12345L, totalTimeMillis = 12345L)
+                    )
+                )
+            )
+        )
+
+        val stoppedWatch = StopwatchItem(
+            name = "Runner Stopped",
+            pastelColorHex = 0xFF90CAF9L,
+            isRunning = false,
+            runs = listOf(
+                RunSession(
+                    runIndex = 1,
+                    startTimeMillis = 1000L,
+                    endTimeMillis = 16432L,
+                    accumulatedMillis = 15432L,
+                    laps = listOf(
+                        LapRecord(lapNumber = 1, lapTimeMillis = 12345L, totalTimeMillis = 12345L)
+                    )
+                )
+            )
+        )
+
+        val nowMillis = 16000L
+        val runningElapsed = runningWatch.getElapsedMillis(nowMillis) // 16000 - 1000 = 15000ms
+        val stoppedElapsed = stoppedWatch.getElapsedMillis(nowMillis) // 15432ms
+
+        // When running: clock precision uses runningDisplayPrecision (SECONDS -> "00:15")
+        val activeRunningPrecision = if (runningWatch.isRunning) runningDisplayPrecision else timePrecision
+        val formattedRunningClock = TimeFormatter.formatTime(runningElapsed, activeRunningPrecision, ".")
+        assertEquals("00:15", formattedRunningClock)
+
+        // When stopped: clock precision uses timePrecision (HUNDREDTHS -> "00:15.43")
+        val activeStoppedPrecision = if (stoppedWatch.isRunning) runningDisplayPrecision else timePrecision
+        val formattedStoppedClock = TimeFormatter.formatTime(stoppedElapsed, activeStoppedPrecision, ".")
+        assertEquals("00:15.43", formattedStoppedClock)
+
+        // Last lap always uses timePrecision (HUNDREDTHS -> "00:12.34")
+        val lastLapTime = runningWatch.currentRunLaps.lastOrNull()?.let {
+            TimeFormatter.formatTime(it.lapTimeMillis, timePrecision, ".")
+        }
+        assertEquals("00:12.34", lastLapTime)
+    }
 }

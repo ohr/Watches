@@ -62,7 +62,12 @@ class StopwatchViewModel(
                 tickerJob = viewModelScope.launch(dispatcher) {
                     while (coroutineContext.isActive) {
                         if (!_uiState.value.stopwatches.any { it.isRunning }) break
-                        delay(16L.milliseconds)
+                        val delayMillis = when (_uiState.value.settings.runningDisplayPrecision) {
+                            AppPrecision.SECONDS -> 500L
+                            AppPrecision.TENTHS -> 50L
+                            AppPrecision.HUNDREDTHS -> 16L
+                        }
+                        delay(delayMillis.milliseconds)
                         _uiState.update { state ->
                             state.copy(lastTickMillis = timeProvider.currentTimeMillis())
                         }
@@ -279,12 +284,15 @@ class StopwatchViewModel(
                         startTimeMillis = now
                     )
                     val currentRunTime = (now - activeRun.startTimeMillis).coerceAtLeast(0L)
-                    val lastTotalTime = activeRun.laps.lastOrNull()?.totalTimeMillis ?: 0L
+                    val lastLap = activeRun.laps.lastOrNull()
+                    val lastTotalTime = lastLap?.totalTimeMillis ?: 0L
                     val lapTime = currentRunTime - lastTotalTime
+                    val lapDeltaMillis = lastLap?.let { lapTime - it.lapTimeMillis }
                     val newLap = LapRecord(
                         lapNumber = activeRun.laps.size + 1,
                         lapTimeMillis = lapTime,
-                        totalTimeMillis = currentRunTime
+                        totalTimeMillis = currentRunTime,
+                        lapDeltaMillis = lapDeltaMillis
                     )
                     val updatedLaps = activeRun.laps + newLap
                     val updatedRun = activeRun.copy(laps = updatedLaps)
@@ -514,6 +522,15 @@ class StopwatchViewModel(
         }
         viewModelScope.launch(dispatcher) {
             settingsRepository?.setAutoSortEnabled(newValue)
+        }
+    }
+
+    fun setRunningDisplayPrecision(precision: AppPrecision) {
+        _uiState.update { state ->
+            state.copy(settings = state.settings.copy(runningDisplayPrecision = precision))
+        }
+        viewModelScope.launch(dispatcher) {
+            settingsRepository?.setRunningDisplayPrecision(precision)
         }
     }
 

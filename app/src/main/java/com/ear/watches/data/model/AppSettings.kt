@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 data class AppSettings(
     val soundAndHapticsEnabled: Boolean = true,
     val hardwareVolumeKeysEnabled: Boolean = true,
+    val runningDisplayPrecision: AppPrecision = AppPrecision.TENTHS,
     val timePrecision: AppPrecision = AppPrecision.TENTHS,
     val language: AppLanguage = AppLanguage.SYSTEM,
     val autoSortEnabled: Boolean = false,

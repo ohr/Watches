@@ -40,7 +40,8 @@
     <string name="setting_hardware_keys">Lautstärketasten</string>
     <string name="setting_hardware_keys_desc">Lauter = Start/Runde (Fokus), Leiser = Stopp/Zurücksetzen</string>
     <string name="setting_auto_sort">Automatisches Sortieren nach nächster Runde</string>
-    <string name="setting_time_precision">Zeitgenauigkeit</string>
+    <string name="setting_running_display_precision">Laufende Zeitanzeige</string>
+    <string name="setting_time_precision">Ergebnis- &amp; Runden-Genauigkeit</string>
 
     <!-- Precision Options -->
     <string name="precision_tenths">Zehntel (0,1s)</string>
@@ -49,7 +50,7 @@
 
     <!-- Language Options -->
     <string name="setting_language">Sprache</string>
-    <string name="language_system_default">Systemstandard</string>
+    <string name="language_system_default">System-Standard</string>
     <string name="language_english">Englisch</string>
     <string name="language_german">Deutsch</string>
 
@@ -61,9 +62,9 @@
 
     <!-- Font Size Options -->
     <string name="setting_font_size">Textgröße</string>
-    <string name="font_size_small">Klein</string>
-    <string name="font_size_normal">Normal</string>
-    <string name="font_size_large">Groß</string>
+    <string name="font_size_small">Klein (85%)</string>
+    <string name="font_size_normal">Normal (100%)</string>
+    <string name="font_size_large">Groß (115%)</string>
 
     <!-- Stopwatch Tile & Focus Badge -->
     <string name="badge_focus">FOKUS</string>
@@ -143,4 +144,9 @@
     <string name="help_detail_view_desc">Tippen Sie auf das Info-Symbol einer Stoppuhr, um den Verlauf der Läufe anzuzeigen und Einzelergebnisse zu exportieren.</string>
     <string name="help_precision_sort_title">Zeitgenauigkeit &amp; Auto-Sortierung</string>
     <string name="help_precision_sort_desc">In den Einstellungen konfigurieren (Standard Zehntel 0,1s).</string>
+
+    <!-- Pace Trend & Delta Strings -->
+    <string name="cd_pace_faster">Schneller</string>
+    <string name="cd_pace_slower">Langsamer</string>
+    <string name="header_pace_delta">Delta</string>
 </resources>

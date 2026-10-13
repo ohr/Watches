@@ -53,6 +53,8 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -71,7 +73,7 @@ import com.ear.watches.ui.theme.WatchesTheme
 @Composable
 fun StopwatchTile(
     watch: StopwatchItem,
-    precision: AppPrecision,
+    timePrecision: AppPrecision,
     nowMillis: Long,
     onStart: (String) -> Unit,
     onPause: (String) -> Unit,
@@ -82,6 +84,7 @@ fun StopwatchTile(
     onOpenDetails: (StopwatchItem) -> Unit,
     onSelectFocus: (String) -> Unit,
     modifier: Modifier = Modifier,
+    runningDisplayPrecision: AppPrecision = timePrecision,
     onFullReset: (String) -> Unit = onReset
 ) {
     val haptic = LocalHapticFeedback.current
@@ -104,10 +107,11 @@ fun StopwatchTile(
         currentTotalTime
     }
     val subsecondSeparator = stringResource(R.string.subsecond_separator)
-    val formattedTime = TimeFormatter.formatTime(displayedTimeMillis, precision, subsecondSeparator)
+    val activeDisplayPrecision = if (watch.isRunning) runningDisplayPrecision else timePrecision
+    val formattedTime = TimeFormatter.formatTime(displayedTimeMillis, activeDisplayPrecision, subsecondSeparator)
 
     val lastLapTime = watch.currentRunLaps.lastOrNull()?.let {
-        TimeFormatter.formatTime(it.lapTimeMillis, precision, subsecondSeparator)
+        TimeFormatter.formatTime(it.lapTimeMillis, timePrecision, subsecondSeparator)
     } ?: "-"
 
     Card(
@@ -320,14 +324,51 @@ fun StopwatchTile(
                     )
                 }
 
-                // Last Lap Display
-                Text(
-                    text = stringResource(R.string.label_last_lap_format, lastLapTime, watch.currentRunLaps.size),
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        color = darkContentColor.copy(alpha = 0.8f),
-                        fontWeight = FontWeight.Medium
+                // Last Lap Display & Pace Trend Indicator
+                val lastLap = watch.currentRunLaps.lastOrNull()
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = stringResource(R.string.label_last_lap_format, lastLapTime, watch.currentRunLaps.size),
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            color = darkContentColor.copy(alpha = 0.8f),
+                            fontWeight = FontWeight.Medium
+                        )
                     )
-                )
+
+                    lastLap?.lapDeltaMillis?.let { delta ->
+                        Spacer(modifier = Modifier.width(6.dp))
+                        val (indicatorText, color, cdRes) = when {
+                            delta < 0 -> Triple(
+                                "▼ ${TimeFormatter.formatDeltaTime(delta, timePrecision, subsecondSeparator)}",
+                                Color(0xFF2E7D32),
+                                R.string.cd_pace_faster
+                            )
+                            delta > 0 -> Triple(
+                                "▲ ${TimeFormatter.formatDeltaTime(delta, timePrecision, subsecondSeparator)}",
+                                Color(0xFFD32F2F),
+                                R.string.cd_pace_slower
+                            )
+                            else -> Triple(
+                                TimeFormatter.formatDeltaTime(delta, timePrecision, subsecondSeparator),
+                                Color.Gray,
+                                null
+                            )
+                        }
+                        val cdText = cdRes?.let { stringResource(it) }
+                        Text(
+                            text = indicatorText,
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = color
+                            ),
+                            modifier = if (cdText != null) {
+                                Modifier.semantics { contentDescription = cdText }
+                            } else {
+                                Modifier
+                            }
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -561,7 +602,8 @@ fun StopwatchTilePreview() {
                         )
                     )
                 ),
-                precision = AppPrecision.TENTHS,
+                timePrecision = AppPrecision.TENTHS,
+                runningDisplayPrecision = AppPrecision.TENTHS,
                 nowMillis = 15000L,
                 onStart = {},
                 onPause = {},

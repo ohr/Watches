@@ -44,4 +44,26 @@ class TimeFormatterTest {
 
         assertEquals("00:00,00", TimeFormatter.formatTime(-1000L, AppPrecision.HUNDREDTHS, ","))
     }
+
+    @Test
+    fun formatDeltaTime_fasterSlowerEqual_tenths() {
+        assertEquals("-1,2s", TimeFormatter.formatDeltaTime(-1200L, ","))
+        assertEquals("+0,8s", TimeFormatter.formatDeltaTime(800L, ","))
+        assertEquals("0,0s", TimeFormatter.formatDeltaTime(0L, ","))
+
+        assertEquals("-1.2s", TimeFormatter.formatDeltaTime(-1200L, "."))
+        assertEquals("+0.8s", TimeFormatter.formatDeltaTime(800L, "."))
+        assertEquals("0.0s", TimeFormatter.formatDeltaTime(0L, "."))
+    }
+
+    @Test
+    fun formatDeltaTime_precisionVariations() {
+        assertEquals("-1,20s", TimeFormatter.formatDeltaTime(-1200L, AppPrecision.HUNDREDTHS, ","))
+        assertEquals("+0,80s", TimeFormatter.formatDeltaTime(800L, AppPrecision.HUNDREDTHS, ","))
+        assertEquals("0,00s", TimeFormatter.formatDeltaTime(0L, AppPrecision.HUNDREDTHS, ","))
+
+        assertEquals("-1s", TimeFormatter.formatDeltaTime(-1200L, AppPrecision.SECONDS, ","))
+        assertEquals("+0s", TimeFormatter.formatDeltaTime(800L, AppPrecision.SECONDS, ","))
+        assertEquals("0s", TimeFormatter.formatDeltaTime(0L, AppPrecision.SECONDS, ","))
+    }
 }
