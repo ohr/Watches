@@ -1,7 +1,9 @@
 package com.ear.watches.data.model
 
+import androidx.compose.runtime.Stable
 import java.util.UUID
 
+@Stable
 data class StopwatchItem(
     val id: String = UUID.randomUUID().toString(),
     val name: String,

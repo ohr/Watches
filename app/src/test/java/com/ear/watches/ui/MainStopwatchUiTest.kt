@@ -46,7 +46,7 @@ class MainStopwatchUiTest {
         assertFalse(viewModel.uiState.value.showHelpDialog)
 
         // Add single watch
-        viewModel.addStopwatch("Sprinter 1")
+        viewModel.addStopwatch("Athlete", "Sprinter 1")
         assertEquals(1, viewModel.uiState.value.stopwatches.size)
         assertEquals("Sprinter 1", viewModel.uiState.value.stopwatches[0].name)
 
@@ -59,7 +59,7 @@ class MainStopwatchUiTest {
 
     @Test
     fun uiWorkflow_editWatchDetails() {
-        viewModel.addStopwatch("Original")
+        viewModel.addStopwatch("Athlete", "Original")
         val watchId = viewModel.uiState.value.stopwatches[0].id
 
         viewModel.updateStopwatch(watchId, "Renamed Athlete", 0xFFFFE082L)

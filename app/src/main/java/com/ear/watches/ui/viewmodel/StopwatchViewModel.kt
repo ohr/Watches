@@ -35,6 +35,9 @@ class StopwatchViewModel(
     private val _uiState = MutableStateFlow(StopwatchUiState())
     val uiState: StateFlow<StopwatchUiState> = _uiState.asStateFlow()
 
+    private val _tickerFlow = MutableStateFlow(timeProvider.currentTimeMillis())
+    val tickerFlow: StateFlow<Long> = _tickerFlow.asStateFlow()
+
     private var tickerJob: Job? = null
 
     init {
@@ -68,9 +71,7 @@ class StopwatchViewModel(
                             AppPrecision.HUNDREDTHS -> 16L
                         }
                         delay(delayMillis.milliseconds)
-                        _uiState.update { state ->
-                            state.copy(lastTickMillis = timeProvider.currentTimeMillis())
-                        }
+                        _tickerFlow.value = timeProvider.currentTimeMillis()
                     }
                 }
             }
@@ -144,10 +145,10 @@ class StopwatchViewModel(
         )
     }
 
-    fun addStopwatch(name: String? = null, colorHex: Long? = null) {
+    fun addStopwatch(defaultNamePrefix: String, name: String? = null, colorHex: Long? = null) {
         _uiState.update { state ->
             val count = state.stopwatches.size
-            val defaultName = name?.takeIf { it.isNotBlank() } ?: "Athlete ${count + 1}"
+            val defaultName = name?.takeIf { it.isNotBlank() } ?: "$defaultNamePrefix ${count + 1}"
             val color = colorHex ?: StopwatchItem.DEFAULT_PASTEL_COLORS[count % StopwatchItem.DEFAULT_PASTEL_COLORS.size]
 
             val newItem = StopwatchItem(
@@ -162,7 +163,7 @@ class StopwatchViewModel(
         }
     }
 
-    fun batchAddStopwatches(count: Int, namePrefix: String = "Athlete") {
+    fun batchAddStopwatches(count: Int, namePrefix: String) {
         if (count <= 0) return
         _uiState.update { state ->
             val existingCount = state.stopwatches.size

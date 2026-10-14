@@ -125,7 +125,7 @@ class HardwareAndShareTest {
 
     @Test
     fun singleStopwatchSharing_formatsIndividualWatchDetails() {
-        viewModel.addStopwatch("Solo Runner")
+        viewModel.addStopwatch("Athlete", "Solo Runner")
         val watchId = viewModel.uiState.value.stopwatches[0].id
 
         viewModel.startStopwatch(watchId)
@@ -147,7 +147,7 @@ class HardwareAndShareTest {
 
     @Test
     fun hasRunData_evaluatesTrueOnlyWhenRunDataExists() {
-        viewModel.addStopwatch("Clean Watch")
+        viewModel.addStopwatch("Athlete", "Clean Watch")
         val emptyWatch = viewModel.uiState.value.stopwatches[0]
         val emptyHasRunData = emptyWatch.runs.any { it.laps.isNotEmpty() || it.accumulatedMillis > 0L || it.endTimeMillis > 0L }
         assertFalse(emptyHasRunData)

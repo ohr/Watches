@@ -40,6 +40,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -69,12 +70,13 @@ import com.ear.watches.data.model.RunSession
 import com.ear.watches.data.model.StopwatchItem
 import com.ear.watches.data.util.TimeFormatter
 import com.ear.watches.ui.theme.WatchesTheme
+import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 fun StopwatchTile(
     watch: StopwatchItem,
     timePrecision: AppPrecision,
-    nowMillis: Long,
+    tickerFlow: StateFlow<Long>,
     onStart: (String) -> Unit,
     onPause: (String) -> Unit,
     onLap: (String) -> Unit,
@@ -98,6 +100,13 @@ fun StopwatchTile(
 
     val cardBackgroundColor = Color(watch.pastelColorHex)
     val darkContentColor = Color(0xFF1F1F1F)
+
+    val currentTick by produceState(initialValue = System.currentTimeMillis(), watch.isRunning, tickerFlow) {
+        if (watch.isRunning) {
+            tickerFlow.collect { value = it }
+        }
+    }
+    val nowMillis = if (watch.isRunning) currentTick else System.currentTimeMillis()
 
     val currentTotalTime = watch.getElapsedMillis(nowMillis)
     val lastLapRecordedTotalTime = watch.currentRunLaps.lastOrNull()?.totalTimeMillis ?: 0L
@@ -604,7 +613,7 @@ fun StopwatchTilePreview() {
                 ),
                 timePrecision = AppPrecision.TENTHS,
                 runningDisplayPrecision = AppPrecision.TENTHS,
-                nowMillis = 15000L,
+                tickerFlow = kotlinx.coroutines.flow.MutableStateFlow(15000L),
                 onStart = {},
                 onPause = {},
                 onLap = {},

@@ -47,7 +47,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.ear.watches.R
 import com.ear.watches.data.model.AppPrecision
+import com.ear.watches.data.model.AppSettings
 import com.ear.watches.data.model.LapRecord
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.getValue
+import kotlinx.coroutines.flow.StateFlow
 import com.ear.watches.data.model.RunSession
 import com.ear.watches.data.model.StopwatchItem
 import com.ear.watches.data.util.TimeFormatter
@@ -59,14 +63,21 @@ import java.util.Date
 @Composable
 fun StopwatchDetailModal(
     watch: StopwatchItem,
-    precision: AppPrecision,
-    nowMillis: Long,
+    settings: AppSettings,
+    tickerFlow: StateFlow<Long>,
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
     val locale = LocalLocale.current.platformLocale
     val timeFormatter = remember(locale) { SimpleDateFormat("HH:mm:ss", locale) }
     val subsecondSeparator = stringResource(R.string.subsecond_separator)
+
+    val currentTick by produceState(initialValue = System.currentTimeMillis(), watch.isRunning, tickerFlow) {
+        if (watch.isRunning) {
+            tickerFlow.collect { value = it }
+        }
+    }
+    val nowMillis = if (watch.isRunning) currentTick else System.currentTimeMillis()
 
     val effectiveRuns = watch.runs.filter { it.startTimeMillis > 0L || it.endTimeMillis > 0L || it.accumulatedMillis > 0L || it.laps.isNotEmpty() }
     val hasRunData = watch.runs.any { it.laps.isNotEmpty() || it.accumulatedMillis > 0L || it.endTimeMillis > 0L }
@@ -135,7 +146,8 @@ fun StopwatchDetailModal(
                     // Total Cumulative Time across all runs
                     item {
                         val totalCumulativeMillis = watch.getTotalCumulativeMillis(nowMillis)
-                        val formattedTotalCumulative = TimeFormatter.formatTime(totalCumulativeMillis, precision, subsecondSeparator)
+                        val totalPrecision = if (watch.isRunning) settings.runningDisplayPrecision else settings.timePrecision
+                        val formattedTotalCumulative = TimeFormatter.formatTime(totalCumulativeMillis, totalPrecision, subsecondSeparator)
                         Card(
                             shape = RoundedCornerShape(12.dp),
                             colors = CardDefaults.cardColors(
@@ -200,7 +212,10 @@ fun StopwatchDetailModal(
                             } else {
                                 run.accumulatedMillis
                             }
-                            val formattedRunDuration = TimeFormatter.formatTime(runDurationMillis, precision, subsecondSeparator)
+                            
+                            val isRunActive = watch.isRunning && run.endTimeMillis == 0L
+                            val runPrecision = if (isRunActive) settings.runningDisplayPrecision else settings.timePrecision
+                            val formattedRunDuration = TimeFormatter.formatTime(runDurationMillis, runPrecision, subsecondSeparator)
 
                             Card(
                                 shape = RoundedCornerShape(12.dp),
@@ -335,7 +350,7 @@ fun StopwatchDetailModal(
                                             run.laps.forEachIndexed { index, lap ->
                                                 val deltaMillis = lap.lapDeltaMillis ?: if (index > 0) lap.lapTimeMillis - run.laps[index - 1].lapTimeMillis else null
                                                 val deltaText = if (deltaMillis != null) {
-                                                    TimeFormatter.formatDeltaTime(deltaMillis, precision, subsecondSeparator)
+                                                    TimeFormatter.formatDeltaTime(deltaMillis, settings.timePrecision, subsecondSeparator)
                                                 } else {
                                                     "-"
                                                 }
@@ -360,7 +375,7 @@ fun StopwatchDetailModal(
                                                         overflow = TextOverflow.Ellipsis
                                                     )
                                                     Text(
-                                                        text = TimeFormatter.formatTime(lap.lapTimeMillis, precision, subsecondSeparator),
+                                                        text = TimeFormatter.formatTime(lap.lapTimeMillis, settings.timePrecision, subsecondSeparator),
                                                         style = MaterialTheme.typography.bodySmall.copy(
                                                             fontFamily = FontFamily.Monospace
                                                         ),
@@ -370,7 +385,7 @@ fun StopwatchDetailModal(
                                                         overflow = TextOverflow.Ellipsis
                                                     )
                                                     Text(
-                                                        text = TimeFormatter.formatTime(lap.totalTimeMillis, precision, subsecondSeparator),
+                                                        text = TimeFormatter.formatTime(lap.totalTimeMillis, settings.timePrecision, subsecondSeparator),
                                                         style = MaterialTheme.typography.bodySmall.copy(
                                                             fontFamily = FontFamily.Monospace
                                                         ),
@@ -424,7 +439,7 @@ fun StopwatchDetailModal(
                     if (hasRunData) {
                         Button(
                             onClick = {
-                                ShareHelper.shareSingleStopwatchResults(context, watch, precision, nowMillis)
+                                ShareHelper.shareSingleStopwatchResults(context, watch, settings.timePrecision, nowMillis)
                             },
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(10.dp),
@@ -474,8 +489,11 @@ fun StopwatchDetailModalPreview() {
                     )
                 )
             ),
-            precision = AppPrecision.HUNDREDTHS,
-            nowMillis = 1700000045200L,
+            settings = AppSettings(
+                runningDisplayPrecision = AppPrecision.TENTHS,
+                timePrecision = AppPrecision.HUNDREDTHS
+            ),
+            tickerFlow = kotlinx.coroutines.flow.MutableStateFlow(1700000045200L),
             onDismiss = {}
         )
     }

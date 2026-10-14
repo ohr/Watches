@@ -60,7 +60,7 @@ class StopwatchViewModelTest {
 
     @Test
     fun addStopwatch_defaultNameAndFocus() {
-        viewModel.addStopwatch()
+        viewModel.addStopwatch("Athlete")
 
         val state = viewModel.uiState.value
         assertEquals(1, state.stopwatches.size)
@@ -87,7 +87,7 @@ class StopwatchViewModelTest {
 
     @Test
     fun startPauseResetStopwatch_tracksTimeAccurately() {
-        viewModel.addStopwatch("Runner 1")
+        viewModel.addStopwatch("Athlete", "Runner 1")
         val watchId = viewModel.uiState.value.stopwatches.first().id
 
         viewModel.startStopwatch(watchId)
@@ -114,7 +114,7 @@ class StopwatchViewModelTest {
 
     @Test
     fun lapStopwatch_recordsCorrectLapTimes() {
-        viewModel.addStopwatch("Runner 1")
+        viewModel.addStopwatch("Athlete", "Runner 1")
         val watchId = viewModel.uiState.value.stopwatches.first().id
 
         viewModel.startStopwatch(watchId)
@@ -140,7 +140,7 @@ class StopwatchViewModelTest {
 
     @Test
     fun lapStopwatch_calculatesLapDeltaMillis_fasterSlowerEqualAndNewSession() {
-        viewModel.addStopwatch("Runner Delta")
+        viewModel.addStopwatch("Athlete", "Runner Delta")
         val watchId = viewModel.uiState.value.stopwatches.first().id
 
         viewModel.startStopwatch(watchId)
@@ -185,7 +185,7 @@ class StopwatchViewModelTest {
 
     @Test
     fun deleteStopwatch_updatesFocusIfDeleted() {
-        viewModel.batchAddStopwatches(2)
+        viewModel.batchAddStopwatches(2, "Athlete")
         val state1 = viewModel.uiState.value
         val id0 = state1.stopwatches[0].id
         val id1 = state1.stopwatches[1].id
@@ -201,7 +201,7 @@ class StopwatchViewModelTest {
 
     @Test
     fun globalActions_startAllPauseAllResetAll() {
-        viewModel.batchAddStopwatches(2)
+        viewModel.batchAddStopwatches(2, "Athlete")
 
         viewModel.startAll()
         assertTrue(viewModel.uiState.value.stopwatches.all { it.isRunning })
@@ -220,7 +220,7 @@ class StopwatchViewModelTest {
 
     @Test
     fun resetAll_vs_resetAllFull_behavior() {
-        viewModel.batchAddStopwatches(2)
+        viewModel.batchAddStopwatches(2, "Athlete")
 
         // Start all and run for 5 seconds
         viewModel.startAll()
@@ -272,7 +272,7 @@ class StopwatchViewModelTest {
 
     @Test
     fun handleVolumeUp_whenAllStopped_startsAll() {
-        viewModel.batchAddStopwatches(2)
+        viewModel.batchAddStopwatches(2, "Athlete")
         viewModel.handleVolumeUp()
 
         assertTrue(viewModel.uiState.value.stopwatches.all { it.isRunning })
@@ -280,7 +280,7 @@ class StopwatchViewModelTest {
 
     @Test
     fun handleVolumeUp_predictsNextFocusedWatchAndRecordsLap() {
-        viewModel.batchAddStopwatches(2)
+        viewModel.batchAddStopwatches(2, "Athlete")
         viewModel.startAll()
 
         val id0 = viewModel.uiState.value.stopwatches[0].id
@@ -313,7 +313,7 @@ class StopwatchViewModelTest {
 
     @Test
     fun zeroLapWatch_hasTopPriorityForFocusOverMultiLapWatches() {
-        viewModel.batchAddStopwatches(2)
+        viewModel.batchAddStopwatches(2, "Athlete")
         val id0 = viewModel.uiState.value.stopwatches[0].id
         val id1 = viewModel.uiState.value.stopwatches[1].id
 
@@ -333,7 +333,7 @@ class StopwatchViewModelTest {
 
     @Test
     fun predictionCalculation_selectsSoonestExpectedNextLap() {
-        viewModel.batchAddStopwatches(2)
+        viewModel.batchAddStopwatches(2, "Athlete")
         val id0 = viewModel.uiState.value.stopwatches[0].id
         val id1 = viewModel.uiState.value.stopwatches[1].id
 
@@ -406,7 +406,7 @@ class StopwatchViewModelTest {
 
     @Test
     fun handleVolumeDown_pausesFocusedRunningOrResetsAllWhenStopped() {
-        viewModel.batchAddStopwatches(2)
+        viewModel.batchAddStopwatches(2, "Athlete")
         val id0 = viewModel.uiState.value.stopwatches[0].id
         val id1 = viewModel.uiState.value.stopwatches[1].id
 
@@ -454,7 +454,7 @@ class StopwatchViewModelTest {
 
     @Test
     fun updateStopwatch_changesNameAndColor() {
-        viewModel.addStopwatch("Old Name")
+        viewModel.addStopwatch("Athlete", "Old Name")
         val id = viewModel.uiState.value.stopwatches.first().id
 
         viewModel.updateStopwatch(id, "New Name", 0xFF123456L)
@@ -465,7 +465,7 @@ class StopwatchViewModelTest {
 
     @Test
     fun multiRunCreation_startsNewRunSessionAfterStop() {
-        viewModel.addStopwatch("Multi-Run Runner")
+        viewModel.addStopwatch("Athlete", "Multi-Run Runner")
         val watchId = viewModel.uiState.value.stopwatches.first().id
 
         // Run 1
@@ -501,7 +501,7 @@ class StopwatchViewModelTest {
 
     @Test
     fun shortClickReset_pausesActiveRunAndPreservesRunSessions() {
-        viewModel.addStopwatch("Runner")
+        viewModel.addStopwatch("Athlete", "Runner")
         val watchId = viewModel.uiState.value.stopwatches.first().id
 
         // Run 1
@@ -538,7 +538,7 @@ class StopwatchViewModelTest {
 
     @Test
     fun shortClickReset_onStoppedStopwatch_resetsMainDisplayToZero() {
-        viewModel.addStopwatch("Runner")
+        viewModel.addStopwatch("Athlete", "Runner")
         val watchId = viewModel.uiState.value.stopwatches.first().id
 
         // Run 1 completed
@@ -571,7 +571,7 @@ class StopwatchViewModelTest {
 
     @Test
     fun longPressReset_clearsAllRunsLapsAndAccumulatedTime() {
-        viewModel.addStopwatch("Runner")
+        viewModel.addStopwatch("Athlete", "Runner")
         val watchId = viewModel.uiState.value.stopwatches.first().id
 
         // Run 1
@@ -600,7 +600,7 @@ class StopwatchViewModelTest {
 
     @Test
     fun longPressReset_whenAlreadyZeroed_clearsAllRunsAndHistory() {
-        viewModel.addStopwatch("Runner")
+        viewModel.addStopwatch("Athlete", "Runner")
         val watchId = viewModel.uiState.value.stopwatches.first().id
 
         // Run 1

@@ -1,5 +1,8 @@
 package com.ear.watches.data.model
 
+import androidx.compose.runtime.Stable
+
+@Stable
 data class RunSession(
     val runIndex: Int,
     val startTimeMillis: Long,

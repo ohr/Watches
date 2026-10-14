@@ -112,7 +112,7 @@ fun MainStopwatchScreen(
                     viewModel.resetAllFull()
                     haptics.playReset(uiState.settings.soundAndHapticsEnabled)
                 },
-                onAddWatch = { viewModel.addStopwatch("$defaultPrefix ${uiState.stopwatches.size + 1}") },
+                onAddWatch = { viewModel.addStopwatch(defaultNamePrefix = defaultPrefix) },
                 onBatchAdd = { showBatchAddDialog = true },
                 onShareResults = {
                     val reportText = RaceResultsFormatter.formatRaceResults(
@@ -182,7 +182,7 @@ fun MainStopwatchScreen(
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Button(
-                                    onClick = { viewModel.addStopwatch("$defaultPrefix ${uiState.stopwatches.size + 1}") },
+                                    onClick = { viewModel.addStopwatch(defaultNamePrefix = defaultPrefix) },
                                     modifier = Modifier.fillMaxWidth(0.85f),
                                     shape = RoundedCornerShape(12.dp),
                                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 12.dp)
@@ -237,7 +237,7 @@ fun MainStopwatchScreen(
                             watch = watch,
                             timePrecision = uiState.settings.timePrecision,
                             runningDisplayPrecision = uiState.settings.runningDisplayPrecision,
-                            nowMillis = uiState.lastTickMillis,
+                            tickerFlow = viewModel.tickerFlow,
                             onStart = { id ->
                                 viewModel.startStopwatch(id)
                                 haptics.playStart(uiState.settings.soundAndHapticsEnabled)
@@ -273,8 +273,8 @@ fun MainStopwatchScreen(
     currentDetailWatch?.let { watch ->
         StopwatchDetailModal(
             watch = watch,
-            precision = uiState.settings.timePrecision,
-            nowMillis = uiState.lastTickMillis,
+            settings = uiState.settings,
+            tickerFlow = viewModel.tickerFlow,
             onDismiss = { detailWatchItem = null }
         )
     }
