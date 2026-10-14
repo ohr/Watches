@@ -72,6 +72,19 @@ import com.ear.watches.data.util.TimeFormatter
 import com.ear.watches.ui.theme.WatchesTheme
 import kotlinx.coroutines.flow.StateFlow
 
+private object StopwatchTileDefaults {
+    val CardShape = RoundedCornerShape(20.dp)
+    val CardElevation = 2.dp
+    val FocusBorderWidth = 3.5.dp
+    val ActionButtonShape = RoundedCornerShape(12.dp)
+    val ActionButtonContentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp)
+    val ActionButtonIconSize = 18.dp
+    val SmallIconSize = 16.dp
+    val TileContentPadding = 16.dp
+    val SectionSpacing = 10.dp
+    val ElementSpacing = 6.dp
+}
+
 @Composable
 fun StopwatchTile(
     watch: StopwatchItem,
@@ -94,7 +107,7 @@ fun StopwatchTile(
 
     val isFocused = watch.isFocused
     val borderThickness by animateDpAsState(
-        targetValue = if (isFocused) 3.5.dp else 1.dp,
+        targetValue = if (isFocused) StopwatchTileDefaults.FocusBorderWidth else 1.dp,
         label = "borderThickness"
     )
 
@@ -127,11 +140,11 @@ fun StopwatchTile(
         modifier = modifier
             .fillMaxWidth()
             .shadow(
-                elevation = if (isFocused) 8.dp else 3.dp,
-                shape = RoundedCornerShape(20.dp)
+                elevation = if (isFocused) 8.dp else StopwatchTileDefaults.CardElevation,
+                shape = StopwatchTileDefaults.CardShape
             )
             .clickable { onSelectFocus(watch.id) },
-        shape = RoundedCornerShape(20.dp),
+        shape = StopwatchTileDefaults.CardShape,
         colors = CardDefaults.cardColors(
             containerColor = cardBackgroundColor
         ),
@@ -143,7 +156,7 @@ fun StopwatchTile(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(StopwatchTileDefaults.TileContentPadding)
         ) {
             // Header Row: Name, Focus Tag, Info Details, Edit & Delete buttons
             Row(
@@ -166,12 +179,12 @@ fun StopwatchTile(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Spacer(modifier = Modifier.width(6.dp))
+                    Spacer(modifier = Modifier.width(StopwatchTileDefaults.ElementSpacing))
                     Icon(
                         imageVector = Icons.Default.Edit,
                         contentDescription = stringResource(R.string.cd_edit_watch),
                         tint = darkContentColor.copy(alpha = 0.6f),
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(StopwatchTileDefaults.SmallIconSize)
                     )
                 }
 
@@ -180,7 +193,7 @@ fun StopwatchTile(
                         Surface(
                             color = Color(0xFF1E88E5),
                             contentColor = Color.White,
-                            shape = RoundedCornerShape(12.dp)
+                            shape = StopwatchTileDefaults.ActionButtonShape
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -214,7 +227,7 @@ fun StopwatchTile(
                         Icon(
                             imageVector = Icons.Default.Info,
                             contentDescription = stringResource(R.string.cd_stopwatch_details),
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(StopwatchTileDefaults.ActionButtonIconSize)
                         )
                     }
 
@@ -228,19 +241,19 @@ fun StopwatchTile(
                         Icon(
                             imageVector = Icons.Default.Delete,
                             contentDescription = stringResource(R.string.cd_delete_watch),
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(StopwatchTileDefaults.ActionButtonIconSize)
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(StopwatchTileDefaults.SectionSpacing))
 
             // Running Time Display
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(StopwatchTileDefaults.ActionButtonShape)
                     .background(Color.White.copy(alpha = 0.65f))
                     .padding(vertical = 10.dp, horizontal = 12.dp),
                 contentAlignment = Alignment.Center
@@ -305,7 +318,7 @@ fun StopwatchTile(
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(StopwatchTileDefaults.SectionSpacing))
 
             // Status and Last Lap Info Row
             Row(
@@ -323,7 +336,7 @@ fun StopwatchTile(
                                 if (watch.isRunning) Color(0xFF2E7D32) else Color.Gray
                             )
                     )
-                    Spacer(modifier = Modifier.width(6.dp))
+                    Spacer(modifier = Modifier.width(StopwatchTileDefaults.ElementSpacing))
                     Text(
                         text = if (watch.isRunning) stringResource(R.string.status_running) else stringResource(R.string.status_stopped),
                         style = MaterialTheme.typography.labelMedium.copy(
@@ -345,7 +358,7 @@ fun StopwatchTile(
                     )
 
                     lastLap?.lapDeltaMillis?.let { delta ->
-                        Spacer(modifier = Modifier.width(6.dp))
+                        Spacer(modifier = Modifier.width(StopwatchTileDefaults.ElementSpacing))
                         val (indicatorText, color, cdRes) = when {
                             delta < 0 -> Triple(
                                 "▼ ${TimeFormatter.formatDeltaTime(delta, timePrecision, subsecondSeparator)}",
@@ -380,7 +393,7 @@ fun StopwatchTile(
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(StopwatchTileDefaults.SectionSpacing))
 
             // Action Controls Row
             Row(
@@ -398,16 +411,16 @@ fun StopwatchTile(
                             disabledContainerColor = Color(0xFFB0BEC5),
                             disabledContentColor = Color(0xFF546E7A)
                         ),
-                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
+                        contentPadding = StopwatchTileDefaults.ActionButtonContentPadding,
                         modifier = Modifier
                             .weight(1.2f)
                             .onInstantPress(enabled = true) { onPause(watch.id) },
-                        shape = RoundedCornerShape(12.dp)
+                        shape = StopwatchTileDefaults.ActionButtonShape
                     ) {
                         Icon(
                             imageVector = Icons.Default.Pause,
                             contentDescription = stringResource(R.string.btn_stop),
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(StopwatchTileDefaults.ActionButtonIconSize)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
@@ -427,16 +440,16 @@ fun StopwatchTile(
                             disabledContainerColor = Color(0xFFB0BEC5),
                             disabledContentColor = Color(0xFF546E7A)
                         ),
-                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
+                        contentPadding = StopwatchTileDefaults.ActionButtonContentPadding,
                         modifier = Modifier
                             .weight(1.2f)
                             .onInstantPress(enabled = true) { onStart(watch.id) },
-                        shape = RoundedCornerShape(12.dp)
+                        shape = StopwatchTileDefaults.ActionButtonShape
                     ) {
                         Icon(
                             imageVector = Icons.Default.PlayArrow,
                             contentDescription = stringResource(R.string.btn_start),
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(StopwatchTileDefaults.ActionButtonIconSize)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
@@ -459,16 +472,16 @@ fun StopwatchTile(
                         disabledContainerColor = Color(0xFFB0BEC5),
                         disabledContentColor = Color(0xFF546E7A)
                     ),
-                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
+                    contentPadding = StopwatchTileDefaults.ActionButtonContentPadding,
                     modifier = Modifier
                         .weight(1f)
                         .onInstantPress(enabled = watch.isRunning) { onLap(watch.id) },
-                    shape = RoundedCornerShape(12.dp)
+                    shape = StopwatchTileDefaults.ActionButtonShape
                 ) {
                     Icon(
                         imageVector = Icons.Default.Flag,
                         contentDescription = stringResource(R.string.btn_lap),
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(StopwatchTileDefaults.SmallIconSize)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
@@ -484,7 +497,7 @@ fun StopwatchTile(
                 Surface(
                     modifier = Modifier
                         .weight(1f)
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(StopwatchTileDefaults.ActionButtonShape)
                         .onResetInstantPress(
                             enabled = !watch.isRunning,
                             onReset = { onReset(watch.id) },
@@ -495,17 +508,17 @@ fun StopwatchTile(
                         ),
                     color = if (!watch.isRunning) Color(0xFFE65100) else Color(0xFFB0BEC5),
                     contentColor = if (!watch.isRunning) Color.White else Color(0xFF546E7A),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = StopwatchTileDefaults.ActionButtonShape
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 6.dp),
+                        modifier = Modifier.padding(StopwatchTileDefaults.ActionButtonContentPadding),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
                             contentDescription = stringResource(R.string.btn_reset),
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(StopwatchTileDefaults.SmallIconSize)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(

@@ -53,6 +53,15 @@ import com.ear.watches.R
 import com.ear.watches.data.model.StopwatchUiState
 import com.ear.watches.ui.theme.WatchesTheme
 
+private object GlobalControlBarDefaults {
+    val ButtonShape = RoundedCornerShape(12.dp)
+    val ButtonContentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
+    val ButtonIconSize = 18.dp
+    val HeaderIconSize = 24.dp
+    val RowSpacing = 8.dp
+    val RowPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp)
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GlobalControlBar(
@@ -85,7 +94,7 @@ fun GlobalControlBar(
                             imageVector = Icons.Default.Timer,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(28.dp)
+                            modifier = Modifier.size(GlobalControlBarDefaults.HeaderIconSize)
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(
@@ -120,23 +129,23 @@ fun GlobalControlBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .horizontalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp, vertical = 6.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    .padding(GlobalControlBarDefaults.RowPadding),
+                horizontalArrangement = Arrangement.spacedBy(GlobalControlBarDefaults.RowSpacing),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Add Watch
                 Button(
                     onClick = onAddWatch,
-                    shape = RoundedCornerShape(12.dp),
+                    shape = GlobalControlBarDefaults.ButtonShape,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary
                     ),
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
+                    contentPadding = GlobalControlBarDefaults.ButtonContentPadding
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = null,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(GlobalControlBarDefaults.ButtonIconSize)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
@@ -148,13 +157,13 @@ fun GlobalControlBar(
                 // Batch Add
                 FilledTonalButton(
                     onClick = onBatchAdd,
-                    shape = RoundedCornerShape(12.dp),
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
+                    shape = GlobalControlBarDefaults.ButtonShape,
+                    contentPadding = GlobalControlBarDefaults.ButtonContentPadding
                 ) {
                     Icon(
                         imageVector = Icons.Default.GroupAdd,
                         contentDescription = null,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(GlobalControlBarDefaults.ButtonIconSize)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(text = stringResource(R.string.action_batch_add))
@@ -166,17 +175,17 @@ fun GlobalControlBar(
                     Button(
                         onClick = onStopAll,
                         enabled = true,
-                        shape = RoundedCornerShape(12.dp),
+                        shape = GlobalControlBarDefaults.ButtonShape,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFFD32F2F),
                             contentColor = Color.White
                         ),
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
+                        contentPadding = GlobalControlBarDefaults.ButtonContentPadding
                     ) {
                         Icon(
                             imageVector = Icons.Default.Stop,
                             contentDescription = null,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(GlobalControlBarDefaults.ButtonIconSize)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
@@ -189,17 +198,17 @@ fun GlobalControlBar(
                     Button(
                         onClick = onStartAll,
                         enabled = hasWatches,
-                        shape = RoundedCornerShape(12.dp),
+                        shape = GlobalControlBarDefaults.ButtonShape,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF2E7D32),
                             contentColor = Color.White
                         ),
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
+                        contentPadding = GlobalControlBarDefaults.ButtonContentPadding
                     ) {
                         Icon(
                             imageVector = Icons.Default.PlayArrow,
                             contentDescription = null,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(GlobalControlBarDefaults.ButtonIconSize)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
@@ -223,7 +232,7 @@ fun GlobalControlBar(
                 ) {
                     Surface(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
+                            .clip(GlobalControlBarDefaults.ButtonShape)
                             .onResetInstantPress(
                                 enabled = resetEnabled,
                                 onReset = onResetAll,
@@ -234,17 +243,17 @@ fun GlobalControlBar(
                             ),
                         color = if (resetEnabled) Color(0xFFE65100) else Color(0xFFB0BEC5),
                         contentColor = if (resetEnabled) Color.White else Color(0xFF546E7A),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = GlobalControlBarDefaults.ButtonShape
                     ) {
                         Row(
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
+                            modifier = Modifier.padding(GlobalControlBarDefaults.ButtonContentPadding),
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Refresh,
                                 contentDescription = null,
-                                modifier = Modifier.size(18.dp)
+                                modifier = Modifier.size(GlobalControlBarDefaults.ButtonIconSize)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
@@ -261,13 +270,13 @@ fun GlobalControlBar(
                 // Share Results
                 FilledTonalButton(
                     onClick = onShareResults,
-                    shape = RoundedCornerShape(12.dp),
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
+                    shape = GlobalControlBarDefaults.ButtonShape,
+                    contentPadding = GlobalControlBarDefaults.ButtonContentPadding
                 ) {
                     Icon(
                         imageVector = Icons.Default.Share,
                         contentDescription = null,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(GlobalControlBarDefaults.ButtonIconSize)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(text = stringResource(R.string.action_share))
