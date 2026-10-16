@@ -1,0 +1,153 @@
+<resources>
+    <string name="app_name">Coach Chronomètre</string>
+
+    <!-- Buttons -->
+    <string name="btn_start">Démarrer</string>
+    <string name="btn_stop">Arrêter</string>
+    <string name="btn_pause">Pause</string>
+    <string name="btn_lap">Tour</string>
+    <string name="btn_reset">Réinitialiser</string>
+    <string name="btn_delete">Supprimer</string>
+    <string name="btn_edit">Modifier</string>
+    <string name="btn_save">Enregistrer</string>
+    <string name="btn_cancel">Annuler</string>
+    <string name="btn_done">Terminé</string>
+    <string name="btn_share">Partager</string>
+
+    <!-- Global Bar Actions -->
+    <string name="action_start_all">Tout démarrer</string>
+    <string name="action_stop_all">Tout arrêter</string>
+    <string name="action_reset_all">Tout réinitialiser</string>
+    <string name="action_add_watch">Ajouter un chrono</string>
+    <string name="action_batch_add">Ajout par lot</string>
+    <string name="action_share">Partager les résultats</string>
+    <string name="action_settings">Paramètres</string>
+
+    <!-- Dialog Titles & Labels -->
+    <string name="dialog_edit_watch_title">Modifier le chronomètre</string>
+    <string name="dialog_edit_watch_name_label">Nom</string>
+    <string name="dialog_edit_watch_color_label">Couleur</string>
+
+    <string name="dialog_batch_add_title">Ajouter plusieurs chronomètres</string>
+    <string name="dialog_batch_add_count_label">Nombre</string>
+    <string name="dialog_batch_add_prefix_label">Préfixe de nom</string>
+    <string name="dialog_batch_add_number_athletes">Nombre d\'athlètes (1 – 12)</string>
+    <string name="dialog_batch_add_confirm">Ajouter %1$d chronomètres</string>
+
+    <string name="dialog_settings_title">Paramètres</string>
+    <string name="setting_sound_haptics">Son &amp; Haptique</string>
+    <string name="setting_sound_haptics_desc">Signaux sonores/vibrations lors des appuis sur les boutons</string>
+    <string name="setting_hardware_keys">Boutons de volume physiques</string>
+    <string name="setting_hardware_keys_desc">Vol + = Démarrer/Tour (Focus), Vol - = Arrêter/Réinitialiser</string>
+    <string name="setting_auto_sort">Tri automatique par tour le plus rapide/suivant</string>
+    <string name="setting_running_display_precision">Précision du temps en cours</string>
+    <string name="setting_time_precision">Précision résultat &amp; tour</string>
+
+    <!-- Precision Options -->
+    <string name="precision_tenths">Dixièmes (0,1s)</string>
+    <string name="precision_hundredths">Centièmes (0,01s)</string>
+    <string name="precision_seconds">Secondes (1s)</string>
+
+    <!-- Language Options -->
+    <string name="setting_language">Langue</string>
+    <string name="language_system_default">Par défaut du système</string>
+    <string name="language_english">Anglais</string>
+    <string name="language_german">Allemand</string>
+    <string name="language_french">Français</string>
+
+    <!-- Theme Options -->
+    <string name="setting_theme_mode">Thème</string>
+    <string name="theme_system_default">Par défaut du système</string>
+    <string name="theme_light">Clair</string>
+    <string name="theme_dark">Sombre</string>
+
+    <!-- Font Size Options -->
+    <string name="setting_font_size">Taille du texte</string>
+    <string name="font_size_small">Petite (85%)</string>
+    <string name="font_size_normal">Normale (100%)</string>
+    <string name="font_size_large">Grande (115%)</string>
+
+    <!-- Stopwatch Tile & Focus Badge -->
+    <string name="badge_focus">FOCUS</string>
+    <string name="label_last_lap">Dernier tour</string>
+    <string name="label_last_lap_format">Dernier tour : %1$s (%2$d)</string>
+    <string name="status_running">EN COURS</string>
+    <string name="status_stopped">ARRÊTÉ</string>
+    <string name="cd_toggle_time_display">Basculer entre Tour actuel / Temps total</string>
+    <string name="label_current_lap">Tour actuel</string>
+    <string name="label_overall_time">Temps total</string>
+    <string name="label_lap_tag">TOUR</string>
+
+    <!-- Race Results Exporter Text Labels -->
+    <string name="report_title">Résumé des résultats de course</string>
+    <string name="report_header_banner">RÉSULTATS MULTI-CHRONOMÈTRE</string>
+    <string name="report_total_athletes">Total athlètes/chronomètres : %1$d</string>
+    <string name="report_runner">Coureur</string>
+    <string name="report_runner_format">%1$d. Coureur : %2$s</string>
+    <string name="report_status">Statut</string>
+    <string name="report_total_time">Temps total</string>
+    <string name="report_total_elapsed_time_format">Temps écoulé total : %1$s</string>
+    <string name="report_best_lap">Meilleur tour</string>
+    <string name="report_best_lap_format">Meilleur tour : %1$s (Tour %2$d)</string>
+    <string name="report_best_lap_na">Meilleur tour : N/A</string>
+    <string name="report_laps">Tours</string>
+    <string name="report_lap_breakdown_format">Détail des tours (%1$d tours) :</string>
+    <string name="report_lap_entry_format">- Tour %1$d : %2$s | Cumulé : %3$s</string>
+    <string name="report_laps_none">Tours : Aucun enregistré</string>
+    <string name="report_no_data">Rapport entraîneur multi-chronomètre\nAucune donnée disponible.</string>
+
+    <!-- Empty State & Share Toast -->
+    <string name="empty_state_title">Aucun chronomètre actif</string>
+    <string name="empty_state_message">Ajoutez des chronomètres individuels pour les athlètes ou utilisez l\'ajout par lot pour configurer toute votre équipe instantanément.</string>
+    <string name="share_subject">Résultats de course multi-chronomètre</string>
+    <string name="share_chooser_title">Partager les résultats via</string>
+    <string name="share_error_toast">Aucune application disponible pour partager les résultats</string>
+
+    <!-- Stopwatch Detail Modal -->
+    <string name="title_stopwatch_details">Détails du chronomètre</string>
+    <string name="label_start_time">Heure de début</string>
+    <string name="label_end_time">Fin</string>
+    <string name="label_total_time">Temps total</string>
+    <string name="btn_share_stopwatch">Partager le chronomètre</string>
+    <string name="btn_close">Fermer</string>
+    <string name="label_lap_breakdown">Détail des tours</string>
+    <string name="header_lap_num">Tour</string>
+    <string name="header_lap_time">Temps au tour</string>
+    <string name="header_total_time">Temps total</string>
+    <string name="cd_stopwatch_details">Afficher les détails du chronomètre</string>
+    <string name="cd_close_details">Fermer les détails</string>
+
+    <!-- Accessibility / Content Descriptions -->
+    <string name="cd_decrease_count">Diminuer le nombre</string>
+    <string name="cd_increase_count">Augmenter le nombre</string>
+    <string name="cd_edit_watch">Modifier le nom du chronomètre</string>
+    <string name="cd_delete_watch">Supprimer le chronomètre</string>
+    <string name="cd_selected">Sélectionné</string>
+    <string name="default_athlete_prefix">Athlète</string>
+
+    <string name="subsecond_separator">,</string>
+
+    <!-- Multi-Run Strings -->
+    <string name="label_run">Course %1$d</string>
+    <string name="hint_hold_to_reset_all">Maintenir 0,5s pour réinitialiser toutes les courses pour tous les chronos</string>
+    <string name="label_hold_to_reset_all">Maintenir pour tout réinitialiser</string>
+    <string name="label_total_all_runs">Total</string>
+    <string name="label_run_duration">Durée de la course</string>
+
+    <!-- Help Dialog & Tooltips -->
+    <string name="cd_help">Aide</string>
+    <string name="dialog_help_title">Aide &amp; Guide rapide</string>
+    <string name="help_hardware_keys_title">Boutons de volume physiques</string>
+    <string name="help_hardware_keys_desc">Volume+ = Tout démarrer / Temps au tour pour le chrono ciblé\nVolume- = Arrêter le chrono ciblé / Tout réinitialiser une fois arrêté</string>
+    <string name="help_reset_button_title">Bouton Réinitialiser</string>
+    <string name="help_reset_button_desc">Pression courte (&lt;0,5s) = réinitialiser le temps affiché &amp; démarrer une nouvelle session la prochaine fois\nPression longue (&gt;0,5s) = effacement complet de toutes les courses et de tous les tours</string>
+    <string name="help_detail_view_title">Vue détaillée</string>
+    <string name="help_detail_view_desc">Appuyez sur l\'icône info d\'un chronomètre pour consulter l\'historique des sessions et exporter les résultats individuels.</string>
+    <string name="help_precision_sort_title">Précision du temps &amp; Tri auto.</string>
+    <string name="help_precision_sort_desc">À configurer dans les Paramètres (Dixièmes 0,1s par défaut).</string>
+
+    <!-- Pace Trend & Delta Strings -->
+    <string name="cd_pace_faster">Plus rapide</string>
+    <string name="cd_pace_slower">Plus lent</string>
+    <string name="header_pace_delta">Écart</string>
+</resources>

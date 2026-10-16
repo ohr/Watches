@@ -10,7 +10,7 @@ class AppLanguageTest {
     @Test
     fun testAppLanguageEntriesAndProperties() {
         val entries = AppLanguage.entries
-        assertEquals(3, entries.size)
+        assertEquals(4, entries.size)
 
         val system = AppLanguage.valueOf("SYSTEM")
         assertEquals("", system.languageTag)
@@ -23,6 +23,10 @@ class AppLanguageTest {
         val german = AppLanguage.valueOf("GERMAN")
         assertEquals("de", german.languageTag)
         assertEquals(R.string.language_german, german.labelResId)
+
+        val french = AppLanguage.valueOf("FRENCH")
+        assertEquals("fr", french.languageTag)
+        assertEquals(R.string.language_french, french.labelResId)
     }
 
     @Test

@@ -11,5 +11,6 @@ enum class AppLanguage(
 ) {
     SYSTEM("", R.string.language_system_default),
     ENGLISH("en", R.string.language_english),
-    GERMAN("de", R.string.language_german)
+    GERMAN("de", R.string.language_german),
+    FRENCH("fr", R.string.language_french)
 }

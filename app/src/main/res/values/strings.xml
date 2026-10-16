@@ -53,6 +53,7 @@
     <string name="language_system_default">System Default</string>
     <string name="language_english">English</string>
     <string name="language_german">German</string>
+    <string name="language_french">French</string>
 
     <!-- Theme Options -->
     <string name="setting_theme_mode">Theme</string>
