@@ -35,6 +35,10 @@ import androidx.compose.ui.unit.dp
 import com.ear.watches.R
 import com.ear.watches.ui.theme.WatchesTheme
 
+/**
+ * A dialog allowing the user to instantiate multiple stopwatches at once with a common name prefix.
+ * Useful for quickly setting up a race with multiple athletes.
+ */
 @Composable
 fun BatchAddDialog(
     onConfirm: (count: Int, namePrefix: String) -> Unit,

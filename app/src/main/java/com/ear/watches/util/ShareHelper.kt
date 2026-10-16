@@ -8,7 +8,8 @@ import com.ear.watches.data.model.AppPrecision
 import com.ear.watches.data.model.StopwatchItem
 
 /**
- * Exports race results via Android Share Sheet using Intent.ACTION_SEND.
+ * Helper utility for exporting formatted race results via the Android Share Sheet.
+ * Utilizes [Intent.ACTION_SEND] to share the text-based reports with external applications.
  */
 object ShareHelper {
 

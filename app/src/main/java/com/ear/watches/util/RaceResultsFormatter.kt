@@ -6,6 +6,10 @@ import com.ear.watches.data.model.AppPrecision
 import com.ear.watches.data.model.StopwatchItem
 import com.ear.watches.data.util.TimeFormatter
 
+/**
+ * Utility responsible for formatting stopwatch data (laps, runs, elapsed times) into plain text reports.
+ * Generates clear, readable output suitable for sharing or reviewing multi-stopwatch race results.
+ */
 object RaceResultsFormatter {
 
     private fun getString(context: Context?, resId: Int, vararg args: Any): String? {

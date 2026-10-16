@@ -62,6 +62,11 @@ private object GlobalControlBarDefaults {
     val RowPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp)
 }
 
+/**
+ * A fixed UI bar, typically at the top of the screen, providing macro-level actions
+ * that affect all stopwatches simultaneously (e.g., Global Start, Stop, Reset). Also houses
+ * the actions for adding new watches, sharing results, and accessing settings.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GlobalControlBar(

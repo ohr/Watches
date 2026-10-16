@@ -2,6 +2,10 @@ package com.ear.watches.data.model
 
 import kotlinx.serialization.Serializable
 
+/**
+ * Represents the formatting precision used for displaying stopwatch times.
+ * Controls how many decimal digits of a second are shown (e.g., tenths, hundredths, or none).
+ */
 @Serializable
 enum class AppPrecision(
     val displayName: String,

@@ -60,6 +60,10 @@ import com.ear.watches.util.ShareHelper
 import java.text.SimpleDateFormat
 import java.util.Date
 
+/**
+ * A detailed modal view for a single stopwatch, showing its full history of runs and laps.
+ * Used for post-workout review, displaying calculated elapsed times and lap deltas.
+ */
 @Composable
 fun StopwatchDetailModal(
     watch: StopwatchItem,

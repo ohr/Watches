@@ -56,6 +56,11 @@ import com.ear.watches.util.FeedbackManager
 import com.ear.watches.util.RaceResultsFormatter
 import com.ear.watches.util.shareRaceResults
 
+/**
+ * The root Jetpack Compose screen that orchestrates the layout of the application.
+ * Contains the [GlobalControlBar], the grid of [StopwatchTile]s, and manages the visibility of
+ * various overlay dialogs (Settings, Add/Edit Watch, Reports).
+ */
 @Composable
 fun MainStopwatchScreen(
     viewModel: StopwatchViewModel,

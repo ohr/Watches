@@ -40,6 +40,10 @@ import com.ear.watches.data.model.AppSettings
 import com.ear.watches.data.model.AppThemeMode
 import com.ear.watches.ui.theme.WatchesTheme
 
+/**
+ * A modal dialog presenting application-wide configuration options.
+ * Allows users to toggle haptics, volume keys, display precision, auto-sort, and language.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsDialog(

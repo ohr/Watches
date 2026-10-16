@@ -12,6 +12,7 @@ typealias SoundHapticsHelper = FeedbackManager
 
 /**
  * Manages tactile (vibration) and audio (tone/beep) feedback for stopwatch user actions.
+ * Encapsulates the logic for different feedback types (start, stop, lap, reset) and respects user preferences.
  */
 class FeedbackManager(context: Context) {
 

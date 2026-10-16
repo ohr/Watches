@@ -21,6 +21,11 @@ import java.io.IOException
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "app_settings")
 
+/**
+ * Repository layer for persisting and retrieving user preferences using DataStore.
+ * Provides a reactive [Flow] of [AppSettings] to the UI and methods to update individual
+ * configuration values.
+ */
 class SettingsRepository(
     private val dataStore: DataStore<Preferences>
 ) {

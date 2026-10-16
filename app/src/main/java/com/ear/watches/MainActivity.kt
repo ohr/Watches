@@ -25,6 +25,10 @@ import com.ear.watches.ui.viewmodel.StopwatchViewModel
 import com.ear.watches.util.FeedbackManager
 import java.util.Locale
 
+/**
+ * The main entry point for the application. Sets up edge-to-edge display, initializes
+ * dependencies like the ViewModel and FeedbackManager, and hosts the root Compose UI content.
+ */
 class MainActivity : ComponentActivity() {
 
     private val viewModel: StopwatchViewModel by viewModels {

@@ -14,11 +14,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -39,9 +40,13 @@ import androidx.compose.ui.window.Dialog
 import com.ear.watches.R
 import com.ear.watches.ui.theme.WatchesTheme
 
+/**
+ * A dialog displaying quick start instructions and usage tips for the application.
+ * Explains hardware button mappings and basic navigation.
+ */
 @Composable
 fun HelpDialog(
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     Dialog(onDismissRequest = onDismiss) {
         Surface(
@@ -50,12 +55,12 @@ fun HelpDialog(
             tonalElevation = 6.dp,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 16.dp)
+                .padding(vertical = 16.dp),
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp)
+                    .padding(20.dp),
             ) {
                 // Header with Title & Close (X) button
                 Row(
@@ -63,22 +68,22 @@ fun HelpDialog(
                         .fillMaxWidth()
                         .padding(bottom = 16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         text = stringResource(R.string.dialog_help_title),
                         style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
                         ),
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
                     )
                     IconButton(
                         onClick = onDismiss,
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(32.dp),
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = stringResource(R.string.cd_close_details)
+                            contentDescription = stringResource(R.string.cd_close_details),
                         )
                     }
                 }
@@ -89,34 +94,41 @@ fun HelpDialog(
                         .weight(1f, fill = false)
                         .fillMaxWidth()
                         .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    // Section 1: Hardware Volume Buttons
+                    // Card 1: Hardware Volume Buttons
                     HelpSectionCard(
                         icon = Icons.AutoMirrored.Default.VolumeUp,
-                        title = stringResource(R.string.help_hardware_keys_title),
-                        description = stringResource(R.string.help_hardware_keys_desc)
+                        title = stringResource(R.string.help_vol_keys_title),
+                        description = stringResource(R.string.help_vol_keys_desc),
                     )
 
-                    // Section 2: Reset Button
+                    // Card 2: Reset Button Controls
                     HelpSectionCard(
                         icon = Icons.Default.Refresh,
-                        title = stringResource(R.string.help_reset_button_title),
-                        description = stringResource(R.string.help_reset_button_desc)
+                        title = stringResource(R.string.help_reset_title),
+                        description = stringResource(R.string.help_reset_desc),
                     )
 
-                    // Section 3: Detail View
+                    // Card 3: Pace Trend Indicators
+                    HelpSectionCard(
+                        icon = Icons.AutoMirrored.Default.TrendingUp,
+                        title = stringResource(R.string.help_pace_trend_title),
+                        description = stringResource(R.string.help_pace_trend_desc),
+                    )
+
+                    // Card 4: Detail View & Export
                     HelpSectionCard(
                         icon = Icons.Default.Info,
-                        title = stringResource(R.string.help_detail_view_title),
-                        description = stringResource(R.string.help_detail_view_desc)
+                        title = stringResource(R.string.help_details_title),
+                        description = stringResource(R.string.help_details_desc),
                     )
 
-                    // Section 4: Time Precision & Auto-Sort
+                    // Card 5: Precision & Display Settings
                     HelpSectionCard(
-                        icon = Icons.Default.Speed,
-                        title = stringResource(R.string.help_precision_sort_title),
-                        description = stringResource(R.string.help_precision_sort_desc)
+                        icon = Icons.Default.Settings,
+                        title = stringResource(R.string.help_settings_title),
+                        description = stringResource(R.string.help_settings_desc),
                     )
                 }
 
@@ -127,7 +139,7 @@ fun HelpDialog(
                     onClick = onDismiss,
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth(),
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
                 ) {
                     Text(text = stringResource(R.string.btn_close))
                 }
@@ -140,20 +152,20 @@ fun HelpDialog(
 private fun HelpSectionCard(
     icon: ImageVector,
     title: String,
-    description: String
+    description: String,
 ) {
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
         ),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(14.dp),
-            verticalAlignment = Alignment.Top
+            verticalAlignment = Alignment.Top,
         ) {
             Icon(
                 imageVector = icon,
@@ -161,7 +173,7 @@ private fun HelpSectionCard(
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
                     .size(24.dp)
-                    .padding(top = 2.dp)
+                    .padding(top = 2.dp),
             )
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
@@ -169,14 +181,14 @@ private fun HelpSectionCard(
                     text = title,
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                        color = MaterialTheme.colorScheme.onSurface,
+                    ),
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
@@ -187,6 +199,6 @@ private fun HelpSectionCard(
 @Composable
 fun HelpDialogPreview() {
     WatchesTheme {
-        HelpDialog(onDismiss = {})
+        HelpDialog {}
     }
 }

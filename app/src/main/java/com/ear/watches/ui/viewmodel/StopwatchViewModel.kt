@@ -26,6 +26,11 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
+/**
+ * Primary ViewModel for the application, responsible for maintaining the state of all stopwatches,
+ * driving the high-frequency UI tick, handling hardware button interactions (volume keys),
+ * and communicating with the [SettingsRepository].
+ */
 class StopwatchViewModel(
     private val settingsRepository: SettingsRepository? = null,
     private val timeProvider: TimeProvider = SystemTimeProvider(),

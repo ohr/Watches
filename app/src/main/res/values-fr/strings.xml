@@ -137,14 +137,24 @@
     <!-- Help Dialog & Tooltips -->
     <string name="cd_help">Aide</string>
     <string name="dialog_help_title">Aide &amp; Guide rapide</string>
+    <string name="help_vol_keys_title">Boutons de volume physiques</string>
+    <string name="help_vol_keys_desc">Volume+ = Tout démarrer / Temps au tour pour le chrono ciblé\nVolume- = Arrêter le chrono ciblé / Tout réinitialiser une fois arrêté</string>
     <string name="help_hardware_keys_title">Boutons de volume physiques</string>
     <string name="help_hardware_keys_desc">Volume+ = Tout démarrer / Temps au tour pour le chrono ciblé\nVolume- = Arrêter le chrono ciblé / Tout réinitialiser une fois arrêté</string>
-    <string name="help_reset_button_title">Bouton Réinitialiser</string>
-    <string name="help_reset_button_desc">Pression courte (&lt;0,5s) = réinitialiser le temps affiché &amp; démarrer une nouvelle session la prochaine fois\nPression longue (&gt;0,5s) = effacement complet de toutes les courses et de tous les tours</string>
-    <string name="help_detail_view_title">Vue détaillée</string>
+    <string name="help_reset_title">Contrôles du bouton Réinitialiser</string>
+    <string name="help_reset_desc">Appui court (&lt;0,5s) : Réinitialise le temps affiché à 0 et prépare une nouvelle session de course (Course 1, Course 2, …).\nAppui long (&gt;0,5s) : Effectue une suppression complète de toutes les sessions de course et de l\'historique des tours.</string>
+    <string name="help_reset_button_title">Contrôles du bouton Réinitialiser</string>
+    <string name="help_reset_button_desc">Appui court (&lt;0,5s) : Réinitialise le temps affiché à 0 et prépare une nouvelle session de course (Course 1, Course 2, …).\nAppui long (&gt;0,5s) : Effectue une suppression complète de toutes les sessions de course et de l\'historique des tours.</string>
+    <string name="help_pace_trend_title">Indicateur de tendance d\'allure</string>
+    <string name="help_pace_trend_desc">Vert ▼ indique un tour plus rapide que le précédent, Rouge ▲ indique un tour plus lent.</string>
+    <string name="help_details_title">Vue détaillée &amp; Export</string>
+    <string name="help_details_desc">Appuyez sur l\'icône info d\'un chronomètre pour consulter l\'historique des sessions et exporter les résultats individuels.</string>
+    <string name="help_detail_view_title">Vue détaillée &amp; Export</string>
     <string name="help_detail_view_desc">Appuyez sur l\'icône info d\'un chronomètre pour consulter l\'historique des sessions et exporter les résultats individuels.</string>
-    <string name="help_precision_sort_title">Précision du temps &amp; Tri auto.</string>
-    <string name="help_precision_sort_desc">À configurer dans les Paramètres (Dixièmes 0,1s par défaut).</string>
+    <string name="help_settings_title">Paramètres de précision &amp; d\'affichage</string>
+    <string name="help_settings_desc">Configurez séparément la précision du temps en cours et des résultats/tours, les thèmes, la taille du texte, le tri automatique et la langue.</string>
+    <string name="help_precision_sort_title">Paramètres de précision &amp; d\'affichage</string>
+    <string name="help_precision_sort_desc">Configurez séparément la précision du temps en cours et des résultats/tours, les thèmes, la taille du texte, le tri automatique et la langue.</string>
 
     <!-- Pace Trend & Delta Strings -->
     <string name="cd_pace_faster">Plus rapide</string>

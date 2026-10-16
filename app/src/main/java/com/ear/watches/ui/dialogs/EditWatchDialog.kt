@@ -39,6 +39,9 @@ import com.ear.watches.R
 import com.ear.watches.data.model.StopwatchItem
 import com.ear.watches.ui.theme.WatchesTheme
 
+/**
+ * A dialog enabling the user to customize the name and color of an individual stopwatch.
+ */
 @Composable
 fun EditWatchDialog(
     watch: StopwatchItem,

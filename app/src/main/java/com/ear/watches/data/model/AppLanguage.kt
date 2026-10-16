@@ -4,6 +4,10 @@ import androidx.annotation.StringRes
 import com.ear.watches.R
 import kotlinx.serialization.Serializable
 
+/**
+ * Defines the supported languages for the application.
+ * Contains the BCP-47 language tag and the corresponding localized string resource for display.
+ */
 @Serializable
 enum class AppLanguage(
     val languageTag: String,

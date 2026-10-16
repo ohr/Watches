@@ -3,6 +3,11 @@ package com.ear.watches.data.model
 import androidx.compose.runtime.Stable
 import kotlinx.serialization.Serializable
 
+/**
+ * User-configurable settings for the application.
+ * Controls preferences like haptics, volume key behavior, display precision, language, and theme.
+ * Designed to be serialized and persisted using DataStore.
+ */
 @Stable
 @Serializable
 data class AppSettings(

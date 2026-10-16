@@ -85,6 +85,11 @@ private object StopwatchTileDefaults {
     val ElementSpacing = 6.dp
 }
 
+/**
+ * A reusable UI component that displays the state and controls for a single stopwatch.
+ * Shows the current elapsed time, lap controls, play/pause buttons, and handles selection
+ * state for volume key focus.
+ */
 @Composable
 fun StopwatchTile(
     watch: StopwatchItem,

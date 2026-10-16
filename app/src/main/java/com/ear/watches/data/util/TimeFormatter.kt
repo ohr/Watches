@@ -4,6 +4,11 @@ import com.ear.watches.data.model.AppPrecision
 import java.util.Locale
 import kotlin.math.abs
 
+/**
+ * Utility object responsible for formatting millisecond durations into human-readable strings.
+ * Handles formatting logic for different precisions (e.g., tenths, hundredths, seconds),
+ * and supports both absolute time formatting and delta time formatting.
+ */
 object TimeFormatter {
 
     fun formatTime(millis: Long, precision: AppPrecision, subsecondSeparator: String = "."): String {
