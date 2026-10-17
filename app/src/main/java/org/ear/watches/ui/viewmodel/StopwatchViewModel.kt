@@ -189,6 +189,26 @@ class StopwatchViewModel(
         }
     }
 
+    fun batchAddStopwatchesWithNames(names: List<String>) {
+        if (names.isEmpty()) return
+        _uiState.update { state ->
+            val existingCount = state.stopwatches.size
+            val newItems = names.mapIndexed { index, name ->
+                val totalNumber = existingCount + index
+                val color = StopwatchItem.DEFAULT_PASTEL_COLORS[totalNumber % StopwatchItem.DEFAULT_PASTEL_COLORS.size]
+                StopwatchItem(
+                    name = name,
+                    pastelColorHex = color
+                )
+            }
+            val newList = state.stopwatches + newItems
+            val newFocusedId = state.activeFocusedWatchId ?: newItems.first().id
+
+            state.copy(stopwatches = newList, activeFocusedWatchId = newFocusedId)
+                .applyFocusAndSort(newFocusedId = newFocusedId)
+        }
+    }
+
     fun deleteStopwatch(id: String) {
         _uiState.update { state ->
             val newList = state.stopwatches.filterNot { it.id == id }
@@ -202,14 +222,18 @@ class StopwatchViewModel(
     }
 
     fun updateStopwatch(id: String, newName: String, newColorHex: Long) {
+        val trimmedName = newName.trim()
         _uiState.update { state ->
             val newList = state.stopwatches.map { item ->
                 if (item.id == id) {
-                    item.copy(name = newName, pastelColorHex = newColorHex)
+                    item.copy(name = trimmedName, pastelColorHex = newColorHex)
                 } else item
             }
             state.copy(stopwatches = newList)
                 .applyFocusAndSort()
+        }
+        if (trimmedName.isNotBlank()) {
+            addProposedAthleteName(trimmedName)
         }
     }
 
@@ -615,6 +639,38 @@ class StopwatchViewModel(
         }
         viewModelScope.launch(dispatcher) {
             settingsRepository?.saveSettings(settings)
+        }
+    }
+
+    fun addProposedAthleteName(name: String) {
+        val trimmed = name.trim()
+        if (trimmed.isBlank()) return
+        _uiState.update { state ->
+            if (state.settings.proposedAthleteNames.contains(trimmed)) {
+                state
+            } else {
+                state.copy(
+                    settings = state.settings.copy(
+                        proposedAthleteNames = state.settings.proposedAthleteNames + trimmed
+                    )
+                )
+            }
+        }
+        viewModelScope.launch(dispatcher) {
+            settingsRepository?.addProposedAthleteName(trimmed)
+        }
+    }
+
+    fun removeProposedAthleteName(name: String) {
+        _uiState.update { state ->
+            state.copy(
+                settings = state.settings.copy(
+                    proposedAthleteNames = state.settings.proposedAthleteNames - name
+                )
+            )
+        }
+        viewModelScope.launch(dispatcher) {
+            settingsRepository?.removeProposedAthleteName(name)
         }
     }
 

@@ -173,4 +173,36 @@ class SettingsRepositoryTest {
         assertEquals(AppFontSize.NORMAL, settings.fontSizeScale)
         assertTrue(settings.keepScreenOnWhileRunning)
     }
+
+    @Test
+    fun addProposedAthleteName_addsTrimmedNonBlankUniqueNames() = testScope.runTest {
+        repository.addProposedAthleteName("  Athlete A  ")
+        var settings = repository.settingsFlow.first()
+        assertEquals(listOf("Athlete A"), settings.proposedAthleteNames)
+
+        // Blank name ignored
+        repository.addProposedAthleteName("   ")
+        settings = repository.settingsFlow.first()
+        assertEquals(listOf("Athlete A"), settings.proposedAthleteNames)
+
+        // Duplicate name not added again
+        repository.addProposedAthleteName("Athlete A")
+        settings = repository.settingsFlow.first()
+        assertEquals(listOf("Athlete A"), settings.proposedAthleteNames)
+
+        // Distinct new name added
+        repository.addProposedAthleteName("Athlete B")
+        settings = repository.settingsFlow.first()
+        assertEquals(listOf("Athlete A", "Athlete B"), settings.proposedAthleteNames)
+    }
+
+    @Test
+    fun removeProposedAthleteName_removesExistingNameFromList() = testScope.runTest {
+        repository.addProposedAthleteName("Athlete A")
+        repository.addProposedAthleteName("Athlete B")
+
+        repository.removeProposedAthleteName("Athlete A")
+        val settings = repository.settingsFlow.first()
+        assertEquals(listOf("Athlete B"), settings.proposedAthleteNames)
+    }
 }

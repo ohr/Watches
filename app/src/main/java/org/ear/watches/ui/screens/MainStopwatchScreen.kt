@@ -51,10 +51,12 @@ import org.ear.watches.ui.dialogs.BatchAddDialog
 import org.ear.watches.ui.dialogs.EditWatchDialog
 import org.ear.watches.ui.dialogs.HelpDialog
 import org.ear.watches.ui.dialogs.SettingsDialog
+import org.ear.watches.ui.dialogs.ShareFormatDialog
 import org.ear.watches.ui.dialogs.StopwatchDetailModal
 import org.ear.watches.ui.viewmodel.StopwatchViewModel
 import org.ear.watches.util.FeedbackManager
 import org.ear.watches.util.RaceResultsFormatter
+import org.ear.watches.util.ShareHelper
 import org.ear.watches.util.shareRaceResults
 
 /**
@@ -80,6 +82,7 @@ fun MainStopwatchScreen(
     var showSettingsDialog by remember { mutableStateOf(false) }
     var showHelpDialog by remember { mutableStateOf(false) }
     var showAboutDialog by remember { mutableStateOf(false) }
+    var showShareFormatDialog by remember { mutableStateOf(false) }
 
     val lazyGridState = rememberLazyGridState()
 
@@ -121,14 +124,7 @@ fun MainStopwatchScreen(
                 },
                 onAddWatch = { viewModel.addStopwatch(defaultNamePrefix = defaultPrefix) },
                 onBatchAdd = { showBatchAddDialog = true },
-                onShareResults = {
-                    val reportText = RaceResultsFormatter.formatRaceResults(
-                        context = context,
-                        stopwatches = uiState.stopwatches,
-                        precision = uiState.settings.timePrecision
-                    )
-                    shareRaceResults(context, reportText)
-                },
+                onShareResults = { showShareFormatDialog = true },
                 onOpenSettings = { showSettingsDialog = true },
                 onOpenHelp = { showHelpDialog = true },
                 onOpenAbout = { showAboutDialog = true }
@@ -301,9 +297,17 @@ fun MainStopwatchScreen(
 
     if (showBatchAddDialog) {
         BatchAddDialog(
-            onConfirm = { count, prefix ->
+            proposedAthleteNames = uiState.settings.proposedAthleteNames,
+            onConfirmBatchWithNames = { names ->
+                viewModel.batchAddStopwatchesWithNames(names)
+                showBatchAddDialog = false
+            },
+            onConfirmBatchNumbered = { count, prefix ->
                 viewModel.batchAddStopwatches(count, prefix)
                 showBatchAddDialog = false
+            },
+            onRemoveProposedName = { name ->
+                viewModel.removeProposedAthleteName(name)
             },
             onDismiss = { showBatchAddDialog = false }
         )
@@ -341,6 +345,29 @@ fun MainStopwatchScreen(
                 showAboutDialog = false
                 viewModel.dismissAboutDialog()
             }
+        )
+    }
+
+    if (showShareFormatDialog) {
+        ShareFormatDialog(
+            onSelectText = {
+                showShareFormatDialog = false
+                val reportText = RaceResultsFormatter.formatRaceResults(
+                    context = context,
+                    stopwatches = uiState.stopwatches,
+                    precision = uiState.settings.timePrecision
+                )
+                shareRaceResults(context, reportText)
+            },
+            onSelectCsv = {
+                showShareFormatDialog = false
+                ShareHelper.shareRaceResultsCsv(
+                    context = context,
+                    stopwatches = uiState.stopwatches,
+                    precision = uiState.settings.timePrecision
+                )
+            },
+            onDismiss = { showShareFormatDialog = false }
         )
     }
 }

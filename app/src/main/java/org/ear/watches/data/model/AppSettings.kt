@@ -20,5 +20,6 @@ data class AppSettings(
     val autoSortEnabled: Boolean = false,
     val themeMode: AppThemeMode = AppThemeMode.SYSTEM_DEFAULT,
     val fontSizeScale: AppFontSize = AppFontSize.NORMAL,
-    val keepScreenOnWhileRunning: Boolean = true
+    val keepScreenOnWhileRunning: Boolean = true,
+    val proposedAthleteNames: List<String> = emptyList()
 )

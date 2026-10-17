@@ -33,6 +33,11 @@
     <string name="dialog_batch_add_prefix_label">Préfixe de nom</string>
     <string name="dialog_batch_add_number_athletes">Nombre d\'athlètes (1 – 12)</string>
     <string name="dialog_batch_add_confirm">Ajouter %1$d chronomètres</string>
+    <string name="dialog_batch_add_saved_roster">Athlètes enregistrés</string>
+    <string name="cd_remove_proposed_name">Supprimer de la liste</string>
+    <string name="btn_select_all">Tout sélectionner</string>
+    <string name="btn_deselect_all">Tout désélectionner</string>
+    <string name="btn_add_selected_count">Ajouter %1$d athlètes sélectionnés</string>
 
     <string name="dialog_settings_title">Paramètres</string>
     <string name="setting_sound">Signaux sonores</string>
@@ -106,6 +111,11 @@
     <string name="share_subject">Résultats de course Coach Chronomètre</string>
     <string name="share_chooser_title">Partager les résultats via</string>
     <string name="share_error_toast">Aucune application disponible pour partager les résultats</string>
+    <string name="share_format_dialog_title">Format d\'exportation</string>
+    <string name="share_as_text">Résumé texte</string>
+    <string name="share_as_text_desc">Format pour SMS et e-mails</string>
+    <string name="share_as_csv">Feuille de calcul CSV</string>
+    <string name="share_as_csv_desc">Format pour Excel et Google Sheets</string>
 
     <!-- Stopwatch Detail Modal -->
     <string name="title_stopwatch_details">Détails du chronomètre</string>
@@ -153,14 +163,18 @@
     <string name="help_reset_button_desc">Appui court (&lt;0,5s) : Réinitialise le temps affiché à 0 et prépare une nouvelle session de course (Course 1, Course 2, …).\nAppui long (&gt;0,5s) : Effectue une suppression complète de toutes les sessions de course et de l\'historique des tours.</string>
     <string name="help_pace_trend_title">Indicateur de tendance d\'allure</string>
     <string name="help_pace_trend_desc">Vert ▼ indique un tour plus rapide que le précédent, Rouge ▲ indique un tour plus lent.</string>
+    <string name="help_roster_title">Liste d\'athlètes enregistrés</string>
+    <string name="help_roster_desc">La modification des noms enregistre automatiquement les athlètes. Dans le menu d\'ajout par lot, cochez les athlètes pour créer leurs chronos.</string>
+    <string name="help_csv_title">Exportation &amp; Fichiers CSV</string>
+    <string name="help_csv_desc">Partagez les résultats sous forme de résumé texte ou de fichier .csv pour Excel et Google Sheets.</string>
     <string name="help_details_title">Vue détaillée &amp; Export</string>
-    <string name="help_details_desc">Appuyez sur l\'icône info d\'un chronomètre pour consulter l\'historique des sessions et exporter les résultats individuels.</string>
+    <string name="help_details_desc">Appuyez sur l\'icône info d\'un chronomètre pour consulter l\'historique des sessions et exporter les résultats individuels. Les chronomètres arrêtés disposent d\'un bouton \"Supprimer les sessions\" dans la vue détaillée pour effacer l\'historique.</string>
     <string name="help_detail_view_title">Vue détaillée &amp; Export</string>
-    <string name="help_detail_view_desc">Appuyez sur l\'icône info d\'un chronomètre pour consulter l\'historique des sessions et exporter les résultats individuels.</string>
+    <string name="help_detail_view_desc">Appuyez sur l\'icône info d\'un chronomètre pour consulter l\'historique des sessions et exporter les résultats individuels. Les chronomètres arrêtés disposent d\'un bouton \"Supprimer les sessions\" dans la vue détaillée pour effacer l\'historique.</string>
     <string name="help_settings_title">Paramètres de précision &amp; d\'affichage</string>
-    <string name="help_settings_desc">Configurez séparément la précision du temps en cours et des résultats/tours, les thèmes, la taille du texte, le tri automatique et la langue.</string>
+    <string name="help_settings_desc">Configurez séparément la précision du temps en cours et des résultats/tours, les thèmes, la taille du texte, le tri automatique, le maintien de l\'écran allumé et la langue.</string>
     <string name="help_precision_sort_title">Paramètres de précision &amp; d\'affichage</string>
-    <string name="help_precision_sort_desc">Configurez séparément la précision du temps en cours et des résultats/tours, les thèmes, la taille du texte, le tri automatique et la langue.</string>
+    <string name="help_precision_sort_desc">Configurez séparément la précision du temps en cours et des résultats/tours, les thèmes, la taille du texte, le tri automatique, le maintien de l\'écran allumé et la langue.</string>
 
     <!-- Pace Trend & Delta Strings -->
     <string name="cd_pace_faster">Plus rapide</string>

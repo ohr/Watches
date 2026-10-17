@@ -145,4 +145,32 @@ object RaceResultsFormatter {
         nowMillis: Long = System.currentTimeMillis(),
         subsecondSeparator: String = "."
     ): String = formatSingleStopwatchResults(null, watch, precision, nowMillis, subsecondSeparator)
+
+    fun formatAsCsv(
+        stopwatches: List<StopwatchItem>,
+        precision: AppPrecision = AppPrecision.HUNDREDTHS,
+        nowMillis: Long = System.currentTimeMillis()
+    ): String {
+        val sb = StringBuilder()
+        sb.appendLine("\"Athlete\",\"Run Session\",\"Lap Number\",\"Lap Time\",\"Total Time\"")
+
+        stopwatches.forEach { watch ->
+            val escapedName = watch.name.replace("\"", "\"\"")
+            watch.runs.forEach { run ->
+                run.laps.forEach { lap ->
+                    val formattedLapTime = TimeFormatter.formatTime(lap.lapTimeMillis, precision)
+                    val formattedTotalTime = TimeFormatter.formatTime(lap.totalTimeMillis, precision)
+                    sb.appendLine("\"$escapedName\",\"Run ${run.runIndex}\",\"${lap.lapNumber}\",\"$formattedLapTime\",\"$formattedTotalTime\"")
+                }
+            }
+        }
+
+        return sb.toString().trimEnd()
+    }
+
+    fun formatSingleAsCsv(
+        watch: StopwatchItem,
+        precision: AppPrecision = AppPrecision.HUNDREDTHS,
+        nowMillis: Long = System.currentTimeMillis()
+    ): String = formatAsCsv(listOf(watch), precision, nowMillis)
 }

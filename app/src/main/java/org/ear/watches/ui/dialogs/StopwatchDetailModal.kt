@@ -54,6 +54,8 @@ import org.ear.watches.data.model.AppSettings
 import org.ear.watches.data.model.LapRecord
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import kotlinx.coroutines.flow.StateFlow
 import org.ear.watches.data.model.RunSession
 import org.ear.watches.data.model.StopwatchItem
@@ -86,6 +88,8 @@ fun StopwatchDetailModal(
         }
     }
     val nowMillis = if (watch.isRunning) currentTick else System.currentTimeMillis()
+
+    var showShareFormatDialog by remember { mutableStateOf(false) }
 
     val effectiveRuns = watch.runs.filter { it.startTimeMillis > 0L || it.endTimeMillis > 0L || it.accumulatedMillis > 0L || it.laps.isNotEmpty() }
     val hasRunData = watch.runs.any { it.laps.isNotEmpty() || it.accumulatedMillis > 0L || it.endTimeMillis > 0L }
@@ -474,9 +478,7 @@ fun StopwatchDetailModal(
 
                     if (hasRunData) {
                         Button(
-                            onClick = {
-                                ShareHelper.shareSingleStopwatchResults(context, watch, settings.timePrecision, nowMillis)
-                            },
+                            onClick = { showShareFormatDialog = true },
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(10.dp),
                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
@@ -497,6 +499,20 @@ fun StopwatchDetailModal(
                 }
             }
         }
+    }
+
+    if (showShareFormatDialog) {
+        ShareFormatDialog(
+            onSelectText = {
+                showShareFormatDialog = false
+                ShareHelper.shareSingleStopwatchResults(context, watch, settings.timePrecision, nowMillis)
+            },
+            onSelectCsv = {
+                showShareFormatDialog = false
+                ShareHelper.shareSingleStopwatchResultsCsv(context, watch, settings.timePrecision, nowMillis)
+            },
+            onDismiss = { showShareFormatDialog = false }
+        )
     }
 }
 

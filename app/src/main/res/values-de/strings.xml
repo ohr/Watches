@@ -33,6 +33,11 @@
     <string name="dialog_batch_add_prefix_label">Namenspräfix</string>
     <string name="dialog_batch_add_number_athletes">Anzahl der Athleten (1 – 12)</string>
     <string name="dialog_batch_add_confirm">%1$d Stoppuhren Hinzufügen</string>
+    <string name="dialog_batch_add_saved_roster">Gespeicherte Athleten</string>
+    <string name="cd_remove_proposed_name">Name aus Liste entfernen</string>
+    <string name="btn_select_all">Alle auswählen</string>
+    <string name="btn_deselect_all">Alle abwählen</string>
+    <string name="btn_add_selected_count">%1$d ausgewählte Athleten hinzufügen</string>
 
     <string name="dialog_settings_title">Einstellungen</string>
     <string name="setting_sound">Tonsignale</string>
@@ -106,6 +111,11 @@
     <string name="share_subject">Coach Stoppuhr Rennergebnisse</string>
     <string name="share_chooser_title">Ergebnisse teilen über</string>
     <string name="share_error_toast">Keine App zum Teilen von Ergebnissen verfügbar</string>
+    <string name="share_format_dialog_title">Export-Format</string>
+    <string name="share_as_text">Text-Übersicht</string>
+    <string name="share_as_text_desc">Geeignet für Messenger und E-Mail</string>
+    <string name="share_as_csv">CSV-Tabelle</string>
+    <string name="share_as_csv_desc">Geeignet für Excel und Google Sheets</string>
 
     <!-- Stopwatch Detail Modal -->
     <string name="title_stopwatch_details">Stoppuhr Details</string>
@@ -153,14 +163,18 @@
     <string name="help_reset_button_desc">Kurz drücken (&lt;0,5s): Setzt die Anzeigezeit auf 0 zurück und bereitet einen neuen Lauf vor (Lauf 1, Lauf 2, …).\nLange drücken (&gt;0,5s): Löscht alle Läufe und den Rundenverlauf vollständig.</string>
     <string name="help_pace_trend_title">Rundentrend-Anzeige</string>
     <string name="help_pace_trend_desc">Grün ▼ zeigt eine schnellere Runde als die vorherige an, Rot ▲ eine langsamere Runde.</string>
+    <string name="help_roster_title">Gespeicherte Athleten-Liste</string>
+    <string name="help_roster_desc">Beim Bearbeiten von Namen werden diese automatisch in Ihrer Liste gespeichert. Im Dialog \'Mehrere Uhren\' können Sie Athleten aus der Liste auswählen.</string>
+    <string name="help_csv_title">Export &amp; CSV-Tabellen</string>
+    <string name="help_csv_desc">Teilen Sie Ergebnisse als Text für Messenger oder als .csv-Tabelle für Excel und Google Sheets.</string>
     <string name="help_details_title">Detailansicht &amp; Export</string>
-    <string name="help_details_desc">Tippen Sie auf das Info-Symbol einer Stoppuhr, um den Verlauf der Läufe anzuzeigen und Einzelergebnisse zu exportieren.</string>
+    <string name="help_details_desc">Tippen Sie auf das Info-Symbol einer Stoppuhr, um den Verlauf der Läufe anzuzeigen und Einzelergebnisse zu exportieren. Gestoppte Stoppuhren bieten in der Detailansicht die Schaltfläche \"Läufe löschen\", um den Verlauf zu leeren.</string>
     <string name="help_detail_view_title">Detailansicht &amp; Export</string>
-    <string name="help_detail_view_desc">Tippen Sie auf das Info-Symbol einer Stoppuhr, um den Verlauf der Läufe anzuzeigen und Einzelergebnisse zu exportieren.</string>
+    <string name="help_detail_view_desc">Tippen Sie auf das Info-Symbol einer Stoppuhr, um den Verlauf der Läufe anzuzeigen und Einzelergebnisse zu exportieren. Gestoppte Stoppuhren bieten in der Detailansicht die Schaltfläche \"Läufe löschen\", um den Verlauf zu leeren.</string>
     <string name="help_settings_title">Präzisions- &amp; Anzeige-Einstellungen</string>
-    <string name="help_settings_desc">Konfigurieren Sie getrennte Genauigkeit für laufende Zeit und Ergebnisse/Runden, Themes, Textskalierung, automatische Sortierung und Spracheinstellungen.</string>
+    <string name="help_settings_desc">Konfigurieren Sie getrennte Genauigkeit für laufende Zeit und Ergebnisse/Runden, Themes, Textskalierung, automatische Sortierung, Bildschirm anlassen und Spracheinstellungen.</string>
     <string name="help_precision_sort_title">Präzisions- &amp; Anzeige-Einstellungen</string>
-    <string name="help_precision_sort_desc">Konfigurieren Sie getrennte Genauigkeit für laufende Zeit und Ergebnisse/Runden, Themes, Textskalierung, automatische Sortierung und Spracheinstellungen.</string>
+    <string name="help_precision_sort_desc">Konfigurieren Sie getrennte Genauigkeit für laufende Zeit und Ergebnisse/Runden, Themes, Textskalierung, automatische Sortierung, Bildschirm anlassen und Spracheinstellungen.</string>
 
     <!-- Pace Trend & Delta Strings -->
     <string name="cd_pace_faster">Schneller</string>

@@ -33,6 +33,11 @@
     <string name="dialog_batch_add_prefix_label">Name Prefix</string>
     <string name="dialog_batch_add_number_athletes">Number of Athletes (1 – 12)</string>
     <string name="dialog_batch_add_confirm">Add %1$d Stopwatches</string>
+    <string name="dialog_batch_add_saved_roster">Saved Roster</string>
+    <string name="cd_remove_proposed_name">Remove name from roster</string>
+    <string name="btn_select_all">Select All</string>
+    <string name="btn_deselect_all">Deselect All</string>
+    <string name="btn_add_selected_count">Add %1$d Selected Athletes</string>
 
     <string name="dialog_settings_title">Settings</string>
     <string name="setting_sound">Sound Cues</string>
@@ -106,6 +111,11 @@
     <string name="share_subject">Coach Stopwatch Race Results</string>
     <string name="share_chooser_title">Share Results via</string>
     <string name="share_error_toast">No app available to share results</string>
+    <string name="share_format_dialog_title">Export Format</string>
+    <string name="share_as_text">Plain Text Summary</string>
+    <string name="share_as_text_desc">Format for messaging apps and emails</string>
+    <string name="share_as_csv">CSV Spreadsheet</string>
+    <string name="share_as_csv_desc">Format for Excel and Google Sheets</string>
 
     <!-- Stopwatch Detail Modal -->
     <string name="title_stopwatch_details">Stopwatch Details</string>
@@ -153,14 +163,18 @@
     <string name="help_reset_button_desc">Short tap (&lt;0.5s): Resets display time to 0 and prepares a new run session (Run 1, Run 2, …).\nLong press (&gt;0.5s): Performs a complete wipe of all run sessions and lap history.</string>
     <string name="help_pace_trend_title">Pace Trend Indicators</string>
     <string name="help_pace_trend_desc">Green ▼ indicates a lap faster than the previous split, while Red ▲ indicates a slower lap.</string>
+    <string name="help_roster_title">Saved Athlete Roster</string>
+    <string name="help_roster_desc">Editing athlete names automatically saves them to your roster. In the Batch Add dialog, tick athlete names from the checklist to quickly create stopwatches for your team.</string>
+    <string name="help_csv_title">Exporting &amp; CSV Spreadsheets</string>
+    <string name="help_csv_desc">Share race results as plain text summaries for messaging apps or as .csv spreadsheet files for Excel and Google Sheets.</string>
     <string name="help_details_title">Detail View &amp; Export</string>
-    <string name="help_details_desc">Tap info icon on any watch tile to view run session history and export individual results.</string>
+    <string name="help_details_desc">Tap info icon on any watch tile to view run session history and export individual results. Stopped stopwatches feature a \"Delete Runs\" button in the Detail View to clear history.</string>
     <string name="help_detail_view_title">Detail View &amp; Export</string>
-    <string name="help_detail_view_desc">Tap info icon on any watch tile to view run session history and export individual results.</string>
+    <string name="help_detail_view_desc">Tap info icon on any watch tile to view run session history and export individual results. Stopped stopwatches feature a \"Delete Runs\" button in the Detail View to clear history.</string>
     <string name="help_settings_title">Precision &amp; Display Settings</string>
-    <string name="help_settings_desc">Configure separate running time vs result/lap precision, themes, text scaling, auto-sorting, and language settings.</string>
+    <string name="help_settings_desc">Configure separate running time vs result/lap precision, themes, text scaling, auto-sorting, Keep Screen Awake, and language settings.</string>
     <string name="help_precision_sort_title">Precision &amp; Display Settings</string>
-    <string name="help_precision_sort_desc">Configure separate running time vs result/lap precision, themes, text scaling, auto-sorting, and language settings.</string>
+    <string name="help_precision_sort_desc">Configure separate running time vs result/lap precision, themes, text scaling, auto-sorting, Keep Screen Awake, and language settings.</string>
 
     <!-- Pace Trend & Delta Strings -->
     <string name="cd_pace_faster">Faster</string>

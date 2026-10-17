@@ -738,4 +738,76 @@ class StopwatchViewModelTest {
 
         assertEquals(updatedSettings, vm.uiState.value.settings)
     }
+
+    @Test
+    fun batchAddStopwatchesWithNames_createsStopwatchesWithNamesAndDistinctPastelColors() {
+        val names = listOf("Alice", "Bob", "Charlie")
+        viewModel.batchAddStopwatchesWithNames(names)
+
+        val state = viewModel.uiState.value
+        assertEquals(3, state.stopwatches.size)
+        assertEquals("Alice", state.stopwatches[0].name)
+        assertEquals("Bob", state.stopwatches[1].name)
+        assertEquals("Charlie", state.stopwatches[2].name)
+
+        assertEquals(state.stopwatches[0].id, state.activeFocusedWatchId)
+        assertTrue(state.stopwatches[0].isFocused)
+    }
+
+    @Test
+    fun updateStopwatch_automaticallyPersistsEditedNameToProposedAthleteNames() = runTest(testDispatcher) {
+        val testFile = File(tempDir, "vm_update_name_settings.preferences_pb")
+        val dataStore = PreferenceDataStoreFactory.create(
+            scope = this,
+            produceFile = { testFile }
+        )
+        val settingsRepository = SettingsRepository(dataStore)
+
+        val vm = StopwatchViewModel(
+            settingsRepository = settingsRepository,
+            timeProvider = timeProvider,
+            dispatcher = testDispatcher
+        )
+
+        vm.addStopwatch("Athlete")
+        val id = vm.uiState.value.stopwatches.first().id
+
+        vm.updateStopwatch(id, "  Coach Dave  ", 0xFF123456L)
+
+        val updatedWatch = vm.uiState.value.stopwatches.first()
+        assertEquals("Coach Dave", updatedWatch.name)
+
+        // Verifies name is trimmed and added to proposedAthleteNames in UI state and repository
+        assertTrue(vm.uiState.value.settings.proposedAthleteNames.contains("Coach Dave"))
+        val repoSettings = settingsRepository.settingsFlow.first()
+        assertTrue(repoSettings.proposedAthleteNames.contains("Coach Dave"))
+    }
+
+    @Test
+    fun removeProposedAthleteName_removesNameFromProposedList() = runTest(testDispatcher) {
+        val testFile = File(tempDir, "vm_remove_proposed.preferences_pb")
+        val dataStore = PreferenceDataStoreFactory.create(
+            scope = this,
+            produceFile = { testFile }
+        )
+        val settingsRepository = SettingsRepository(dataStore)
+
+        val vm = StopwatchViewModel(
+            settingsRepository = settingsRepository,
+            timeProvider = timeProvider,
+            dispatcher = testDispatcher
+        )
+
+        vm.addProposedAthleteName("Runner One")
+        vm.addProposedAthleteName("Runner Two")
+        assertTrue(vm.uiState.value.settings.proposedAthleteNames.contains("Runner One"))
+
+        vm.removeProposedAthleteName("Runner One")
+        assertFalse(vm.uiState.value.settings.proposedAthleteNames.contains("Runner One"))
+        assertTrue(vm.uiState.value.settings.proposedAthleteNames.contains("Runner Two"))
+
+        val repoSettings = settingsRepository.settingsFlow.first()
+        assertFalse(repoSettings.proposedAthleteNames.contains("Runner One"))
+        assertTrue(repoSettings.proposedAthleteNames.contains("Runner Two"))
+    }
 }

@@ -17,9 +17,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -117,14 +119,28 @@ fun HelpDialog(
                         description = stringResource(R.string.help_pace_trend_desc),
                     )
 
-                    // Card 4: Detail View & Export
+                    // Card 4: Saved Athlete Roster & Batch Add
+                    HelpSectionCard(
+                        icon = Icons.Default.GroupAdd,
+                        title = stringResource(R.string.help_roster_title),
+                        description = stringResource(R.string.help_roster_desc),
+                    )
+
+                    // Card 5: Detail View & Delete Runs
                     HelpSectionCard(
                         icon = Icons.Default.Info,
                         title = stringResource(R.string.help_details_title),
                         description = stringResource(R.string.help_details_desc),
                     )
 
-                    // Card 5: Precision & Display Settings
+                    // Card 6: Exporting & CSV Spreadsheets
+                    HelpSectionCard(
+                        icon = Icons.Default.Share,
+                        title = stringResource(R.string.help_csv_title),
+                        description = stringResource(R.string.help_csv_desc),
+                    )
+
+                    // Card 7: Display & Settings
                     HelpSectionCard(
                         icon = Icons.Default.Settings,
                         title = stringResource(R.string.help_settings_title),

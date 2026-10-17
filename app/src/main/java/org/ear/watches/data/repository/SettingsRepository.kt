@@ -224,4 +224,22 @@ class SettingsRepository(
     suspend fun setFontSizeScale(fontSizeScale: AppFontSize) {
         updateSettings { it.copy(fontSizeScale = fontSizeScale) }
     }
+
+    suspend fun addProposedAthleteName(name: String) {
+        val trimmed = name.trim()
+        if (trimmed.isBlank()) return
+        updateSettings { current ->
+            if (current.proposedAthleteNames.contains(trimmed)) {
+                current
+            } else {
+                current.copy(proposedAthleteNames = current.proposedAthleteNames + trimmed)
+            }
+        }
+    }
+
+    suspend fun removeProposedAthleteName(name: String) {
+        updateSettings { current ->
+            current.copy(proposedAthleteNames = current.proposedAthleteNames - name)
+        }
+    }
 }
