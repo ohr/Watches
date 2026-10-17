@@ -46,6 +46,7 @@ import com.ear.watches.R
 import com.ear.watches.data.model.StopwatchItem
 import com.ear.watches.ui.components.GlobalControlBar
 import com.ear.watches.ui.components.StopwatchTile
+import com.ear.watches.ui.dialogs.AboutDialog
 import com.ear.watches.ui.dialogs.BatchAddDialog
 import com.ear.watches.ui.dialogs.EditWatchDialog
 import com.ear.watches.ui.dialogs.HelpDialog
@@ -78,6 +79,7 @@ fun MainStopwatchScreen(
     var showBatchAddDialog by remember { mutableStateOf(false) }
     var showSettingsDialog by remember { mutableStateOf(false) }
     var showHelpDialog by remember { mutableStateOf(false) }
+    var showAboutDialog by remember { mutableStateOf(false) }
 
     val lazyGridState = rememberLazyGridState()
 
@@ -128,7 +130,8 @@ fun MainStopwatchScreen(
                     shareRaceResults(context, reportText)
                 },
                 onOpenSettings = { showSettingsDialog = true },
-                onOpenHelp = { showHelpDialog = true }
+                onOpenHelp = { showHelpDialog = true },
+                onOpenAbout = { showAboutDialog = true }
             )
         }
     ) { innerPadding ->
@@ -320,9 +323,21 @@ fun MainStopwatchScreen(
         )
     }
 
-    if (showHelpDialog) {
+    if (showHelpDialog || uiState.showHelpDialog) {
         HelpDialog(
-            onDismiss = { showHelpDialog = false }
+            onDismiss = {
+                showHelpDialog = false
+                viewModel.dismissHelpDialog()
+            }
+        )
+    }
+
+    if (showAboutDialog || uiState.showAboutDialog) {
+        AboutDialog(
+            onDismiss = {
+                showAboutDialog = false
+                viewModel.dismissAboutDialog()
+            }
         )
     }
 }

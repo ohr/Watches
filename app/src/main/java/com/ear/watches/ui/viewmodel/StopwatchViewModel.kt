@@ -586,6 +586,22 @@ class StopwatchViewModel(
         }
     }
 
+    fun openHelpDialog() {
+        _uiState.update { it.copy(showHelpDialog = true) }
+    }
+
+    fun dismissHelpDialog() {
+        _uiState.update { it.copy(showHelpDialog = false) }
+    }
+
+    fun openAboutDialog() {
+        _uiState.update { it.copy(showAboutDialog = true) }
+    }
+
+    fun dismissAboutDialog() {
+        _uiState.update { it.copy(showAboutDialog = false) }
+    }
+
     private fun syncFocusState() {
         _uiState.update { state ->
             state.applyFocusAndSort()

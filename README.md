@@ -66,7 +66,7 @@ Execute the following commands from the project root directory:
 ## License & Contributing
 
 ### License
-This project is provided open-source under the GPL License.
+This project is open-source software licensed under the **GNU General Public License v3.0 (GPLv3)**. See the [LICENSE](LICENSE) file for details.
 
 ### Contributing
 Contributions, bug reports, and feature requests are welcome. Feel free to open an issue or submit a pull request!

@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -80,6 +81,7 @@ fun GlobalControlBar(
     onShareResults: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenHelp: () -> Unit,
+    onOpenAbout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val hasWatches = uiState.stopwatches.isNotEmpty()
@@ -111,6 +113,12 @@ fun GlobalControlBar(
                     }
                 },
                 actions = {
+                    IconButton(onClick = onOpenAbout) {
+                        Icon(
+                            imageVector = Icons.Outlined.Info,
+                            contentDescription = stringResource(R.string.action_about)
+                        )
+                    }
                     IconButton(onClick = onOpenHelp) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.HelpOutline,
@@ -305,7 +313,8 @@ fun GlobalControlBarPreview() {
             onBatchAdd = {},
             onShareResults = {},
             onOpenSettings = {},
-            onOpenHelp = {}
+            onOpenHelp = {},
+            onOpenAbout = {}
         )
     }
 }

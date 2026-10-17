@@ -1,12 +1,43 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.devtools.ksp)
     alias(libs.plugins.jetbrains.kotlin.plugin.serialization)
+    alias(libs.plugins.aboutlibraries)
+}
+
+aboutLibraries {
+    // Exclude test-related libraries from generated definitions
+    exclusionPatterns = listOf(
+        ".*hamcrest.*".toPattern(),
+        ".*junit.*".toPattern(),
+        ".*test.*".toPattern(),
+        ".*mock.*".toPattern())
 }
 
 android {
     namespace = "com.ear.watches"
+
+    signingConfigs {
+        create("release") {
+            val keystorePropertiesFile = rootProject.file("keystore.properties")
+            if (keystorePropertiesFile.exists()) {
+                val keystoreProperties = Properties()
+                keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+                val storeFilePath = keystoreProperties["storeFile"] as String?
+                if (storeFilePath != null) {
+                    storeFile = file(storeFilePath)
+                    storePassword = keystoreProperties["storePassword"] as String
+                    keyAlias = keystoreProperties["keyAlias"] as String
+                    keyPassword = keystoreProperties["keyPassword"] as String
+                }
+            }
+        }
+    }
+
     compileSdk {
         version = release(37)
     }
@@ -14,15 +45,20 @@ android {
     defaultConfig {
         applicationId = "com.ear.watches"
         minSdk = 30
-        targetSdk = 37
+        targetSdk = 35
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.0"
+        resValue("string", "app_version", "\"${versionName}\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             optimization {
                 enable = true
                 packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
@@ -35,7 +71,20 @@ android {
     }
     buildFeatures {
         compose = true
+        resValues = true
     }
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
+    sourceSets {
+        getByName("main") {
+            assets.directories.add(file("build/generated/aboutLibraries").path)
+        }
+    }
+}
+
+tasks.matching { it.name.startsWith("merge") && it.name.endsWith("Assets") }.configureEach {
+    dependsOn("exportLibraryDefinitions")
 }
 
 tasks.withType<Test> {
@@ -52,6 +101,7 @@ androidComponents {
 
 dependencies {
     implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.aboutlibraries.compose.m3)
     implementation(libs.accompanist.permissions)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.camera.camera2)

@@ -25,7 +25,7 @@ object RaceResultsFormatter {
     ): String {
         if (stopwatches.isEmpty()) {
             return getString(context, R.string.report_no_data)
-                ?: "Multi-Stopwatch Coach Report\nNo stopwatch data available."
+                ?: "Coach Stopwatch Report\nNo stopwatch data available."
         }
 
         val effectiveSeparator = subsecondSeparator
@@ -34,7 +34,7 @@ object RaceResultsFormatter {
 
         val sb = StringBuilder()
         sb.appendLine("========================================")
-        val headerBanner = getString(context, R.string.report_header_banner) ?: "MULTI-STOPWATCH RESULTS"
+        val headerBanner = getString(context, R.string.report_header_banner) ?: "COACH STOPWATCH RESULTS"
         sb.appendLine("         $headerBanner        ")
         sb.appendLine("========================================")
 

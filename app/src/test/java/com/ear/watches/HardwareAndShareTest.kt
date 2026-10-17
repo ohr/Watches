@@ -116,7 +116,7 @@ class HardwareAndShareTest {
             nowMillis = timeProvider.currentTimeMillis()
         )
 
-        assertTrue(reportText.contains("MULTI-STOPWATCH RESULTS"))
+        assertTrue(reportText.contains("COACH STOPWATCH RESULTS"))
         assertTrue(reportText.contains("Runner: Runner 1"))
         assertTrue(reportText.contains("Runner: Runner 2"))
         assertTrue(reportText.contains("Best Lap:"))

@@ -80,7 +80,7 @@
 
     <!-- Race Results Exporter Text Labels -->
     <string name="report_title">Race Results Summary</string>
-    <string name="report_header_banner">MULTI-STOPWATCH RESULTS</string>
+    <string name="report_header_banner">COACH STOPWATCH RESULTS</string>
     <string name="report_total_athletes">Total Athletes/Stopwatches: %1$d</string>
     <string name="report_runner">Runner</string>
     <string name="report_runner_format">%1$d. Runner: %2$s</string>
@@ -94,12 +94,12 @@
     <string name="report_lap_breakdown_format">Lap Breakdown (%1$d laps):</string>
     <string name="report_lap_entry_format">- Lap %1$d: %2$s | Cumulative: %3$s</string>
     <string name="report_laps_none">Laps: None recorded</string>
-    <string name="report_no_data">Multi-Stopwatch Coach Report\nNo stopwatch data available.</string>
+    <string name="report_no_data">Coach Stopwatch Report\nNo stopwatch data available.</string>
 
     <!-- Empty State & Share Toast -->
     <string name="empty_state_title">No Stopwatches Active</string>
     <string name="empty_state_message">Add individual stopwatches for athletes or use Batch Add to set up your entire squad instantly.</string>
-    <string name="share_subject">Multi-Stopwatch Race Results</string>
+    <string name="share_subject">Coach Stopwatch Race Results</string>
     <string name="share_chooser_title">Share Results via</string>
     <string name="share_error_toast">No app available to share results</string>
 
@@ -160,4 +160,13 @@
     <string name="cd_pace_faster">Faster</string>
     <string name="cd_pace_slower">Slower</string>
     <string name="header_pace_delta">Delta</string>
+
+    <!-- About Dialog -->
+    <string name="action_about">About</string>
+    <string name="title_about">About Coach Stopwatch</string>
+    <string name="app_version_label">Version %1$s</string>
+    <string name="about_git_repo">https://github.com/ohr/Watches.git</string>
+    <string name="about_community_note">Built with passion for coaches. Bug reports, feature suggestions, and Pull Requests (PRs) are always welcome!</string>
+    <string name="about_licenses_header">Third-Party Open Source Libraries</string>
+    <string name="about_licenses_unavailable">Library license information is unavailable.</string>
 </resources>

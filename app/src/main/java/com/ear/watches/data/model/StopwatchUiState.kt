@@ -12,5 +12,6 @@ data class StopwatchUiState(
     val stopwatches: List<StopwatchItem> = emptyList(),
     val settings: AppSettings = AppSettings(),
     val activeFocusedWatchId: String? = null,
-    val showHelpDialog: Boolean = false
+    val showHelpDialog: Boolean = false,
+    val showAboutDialog: Boolean = false
 )

@@ -95,7 +95,7 @@ class MainStopwatchUiTest {
 
         assertTrue(report.contains("Runner 1"))
         assertTrue(report.contains("Runner 2"))
-        assertTrue(report.contains("MULTI-STOPWATCH RESULTS"))
+        assertTrue(report.contains("COACH STOPWATCH RESULTS"))
     }
 
     @Test
@@ -127,5 +127,16 @@ class MainStopwatchUiTest {
         // Change language
         viewModel.setLanguage(AppLanguage.GERMAN)
         assertEquals(AppLanguage.GERMAN, viewModel.uiState.value.settings.language)
+    }
+
+    @Test
+    fun uiWorkflow_aboutDialogState() {
+        assertFalse(viewModel.uiState.value.showAboutDialog)
+
+        viewModel.openAboutDialog()
+        assertTrue(viewModel.uiState.value.showAboutDialog)
+
+        viewModel.dismissAboutDialog()
+        assertFalse(viewModel.uiState.value.showAboutDialog)
     }
 }

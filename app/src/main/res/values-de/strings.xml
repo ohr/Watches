@@ -80,7 +80,7 @@
 
     <!-- Race Results Exporter Text Labels -->
     <string name="report_title">Rennergebnisse Übersicht</string>
-    <string name="report_header_banner">MEHRFACH-STOPPUHR ERGEBNISSE</string>
+    <string name="report_header_banner">COACH STOPPUHR ERGEBNISSE</string>
     <string name="report_total_athletes">Gesamtzahl Athleten/Stoppuhren: %1$d</string>
     <string name="report_runner">Läufer</string>
     <string name="report_runner_format">%1$d. Läufer: %2$s</string>
@@ -94,12 +94,12 @@
     <string name="report_lap_breakdown_format">Rundenaufschlüsselung (%1$d Runden):</string>
     <string name="report_lap_entry_format">- Runde %1$d: %2$s | Kumuliert: %3$s</string>
     <string name="report_laps_none">Runden: Keine aufgezeichnet</string>
-    <string name="report_no_data">Mehrfach-Stoppuhr Trainer Bericht\nKeine Stoppuhr-Daten verfügbar.</string>
+    <string name="report_no_data">Coach Stoppuhr Bericht\nKeine Stoppuhr-Daten verfügbar.</string>
 
     <!-- Empty State & Share Toast -->
     <string name="empty_state_title">Keine Stoppuhren aktiv</string>
     <string name="empty_state_message">Fügen Sie einzelne Stoppuhren für Athleten hinzu oder nutzen Sie "Mehrere Uhren" für Ihr gesamtes Team.</string>
-    <string name="share_subject">Mehrfach-Stoppuhr Rennergebnisse</string>
+    <string name="share_subject">Coach Stoppuhr Rennergebnisse</string>
     <string name="share_chooser_title">Ergebnisse teilen über</string>
     <string name="share_error_toast">Keine App zum Teilen von Ergebnissen verfügbar</string>
 
@@ -160,4 +160,13 @@
     <string name="cd_pace_faster">Schneller</string>
     <string name="cd_pace_slower">Langsamer</string>
     <string name="header_pace_delta">Delta</string>
+
+    <!-- About Dialog -->
+    <string name="action_about">Über</string>
+    <string name="title_about">Über Coach Stoppuhr</string>
+    <string name="app_version_label">Version %1$s</string>
+    <string name="about_git_repo">https://github.com/ohr/Watches.git</string>
+    <string name="about_community_note">Entwickelt mit Leidenschaft für Trainer. Fehlerberichte, Verbesserungsvorschläge und Pull Requests (PRs) sind herzlich willkommen!</string>
+    <string name="about_licenses_header">Drittanbieter Open-Source-Lizenzen</string>
+    <string name="about_licenses_unavailable">Bibliotheks-Lizenzinformationen sind nicht verfügbar.</string>
 </resources>

@@ -80,7 +80,7 @@
 
     <!-- Race Results Exporter Text Labels -->
     <string name="report_title">Résumé des résultats de course</string>
-    <string name="report_header_banner">RÉSULTATS MULTI-CHRONOMÈTRE</string>
+    <string name="report_header_banner">RÉSULTATS COACH CHRONOMÈTRE</string>
     <string name="report_total_athletes">Total athlètes/chronomètres : %1$d</string>
     <string name="report_runner">Coureur</string>
     <string name="report_runner_format">%1$d. Coureur : %2$s</string>
@@ -94,12 +94,12 @@
     <string name="report_lap_breakdown_format">Détail des tours (%1$d tours) :</string>
     <string name="report_lap_entry_format">- Tour %1$d : %2$s | Cumulé : %3$s</string>
     <string name="report_laps_none">Tours : Aucun enregistré</string>
-    <string name="report_no_data">Rapport entraîneur multi-chronomètre\nAucune donnée disponible.</string>
+    <string name="report_no_data">Rapport Coach Chronomètre\nAucune donnée disponible.</string>
 
     <!-- Empty State & Share Toast -->
     <string name="empty_state_title">Aucun chronomètre actif</string>
     <string name="empty_state_message">Ajoutez des chronomètres individuels pour les athlètes ou utilisez l\'ajout par lot pour configurer toute votre équipe instantanément.</string>
-    <string name="share_subject">Résultats de course multi-chronomètre</string>
+    <string name="share_subject">Résultats de course Coach Chronomètre</string>
     <string name="share_chooser_title">Partager les résultats via</string>
     <string name="share_error_toast">Aucune application disponible pour partager les résultats</string>
 
@@ -160,4 +160,13 @@
     <string name="cd_pace_faster">Plus rapide</string>
     <string name="cd_pace_slower">Plus lent</string>
     <string name="header_pace_delta">Écart</string>
+
+    <!-- About Dialog -->
+    <string name="action_about">À propos</string>
+    <string name="title_about">À propos de Coach Chronomètre</string>
+    <string name="app_version_label">Version %1$s</string>
+    <string name="about_git_repo">https://github.com/ohr/Watches.git</string>
+    <string name="about_community_note">Développé avec passion pour les entraîneurs. Les rapports de bugs, suggestions et Pull Requests (PRs) sont les bienvenus !</string>
+    <string name="about_licenses_header">Licences open-source tierces</string>
+    <string name="about_licenses_unavailable">Les informations de licence des bibliothèques ne sont pas disponibles.</string>
 </resources>
