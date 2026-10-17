@@ -89,6 +89,7 @@ tasks.matching { it.name.startsWith("merge") && it.name.endsWith("Assets") }.con
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    dependsOn("exportLibraryDefinitions")
 }
 
 androidComponents {
