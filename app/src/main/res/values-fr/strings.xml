@@ -35,11 +35,15 @@
     <string name="dialog_batch_add_confirm">Ajouter %1$d chronomètres</string>
 
     <string name="dialog_settings_title">Paramètres</string>
-    <string name="setting_sound_haptics">Son &amp; Haptique</string>
-    <string name="setting_sound_haptics_desc">Signaux sonores/vibrations lors des appuis sur les boutons</string>
+    <string name="setting_sound">Signaux sonores</string>
+    <string name="setting_sound_desc">Jouer un signal sonore lors des clics</string>
+    <string name="setting_haptics">Vibreur</string>
+    <string name="setting_haptics_desc">Vibrer lors des clics</string>
     <string name="setting_hardware_keys">Boutons de volume physiques</string>
     <string name="setting_hardware_keys_desc">Vol + = Démarrer/Tour (Focus), Vol - = Arrêter/Réinitialiser</string>
     <string name="setting_auto_sort">Tri automatique par tour le plus rapide/suivant</string>
+    <string name="setting_keep_screen_on">Garder l\'écran allumé</string>
+    <string name="setting_keep_screen_on_desc">Empêcher la mise en veille pendant le chrono</string>
     <string name="setting_running_display_precision">Précision du temps en cours</string>
     <string name="setting_time_precision">Précision résultat &amp; tour</string>
 
@@ -110,12 +114,14 @@
     <string name="label_total_time">Temps total</string>
     <string name="btn_share_stopwatch">Partager le chronomètre</string>
     <string name="btn_close">Fermer</string>
+    <string name="btn_delete_runs">Supprimer les sessions</string>
     <string name="label_lap_breakdown">Détail des tours</string>
     <string name="header_lap_num">Tour</string>
     <string name="header_lap_time">Temps au tour</string>
     <string name="header_total_time">Temps total</string>
     <string name="cd_stopwatch_details">Afficher les détails du chronomètre</string>
     <string name="cd_close_details">Fermer les détails</string>
+    <string name="cd_delete_runs">Supprimer toutes les sessions</string>
 
     <!-- Accessibility / Content Descriptions -->
     <string name="cd_decrease_count">Diminuer le nombre</string>

@@ -19,7 +19,7 @@ aboutLibraries {
 }
 
 android {
-    namespace = "com.ear.watches"
+    namespace = "org.ear.watches"
 
     signingConfigs {
         create("release") {
@@ -43,7 +43,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.ear.watches"
+        applicationId = "org.ear.watches"
         minSdk = 30
         targetSdk = 35
         versionCode = 1

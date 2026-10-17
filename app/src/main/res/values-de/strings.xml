@@ -35,11 +35,15 @@
     <string name="dialog_batch_add_confirm">%1$d Stoppuhren Hinzufügen</string>
 
     <string name="dialog_settings_title">Einstellungen</string>
-    <string name="setting_sound_haptics">Ton &amp; Haptik</string>
-    <string name="setting_sound_haptics_desc">Vibrations-/Tonsignale bei Tastendruck</string>
+    <string name="setting_sound">Tonsignale</string>
+    <string name="setting_sound_desc">Akustische Signale bei Tastendruck abspielen</string>
+    <string name="setting_haptics">Vibration</string>
+    <string name="setting_haptics_desc">Vibration bei Tastendruck ausführen</string>
     <string name="setting_hardware_keys">Lautstärketasten</string>
     <string name="setting_hardware_keys_desc">Lauter = Start/Runde (Fokus), Leiser = Stopp/Zurücksetzen</string>
     <string name="setting_auto_sort">Automatisches Sortieren nach nächster Runde</string>
+    <string name="setting_keep_screen_on">Bildschirm anlassen</string>
+    <string name="setting_keep_screen_on_desc">Bildschirm während aktiver Zeitmessung nicht ausschalten</string>
     <string name="setting_running_display_precision">Laufende Zeitanzeige</string>
     <string name="setting_time_precision">Ergebnis- &amp; Runden-Genauigkeit</string>
 
@@ -110,12 +114,14 @@
     <string name="label_total_time">Gesamtzeit</string>
     <string name="btn_share_stopwatch">Stoppuhr Teilen</string>
     <string name="btn_close">Schließen</string>
+    <string name="btn_delete_runs">Läufe löschen</string>
     <string name="label_lap_breakdown">Runden-Aufschlüsselung</string>
     <string name="header_lap_num">Runde</string>
     <string name="header_lap_time">Rundenzeit</string>
     <string name="header_total_time">Gesamtzeit</string>
     <string name="cd_stopwatch_details">Stoppuhr-Details anzeigen</string>
     <string name="cd_close_details">Details schließen</string>
+    <string name="cd_delete_runs">Alle Läufe löschen</string>
 
     <!-- Accessibility / Content Descriptions -->
     <string name="cd_decrease_count">Anzahl verringern</string>
