@@ -1,6 +1,7 @@
 package org.ear.watches.data.model
 
 import androidx.compose.runtime.Stable
+import kotlinx.serialization.Serializable
 
 /**
  * Represents a continuous recording period (run) of a stopwatch, starting when the stopwatch is resumed/started
@@ -22,8 +23,10 @@ import androidx.compose.runtime.Stable
  * @property accumulatedNanos Total duration accumulated in nanoseconds during this run.
  * @property startTimeMillis Wall-clock start timestamp in milliseconds for time-of-day display.
  * @property laps Recorded lap splits belonging to this run.
+ * @property name Optional custom title/label assigned to this run session.
  */
 @Stable
+@Serializable
 data class RunSession(
     val runIndex: Int,
     val startTimeNanos: Long = 0L,
@@ -31,8 +34,14 @@ data class RunSession(
     val accumulatedNanos: Long = 0L,
     val startTimeMillis: Long = 0L,
     val laps: List<LapRecord> = emptyList(),
+    val name: String? = null
 ) {
     val accumulatedMillis: Long get() = accumulatedNanos / 1_000_000L
+
+    /**
+     * Returns the custom session name if non-blank, otherwise returns the provided [fallback] string.
+     */
+    fun getDisplayName(fallback: String): String = name?.takeIf { it.isNotBlank() } ?: fallback
 
     /**
      * `true` if this run session has not been started yet ([startTimeNanos] is 0L).

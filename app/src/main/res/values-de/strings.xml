@@ -28,6 +28,16 @@
     <string name="dialog_edit_watch_name_label">Name</string>
     <string name="dialog_edit_watch_color_label">Farbe</string>
 
+    <string name="dialog_name_session_title">Session benennen</string>
+    <string name="dialog_name_session_subtitle">Stoppuhr läuft im Hintergrund weiter</string>
+    <string name="dialog_name_session_label">Session-Name</string>
+    <string name="hint_hold_to_name_session">Gedrückt halten zum Benennen der aktiven Session</string>
+    <string name="cd_edit_session_name">Session-Name bearbeiten</string>
+    <string name="dialog_name_session_saved_proposals">Gespeicherte Session-Namen</string>
+    <string name="dialog_name_session_proposed">Gespeicherte Session-Namen</string>
+    <string name="cd_remove_proposed_session_name">Session-Name entfernen</string>
+    <string name="cd_remove_proposed_session">Session-Name entfernen</string>
+
     <string name="dialog_batch_add_title">Mehrere Stoppuhren Hinzufügen</string>
     <string name="dialog_batch_add_count_label">Anzahl</string>
     <string name="dialog_batch_add_prefix_label">Namenspräfix</string>
@@ -69,6 +79,11 @@
     <string name="theme_system_default">System</string>
     <string name="theme_light">Hell</string>
     <string name="theme_dark">Dunkel</string>
+    <string name="setting_dynamic_color">Dynamische Farben</string>
+    <string name="setting_dynamic_color_desc">Farbschema an Hintergrundbild anpassen (Android 12+)</string>
+    <string name="btn_reset_settings_default">Einstellungen zurücksetzen</string>
+    <string name="btn_settings_open_help">Hilfe &amp; Kurzanleitung</string>
+    <string name="btn_settings_open_about">Über die App &amp; Lizenzen</string>
 
     <!-- Font Size Options -->
     <string name="setting_font_size">Textgröße</string>
@@ -173,6 +188,8 @@
     <string name="help_detail_view_desc">Tippen Sie auf das Info-Symbol einer Stoppuhr, um den Verlauf der Läufe anzuzeigen und Einzelergebnisse zu exportieren. Gestoppte Stoppuhren bieten in der Detailansicht die Schaltfläche \"Läufe löschen\", um den Verlauf zu leeren.</string>
     <string name="help_settings_title">Präzisions- &amp; Anzeige-Einstellungen</string>
     <string name="help_settings_desc">Konfigurieren Sie getrennte Genauigkeit für laufende Zeit und Ergebnisse/Runden, Themes, Textskalierung, automatische Sortierung, Bildschirm anlassen und Spracheinstellungen.</string>
+    <string name="help_session_naming_title">Sessionen benennen</string>
+    <string name="help_session_naming_desc">Drücken Sie lange auf Start oder Starten (&gt;0,5s), um eine Session mit Schnellauswahl-Chips zu benennen. Sie können Sessionen auch nachträglich in den Details umbenennen.</string>
     <string name="help_precision_sort_title">Präzisions- &amp; Anzeige-Einstellungen</string>
     <string name="help_precision_sort_desc">Konfigurieren Sie getrennte Genauigkeit für laufende Zeit und Ergebnisse/Runden, Themes, Textskalierung, automatische Sortierung, Bildschirm anlassen und Spracheinstellungen.</string>
 

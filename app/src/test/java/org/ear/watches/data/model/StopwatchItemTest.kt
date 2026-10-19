@@ -6,7 +6,10 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Timeout
+import java.util.concurrent.TimeUnit
 
+@Timeout(value = 10, unit = TimeUnit.SECONDS)
 class StopwatchItemTest {
 
     private val initialWatch = StopwatchItem(
@@ -167,5 +170,33 @@ class StopwatchItemTest {
         assertTrue(resetFullWatch.allLaps.isEmpty())
         assertEquals(0L, resetFullWatch.getElapsedMillis(nowNanos = 5_000_000_000L))
         assertEquals(0L, resetFullWatch.getTotalCumulativeMillis(nowNanos = 5_000_000_000L))
+    }
+
+    @Test
+    fun start_withSessionName_assignsCustomSessionName() {
+        val started = initialWatch.start(nowNanos = 1_000_000_000L, nowMillis = 1_000L, sessionName = "Warm-up")
+
+        assertEquals("Warm-up", started.activeRun?.name)
+        assertEquals("Warm-up", started.activeRun?.getDisplayName("Run 1"))
+    }
+
+    @Test
+    fun updateActiveRunSessionName_updatesNameOfActiveSession() {
+        val started = initialWatch.start(nowNanos = 1_000_000_000L, nowMillis = 1_000L)
+        val updated = started.updateActiveRunSessionName("Heat 1")
+
+        assertEquals("Heat 1", updated.activeRun?.name)
+    }
+
+    @Test
+    fun updateRunSessionName_updatesSpecificSessionByIndex() {
+        val started1 = initialWatch.start(nowNanos = 1_000_000_000L, nowMillis = 1_000L, sessionName = "Run 1 Name")
+        val paused1 = started1.pause(nowNanos = 5_000_000_000L)
+        val started2 = paused1.start(nowNanos = 6_000_000_000L, nowMillis = 6_000L, sessionName = "Run 2 Name")
+
+        val updated = started2.updateRunSessionName(runIndex = 1, newName = "Warm-up Final")
+
+        assertEquals("Warm-up Final", updated.runs[0].name)
+        assertEquals("Run 2 Name", updated.runs[1].name)
     }
 }

@@ -42,6 +42,7 @@ class SettingsRepository(
         val AUTO_SORT_ENABLED = booleanPreferencesKey("auto_sort_enabled")
         val APP_LANGUAGE = stringPreferencesKey("app_language")
         val KEEP_SCREEN_ON_WHILE_RUNNING = booleanPreferencesKey("keep_screen_on_while_running")
+        val USE_DYNAMIC_COLOR = booleanPreferencesKey("use_dynamic_color")
     }
 
     private val json = Json {
@@ -78,10 +79,16 @@ class SettingsRepository(
                     } else {
                         preferences[KEEP_SCREEN_ON_WHILE_RUNNING] ?: decoded.keepScreenOnWhileRunning
                     }
+                    val dynamicColor = if (jsonString.contains("useDynamicColor")) {
+                        decoded.useDynamicColor
+                    } else {
+                        preferences[USE_DYNAMIC_COLOR] ?: decoded.useDynamicColor
+                    }
                     decoded.copy(
                         soundEnabled = sound,
                         hapticsEnabled = haptics,
-                        keepScreenOnWhileRunning = keepScreenOn
+                        keepScreenOnWhileRunning = keepScreenOn,
+                        useDynamicColor = dynamicColor
                     )
                 } catch (_: Exception) {
                     fallbackFromPreferences(preferences)
@@ -110,6 +117,7 @@ class SettingsRepository(
             AppLanguage.entries.find { it.name == str }
         } ?: AppLanguage.SYSTEM
         val keepScreenOn = preferences[KEEP_SCREEN_ON_WHILE_RUNNING] ?: true
+        val dynamicColor = preferences[USE_DYNAMIC_COLOR] ?: true
 
         return AppSettings(
             soundEnabled = sound,
@@ -121,7 +129,8 @@ class SettingsRepository(
             autoSortEnabled = autoSort,
             themeMode = AppThemeMode.SYSTEM_DEFAULT,
             fontSizeScale = AppFontSize.NORMAL,
-            keepScreenOnWhileRunning = keepScreenOn
+            keepScreenOnWhileRunning = keepScreenOn,
+            useDynamicColor = dynamicColor
         )
     }
 
@@ -147,10 +156,16 @@ class SettingsRepository(
                     } else {
                         preferences[KEEP_SCREEN_ON_WHILE_RUNNING] ?: decoded.keepScreenOnWhileRunning
                     }
+                    val dynamicColor = if (currentJson.contains("useDynamicColor")) {
+                        decoded.useDynamicColor
+                    } else {
+                        preferences[USE_DYNAMIC_COLOR] ?: decoded.useDynamicColor
+                    }
                     decoded.copy(
                         soundEnabled = sound,
                         hapticsEnabled = haptics,
-                        keepScreenOnWhileRunning = keepScreenOn
+                        keepScreenOnWhileRunning = keepScreenOn,
+                        useDynamicColor = dynamicColor
                     )
                 } catch (_: Exception) {
                     fallbackFromPreferences(preferences)
@@ -168,6 +183,7 @@ class SettingsRepository(
             preferences[AUTO_SORT_ENABLED] = updated.autoSortEnabled
             preferences[APP_LANGUAGE] = updated.language.name
             preferences[KEEP_SCREEN_ON_WHILE_RUNNING] = updated.keepScreenOnWhileRunning
+            preferences[USE_DYNAMIC_COLOR] = updated.useDynamicColor
         }
     }
 
@@ -182,6 +198,7 @@ class SettingsRepository(
             preferences[AUTO_SORT_ENABLED] = settings.autoSortEnabled
             preferences[APP_LANGUAGE] = settings.language.name
             preferences[KEEP_SCREEN_ON_WHILE_RUNNING] = settings.keepScreenOnWhileRunning
+            preferences[USE_DYNAMIC_COLOR] = settings.useDynamicColor
         }
     }
 
@@ -213,6 +230,14 @@ class SettingsRepository(
         updateSettings { it.copy(keepScreenOnWhileRunning = enabled) }
     }
 
+    suspend fun setUseDynamicColor(enabled: Boolean) {
+        updateSettings { it.copy(useDynamicColor = enabled) }
+    }
+
+    suspend fun resetSettingsToDefault() {
+        saveSettings(AppSettings())
+    }
+
     suspend fun setAppLanguage(language: AppLanguage) {
         updateSettings { it.copy(language = language) }
     }
@@ -240,6 +265,24 @@ class SettingsRepository(
     suspend fun removeProposedAthleteName(name: String) {
         updateSettings { current ->
             current.copy(proposedAthleteNames = current.proposedAthleteNames - name)
+        }
+    }
+
+    suspend fun addProposedSessionName(name: String) {
+        val trimmed = name.trim()
+        if (trimmed.isBlank()) return
+        updateSettings { current ->
+            if (current.proposedSessionNames.contains(trimmed)) {
+                current
+            } else {
+                current.copy(proposedSessionNames = current.proposedSessionNames + trimmed)
+            }
+        }
+    }
+
+    suspend fun removeProposedSessionName(name: String) {
+        updateSettings { current ->
+            current.copy(proposedSessionNames = current.proposedSessionNames - name)
         }
     }
 }

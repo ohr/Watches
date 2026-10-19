@@ -5,8 +5,11 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Timeout
 import java.io.File
+import java.util.concurrent.TimeUnit
 
+@Timeout(value = 10, unit = TimeUnit.SECONDS)
 class AboutLibrariesTest {
 
     @Test

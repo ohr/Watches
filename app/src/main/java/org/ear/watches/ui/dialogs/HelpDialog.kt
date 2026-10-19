@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
@@ -103,6 +104,13 @@ fun HelpDialog(
                         icon = Icons.AutoMirrored.Default.VolumeUp,
                         title = stringResource(R.string.help_vol_keys_title),
                         description = stringResource(R.string.help_vol_keys_desc),
+                    )
+
+                    // Card 2: Custom Session Naming
+                    HelpSectionCard(
+                        icon = Icons.Default.Edit,
+                        title = stringResource(R.string.help_session_naming_title),
+                        description = stringResource(R.string.help_session_naming_desc),
                     )
 
                     // Card 2: Reset Button Controls

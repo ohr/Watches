@@ -16,8 +16,11 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Timeout
+import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@Timeout(value = 10, unit = TimeUnit.SECONDS)
 class HardwareAndShareTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()

@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -57,6 +58,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.ear.watches.data.model.RunSession
 import org.ear.watches.data.model.StopwatchItem
@@ -76,6 +78,8 @@ fun StopwatchDetailModal(
     settings: AppSettings,
     tickerFlow: StateFlow<Long>,
     onDeleteRuns: (String) -> Unit = {},
+    onUpdateRunSessionName: (watchId: String, runIndex: Int, newName: String) -> Unit = { _, _, _ -> },
+    onRemoveProposedSessionName: (String) -> Unit = {},
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
@@ -91,6 +95,7 @@ fun StopwatchDetailModal(
     val nowNanos = if (watch.isRunning) currentTick else SystemClock.elapsedRealtimeNanos()
 
     var showShareFormatDialog by remember { mutableStateOf(false) }
+    var renamingRunSession by remember { mutableStateOf<RunSession?>(null) }
 
     val effectiveRuns = watch.runs.filter { it.isStarted || it.isFinished || it.accumulatedNanos > 0L || it.laps.isNotEmpty() }
     val hasRunData = watch.runs.any { it.laps.isNotEmpty() || it.accumulatedNanos > 0L || it.isFinished }
@@ -255,15 +260,32 @@ fun StopwatchDetailModal(
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Text(
-                                            text = stringResource(R.string.label_run, run.runIndex),
-                                            style = MaterialTheme.typography.titleMedium.copy(
-                                                fontWeight = FontWeight.Bold,
-                                                color = MaterialTheme.colorScheme.primary
-                                            ),
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.weight(1f)
+                                        ) {
+                                            val fallbackRunName = stringResource(R.string.label_run, run.runIndex)
+                                            Text(
+                                                text = run.getDisplayName(fallbackRunName),
+                                                style = MaterialTheme.typography.titleMedium.copy(
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = MaterialTheme.colorScheme.primary
+                                                ),
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                            IconButton(
+                                                onClick = { renamingRunSession = run },
+                                                modifier = Modifier.size(28.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Edit,
+                                                    contentDescription = stringResource(R.string.cd_edit_session_name),
+                                                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                            }
+                                        }
                                         Text(
                                             text = formattedRunDuration,
                                             style = MaterialTheme.typography.titleMedium.copy(
@@ -519,6 +541,19 @@ fun StopwatchDetailModal(
             onDismiss = { showShareFormatDialog = false }
         )
     }
+
+    renamingRunSession?.let { sessionToRename ->
+        NameSessionDialog(
+            initialName = sessionToRename.name ?: "",
+            proposedSessionNames = settings.proposedSessionNames,
+            onConfirm = { newName ->
+                onUpdateRunSessionName(watch.id, sessionToRename.runIndex, newName)
+                renamingRunSession = null
+            },
+            onDismiss = { renamingRunSession = null },
+            onRemoveProposedSessionName = onRemoveProposedSessionName
+        )
+    }
 }
 
 @Preview(showBackground = true)
@@ -552,7 +587,7 @@ fun StopwatchDetailModalPreview() {
                 runningDisplayPrecision = AppPrecision.TENTHS,
                 timePrecision = AppPrecision.HUNDREDTHS
             ),
-            tickerFlow = kotlinx.coroutines.flow.MutableStateFlow(1700000045200L),
+            tickerFlow = MutableStateFlow(1700000045200L),
             onDismiss = {}
         )
     }

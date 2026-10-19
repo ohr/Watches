@@ -8,7 +8,10 @@ import org.ear.watches.data.util.TimeFormatter
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Timeout
+import java.util.concurrent.TimeUnit
 
+@Timeout(value = 10, unit = TimeUnit.SECONDS)
 class StopwatchTileLogicTest {
 
     @Test

@@ -4,7 +4,10 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Timeout
+import java.util.concurrent.TimeUnit
 
+@Timeout(value = 10, unit = TimeUnit.SECONDS)
 class RunSessionTest {
 
     @Test
@@ -47,5 +50,17 @@ class RunSessionTest {
         assertFalse(run.isRunning)
         assertTrue(run.isFinished)
         assertEquals(5000L, run.accumulatedMillis)
+    }
+
+    @Test
+    fun getDisplayName_returnsCustomNameOrFallback() {
+        val unnamedRun = RunSession(runIndex = 1)
+        assertEquals("Run 1", unnamedRun.getDisplayName("Run 1"))
+
+        val blankNamedRun = RunSession(runIndex = 1, name = "   ")
+        assertEquals("Run 1", blankNamedRun.getDisplayName("Run 1"))
+
+        val customNamedRun = RunSession(runIndex = 1, name = "Warm-up")
+        assertEquals("Warm-up", customNamedRun.getDisplayName("Run 1"))
     }
 }

@@ -1,23 +1,32 @@
 package org.ear.watches.ui.dialogs
 
+import android.os.Build
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -53,12 +62,14 @@ fun SettingsDialog(
     onToggleHardwareKeys: () -> Unit,
     onToggleAutoSort: () -> Unit,
     onToggleKeepScreenOn: () -> Unit = {},
+    onToggleDynamicColor: () -> Unit = {},
     onSetPrecision: (AppPrecision) -> Unit,
     onSetRunningDisplayPrecision: (AppPrecision) -> Unit = {},
     onSetLanguage: (AppLanguage) -> Unit = {},
     onLanguageSelected: (AppLanguage) -> Unit = onSetLanguage,
     onSetThemeMode: (AppThemeMode) -> Unit = {},
     onSetFontSizeScale: (AppFontSize) -> Unit = {},
+    onResetSettingsToDefault: () -> Unit = {},
     onDismiss: () -> Unit,
 ) {
     AlertDialog(
@@ -300,6 +311,35 @@ fun SettingsDialog(
 
                 HorizontalDivider()
 
+                // Dynamic Colors Switch (Android 12+)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onToggleDynamicColor() },
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.setting_dynamic_color),
+                                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
+                            )
+                            Text(
+                                text = stringResource(R.string.setting_dynamic_color_desc),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = settings.useDynamicColor,
+                            onCheckedChange = { onToggleDynamicColor() }
+                        )
+                    }
+
+                    HorizontalDivider()
+                }
+
                 // Sound Cues Switch
                 Row(
                     modifier = Modifier
@@ -427,6 +467,30 @@ fun SettingsDialog(
                         onCheckedChange = { onToggleKeepScreenOn() }
                     )
                 }
+
+                HorizontalDivider()
+
+                // Reset Settings to Default Button
+                OutlinedButton(
+                    onClick = { onResetSettingsToDefault() },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    ),
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.RestartAlt,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = stringResource(R.string.btn_reset_settings_default),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
             }
         },
         confirmButton = {
@@ -452,11 +516,13 @@ fun SettingsDialogPreview() {
             onToggleHardwareKeys = {},
             onToggleAutoSort = {},
             onToggleKeepScreenOn = {},
+            onToggleDynamicColor = {},
             onSetPrecision = {},
             onSetRunningDisplayPrecision = {},
             onSetLanguage = {},
             onSetThemeMode = {},
             onSetFontSizeScale = {},
+            onResetSettingsToDefault = {},
             onDismiss = {}
         )
     }

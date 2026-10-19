@@ -124,20 +124,22 @@ data class StopwatchItem(
      * Performs an immutable state transition when starting or resuming timing.
      *
      * Creates a new [RunSession] if none exists or if the last run was finished, or updates the start timestamp
-     * of the last run if resuming. Sets [isRunning] to `true`.
+     * of the last run if resuming. Sets [isRunning] to `true`. Optionally assigns a custom session [sessionName].
      *
      * @param nowNanos Current system monotonic timestamp in nanoseconds (System.nanoTime()).
      * @param nowMillis Current wall-clock timestamp in milliseconds (System.currentTimeMillis()).
+     * @param sessionName Optional title to assign to the newly created or activated [RunSession].
      * @return A new [StopwatchItem] instance with updated running state and run sessions.
      */
-    fun start(nowNanos: Long, nowMillis: Long): StopwatchItem {
+    fun start(nowNanos: Long, nowMillis: Long, sessionName: String? = null): StopwatchItem {
         if (isRunning) return this
         val newRuns = if (runs.isEmpty()) {
             listOf(
                 RunSession(
                     runIndex = 1,
                     startTimeNanos = nowNanos,
-                    startTimeMillis = nowMillis
+                    startTimeMillis = nowMillis,
+                    name = sessionName
                 )
             )
         } else {
@@ -147,12 +149,15 @@ data class StopwatchItem(
                 runs + RunSession(
                     runIndex = runIndex,
                     startTimeNanos = nowNanos,
-                    startTimeMillis = nowMillis
+                    startTimeMillis = nowMillis,
+                    name = sessionName
                 )
             } else {
                 val updatedLastRun = lastRun.copy(
                     startTimeNanos = nowNanos,
-                    startTimeMillis = if (lastRun.startTimeMillis == 0L) nowMillis else lastRun.startTimeMillis
+                    startTimeMillis = if (lastRun.startTimeMillis == 0L)
+                        nowMillis else lastRun.startTimeMillis,
+                    name = sessionName ?: lastRun.name
                 )
                 runs.dropLast(1) + updatedLastRun
             }
@@ -161,6 +166,37 @@ data class StopwatchItem(
             isRunning = true,
             runs = newRuns
         )
+    }
+
+    /**
+     * Updates the custom session name of the currently active [RunSession] (if one exists).
+     *
+     * @param newName The new session name to assign.
+     * @return A new [StopwatchItem] instance with the updated active session name.
+     */
+    fun updateActiveRunSessionName(newName: String): StopwatchItem {
+        val active = activeRun ?: return this
+        val updatedRun = active.copy(name = newName)
+        val newRuns = runs.dropLast(1) + updatedRun
+        return copy(runs = newRuns)
+    }
+
+    /**
+     * Updates the custom session name of a specific [RunSession] identified by its [runIndex].
+     *
+     * @param runIndex The 1-based index of the run session to update.
+     * @param newName The new session name to assign.
+     * @return A new [StopwatchItem] instance with the updated session name.
+     */
+    fun updateRunSessionName(runIndex: Int, newName: String): StopwatchItem {
+        val newRuns = runs.map { session ->
+            if (session.runIndex == runIndex) {
+                session.copy(name = newName)
+            } else {
+                session
+            }
+        }
+        return copy(runs = newRuns)
     }
 
     /**

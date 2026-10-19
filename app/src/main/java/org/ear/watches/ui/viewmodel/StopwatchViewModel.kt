@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import org.ear.watches.data.model.AppFontSize
 import org.ear.watches.data.model.AppLanguage
 import org.ear.watches.data.model.AppPrecision
+import org.ear.watches.data.model.AppSettings
 import org.ear.watches.data.model.AppThemeMode
 import org.ear.watches.data.model.StopwatchItem
 import org.ear.watches.data.model.StopwatchUiState
@@ -64,11 +65,10 @@ class StopwatchViewModel(
         val anyRunning = _uiState.value.stopwatches.any { it.isRunning }
         if (anyRunning) {
             if (tickerJob?.isActive != true) {
-                tickerJob = viewModelScope.launch(dispatcher) {
+                tickerJob = viewModelScope.launch(Dispatchers.Default) {
                     while (coroutineContext.isActive) {
                         if (!_uiState.value.stopwatches.any { it.isRunning }) break
-                        val delayMillis = _uiState.value.settings.runningDisplayPrecision.refreshMillis
-                        delay(delayMillis.milliseconds)
+                        _uiState.value.settings.runningDisplayPrecision.delayRefresh()
                         _tickerFlow.value = timeProvider.currentTimeNanos()
                     }
                 }
@@ -85,8 +85,8 @@ class StopwatchViewModel(
         val determinedFocusedId = newFocusedId
             ?: StopwatchItem.calculateNextFocusedWatchId(stopwatches, activeFocusedWatchId)
 
-        val sortedWatchList = if (settings.autoSortEnabled) StopwatchItem.sortStopwatches(stopwatches) else stopwatches
-
+        val sortedWatchList = if (settings.autoSortEnabled)
+            StopwatchItem.sortStopwatches(stopwatches) else stopwatches
         val updatedWatchList = sortedWatchList.map {
             it.copy(isFocused = (it.id == determinedFocusedId))
         }
@@ -178,11 +178,39 @@ class StopwatchViewModel(
         }
     }
 
-    fun startStopwatch(id: String) {
+    fun startStopwatch(id: String, sessionName: String? = null) {
         val nowNanos = timeProvider.currentTimeNanos()
         val nowMillis = timeProvider.currentTimeMillis()
-        updateWatch(id) { it.start(nowNanos, nowMillis) }
+        val trimmedSessionName = sessionName?.trim()
+        updateWatch(id) { it.start(nowNanos, nowMillis, trimmedSessionName) }
+        if (!trimmedSessionName.isNullOrBlank()) {
+            addProposedSessionName(trimmedSessionName)
+        }
         checkTicker()
+    }
+
+    fun updateActiveRunSessionName(id: String, newName: String) {
+        val trimmed = newName.trim()
+        updateWatch(id) { it.updateActiveRunSessionName(trimmed) }
+        if (trimmed.isNotBlank()) {
+            addProposedSessionName(trimmed)
+        }
+    }
+
+    fun updateAllActiveRunSessionNames(newName: String) {
+        val trimmed = newName.trim()
+        updateAllWatches { it.updateActiveRunSessionName(trimmed) }
+        if (trimmed.isNotBlank()) {
+            addProposedSessionName(trimmed)
+        }
+    }
+
+    fun updateRunSessionName(id: String, runIndex: Int, newName: String) {
+        val trimmed = newName.trim()
+        updateWatch(id) { it.updateRunSessionName(runIndex, trimmed) }
+        if (trimmed.isNotBlank()) {
+            addProposedSessionName(trimmed)
+        }
     }
 
     fun pauseStopwatch(id: String) {
@@ -207,10 +235,14 @@ class StopwatchViewModel(
         checkTicker()
     }
 
-    fun startAll() {
+    fun startAll(sessionName: String? = null) {
         val nowNanos = timeProvider.currentTimeNanos()
         val nowMillis = timeProvider.currentTimeMillis()
-        updateAllWatches { it.start(nowNanos, nowMillis) }
+        val trimmedSessionName = sessionName?.trim()
+        updateAllWatches { it.start(nowNanos, nowMillis, trimmedSessionName) }
+        if (!trimmedSessionName.isNullOrBlank()) {
+            addProposedSessionName(trimmedSessionName)
+        }
         checkTicker()
     }
 
@@ -328,6 +360,31 @@ class StopwatchViewModel(
         }
     }
 
+    fun toggleDynamicColor() {
+        val newValue = !_uiState.value.settings.useDynamicColor
+        setUseDynamicColor(newValue)
+    }
+
+    fun setUseDynamicColor(enabled: Boolean) {
+        _uiState.update {
+            it.copy(settings = it.settings.copy(useDynamicColor = enabled))
+        }
+        viewModelScope.launch(dispatcher) {
+            settingsRepository?.setUseDynamicColor(enabled)
+        }
+    }
+
+    fun resetSettingsToDefault() {
+        val defaultSettings = AppSettings()
+        _uiState.update {
+            it.copy(settings = defaultSettings)
+                .applyFocusAndSort()
+        }
+        viewModelScope.launch(dispatcher) {
+            settingsRepository?.resetSettingsToDefault()
+        }
+    }
+
     fun setRunningDisplayPrecision(precision: AppPrecision) {
         _uiState.update { it.copy(settings = it.settings.copy(runningDisplayPrecision = precision)) }
         viewModelScope.launch(dispatcher) {
@@ -394,6 +451,38 @@ class StopwatchViewModel(
         }
         viewModelScope.launch(dispatcher) {
             settingsRepository?.removeProposedAthleteName(name)
+        }
+    }
+
+    fun addProposedSessionName(name: String) {
+        val trimmed = name.trim()
+        if (trimmed.isBlank()) return
+        _uiState.update {
+            if (it.settings.proposedSessionNames.contains(trimmed)) {
+                it
+            } else {
+                it.copy(
+                    settings = it.settings.copy(
+                        proposedSessionNames = it.settings.proposedSessionNames + trimmed
+                    )
+                )
+            }
+        }
+        viewModelScope.launch(dispatcher) {
+            settingsRepository?.addProposedSessionName(trimmed)
+        }
+    }
+
+    fun removeProposedSessionName(name: String) {
+        _uiState.update {
+            it.copy(
+                settings = it.settings.copy(
+                    proposedSessionNames = it.settings.proposedSessionNames - name
+                )
+            )
+        }
+        viewModelScope.launch(dispatcher) {
+            settingsRepository?.removeProposedSessionName(name)
         }
     }
 

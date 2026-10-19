@@ -23,8 +23,10 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Timeout
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
+import java.util.concurrent.TimeUnit
 
 class TestTimeProvider(
     var currentTimeNanos: Long = 1_000_000_000L,
@@ -40,6 +42,7 @@ class TestTimeProvider(
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@Timeout(value = 10, unit = TimeUnit.SECONDS)
 class StopwatchViewModelTest {
 
     @TempDir
@@ -476,6 +479,15 @@ class StopwatchViewModelTest {
 
         viewModel.setLanguage(AppLanguage.GERMAN)
         assertEquals(AppLanguage.GERMAN, viewModel.uiState.value.settings.language)
+
+        viewModel.toggleDynamicColor()
+        assertFalse(viewModel.uiState.value.settings.useDynamicColor)
+
+        viewModel.setUseDynamicColor(true)
+        assertTrue(viewModel.uiState.value.settings.useDynamicColor)
+
+        viewModel.resetSettingsToDefault()
+        assertEquals(AppSettings(), viewModel.uiState.value.settings)
     }
 
     @Test
@@ -719,6 +731,15 @@ class StopwatchViewModelTest {
         vm.setFontSizeScale(AppFontSize.LARGE)
         assertEquals(AppFontSize.LARGE, vm.uiState.value.settings.fontSizeScale)
         assertEquals(AppFontSize.LARGE, settingsRepository.settingsFlow.first().fontSizeScale)
+
+        // Dynamic color & reset to default
+        vm.toggleDynamicColor()
+        assertFalse(vm.uiState.value.settings.useDynamicColor)
+        assertFalse(settingsRepository.settingsFlow.first().useDynamicColor)
+
+        vm.resetSettingsToDefault()
+        assertEquals(AppSettings(), vm.uiState.value.settings)
+        assertEquals(AppSettings(), settingsRepository.settingsFlow.first())
     }
 
     @Test
@@ -821,5 +842,135 @@ class StopwatchViewModelTest {
         val repoSettings = settingsRepository.settingsFlow.first()
         assertFalse(repoSettings.proposedAthleteNames.contains("Runner One"))
         assertTrue(repoSettings.proposedAthleteNames.contains("Runner Two"))
+    }
+
+    @Test
+    fun startStopwatch_withSessionName_and_updateActiveRunSessionName() {
+        viewModel.addStopwatch("Athlete")
+        val id = viewModel.uiState.value.stopwatches.first().id
+
+        viewModel.startStopwatch(id, sessionName = "Warm-up")
+
+        val watch1 = viewModel.uiState.value.stopwatches.first()
+        assertEquals("Warm-up", watch1.activeRun?.name)
+
+        viewModel.updateActiveRunSessionName(id, "Heat 1")
+
+        val watch2 = viewModel.uiState.value.stopwatches.first()
+        assertEquals("Heat 1", watch2.activeRun?.name)
+    }
+
+    @Test
+    fun startAll_withSessionName_and_updateAllActiveRunSessionNames() {
+        viewModel.batchAddStopwatches(2, "Runner")
+
+        viewModel.startAll(sessionName = "Heat 1")
+
+        val watches1 = viewModel.uiState.value.stopwatches
+        assertEquals("Heat 1", watches1[0].activeRun?.name)
+        assertEquals("Heat 1", watches1[1].activeRun?.name)
+
+        viewModel.updateAllActiveRunSessionNames("Finals")
+
+        val watches2 = viewModel.uiState.value.stopwatches
+        assertEquals("Finals", watches2[0].activeRun?.name)
+        assertEquals("Finals", watches2[1].activeRun?.name)
+    }
+
+    @Test
+    fun updateRunSessionName_retroactiveByRunIndex() {
+        viewModel.addStopwatch("Athlete")
+        val id = viewModel.uiState.value.stopwatches.first().id
+
+        // Run 1
+        viewModel.startStopwatch(id, "Run 1 Name")
+        timeProvider.advanceTimeBy(5_000_000_000L)
+        viewModel.pauseStopwatch(id)
+
+        // Run 2
+        viewModel.startStopwatch(id, "Run 2 Name")
+        timeProvider.advanceTimeBy(3_000_000_000L)
+        viewModel.pauseStopwatch(id)
+
+        var watch = viewModel.uiState.value.stopwatches.first()
+        assertEquals(2, watch.runs.size)
+        assertEquals("Run 1 Name", watch.runs[0].name)
+        assertEquals("Run 2 Name", watch.runs[1].name)
+
+        // Retroactive rename of Run 1
+        viewModel.updateRunSessionName(id, runIndex = 1, newName = "Warm-up Final")
+
+        watch = viewModel.uiState.value.stopwatches.first()
+        assertEquals("Warm-up Final", watch.runs[0].name)
+        assertEquals("Run 2 Name", watch.runs[1].name)
+    }
+
+    @Test
+    fun addProposedSessionName_and_removeProposedSessionName_updatesStateAndRepository() = runTest(testDispatcher) {
+        val testFile = File(tempDir, "vm_proposed_session.preferences_pb")
+        val dataStore = PreferenceDataStoreFactory.create(
+            scope = this,
+            produceFile = { testFile }
+        )
+        val settingsRepository = SettingsRepository(dataStore)
+
+        val vm = StopwatchViewModel(
+            settingsRepository = settingsRepository,
+            timeProvider = timeProvider,
+            dispatcher = testDispatcher
+        )
+
+        vm.addProposedSessionName("  Session A  ")
+        vm.addProposedSessionName("Session B")
+        assertTrue(vm.uiState.value.settings.proposedSessionNames.contains("Session A"))
+        assertTrue(vm.uiState.value.settings.proposedSessionNames.contains("Session B"))
+
+        vm.removeProposedSessionName("Session A")
+        assertFalse(vm.uiState.value.settings.proposedSessionNames.contains("Session A"))
+        assertTrue(vm.uiState.value.settings.proposedSessionNames.contains("Session B"))
+
+        val repoSettings = settingsRepository.settingsFlow.first()
+        assertFalse(repoSettings.proposedSessionNames.contains("Session A"))
+        assertTrue(repoSettings.proposedSessionNames.contains("Session B"))
+    }
+
+    @Test
+    fun sessionNameCreationAndUpdates_automaticallyAddsToProposedSessionNames() = runTest(testDispatcher) {
+        val testFile = File(tempDir, "vm_auto_session.preferences_pb")
+        val dataStore = PreferenceDataStoreFactory.create(
+            scope = this,
+            produceFile = { testFile }
+        )
+        val settingsRepository = SettingsRepository(dataStore)
+
+        val vm = StopwatchViewModel(
+            settingsRepository = settingsRepository,
+            timeProvider = timeProvider,
+            dispatcher = testDispatcher
+        )
+
+        vm.addStopwatch("Athlete")
+        val id = vm.uiState.value.stopwatches.first().id
+
+        // 1. startStopwatch with name
+        vm.startStopwatch(id, sessionName = "Warm-up")
+        assertTrue(vm.uiState.value.settings.proposedSessionNames.contains("Warm-up"))
+        assertTrue(settingsRepository.settingsFlow.first().proposedSessionNames.contains("Warm-up"))
+
+        // 2. updateActiveRunSessionName
+        vm.updateActiveRunSessionName(id, "Heat 1")
+        assertTrue(vm.uiState.value.settings.proposedSessionNames.contains("Heat 1"))
+
+        // 3. startAll with name
+        vm.startAll(sessionName = "Heat 2")
+        assertTrue(vm.uiState.value.settings.proposedSessionNames.contains("Heat 2"))
+
+        // 4. updateAllActiveRunSessionNames
+        vm.updateAllActiveRunSessionNames("Finals")
+        assertTrue(vm.uiState.value.settings.proposedSessionNames.contains("Finals"))
+
+        // 5. updateRunSessionName
+        vm.updateRunSessionName(id, runIndex = 1, newName = "Interval 1")
+        assertTrue(vm.uiState.value.settings.proposedSessionNames.contains("Interval 1"))
     }
 }

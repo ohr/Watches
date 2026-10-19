@@ -50,6 +50,7 @@ import org.ear.watches.ui.dialogs.AboutDialog
 import org.ear.watches.ui.dialogs.BatchAddDialog
 import org.ear.watches.ui.dialogs.EditWatchDialog
 import org.ear.watches.ui.dialogs.HelpDialog
+import org.ear.watches.ui.dialogs.NameSessionDialog
 import org.ear.watches.ui.dialogs.SettingsDialog
 import org.ear.watches.ui.dialogs.ShareFormatDialog
 import org.ear.watches.ui.dialogs.StopwatchDetailModal
@@ -83,6 +84,8 @@ fun MainStopwatchScreen(
     var showHelpDialog by remember { mutableStateOf(false) }
     var showAboutDialog by remember { mutableStateOf(false) }
     var showShareFormatDialog by remember { mutableStateOf(false) }
+    var namingSingleWatchId by remember { mutableStateOf<String?>(null) }
+    var showNameAllDialog by remember { mutableStateOf(false) }
 
     val lazyGridState = rememberLazyGridState()
 
@@ -109,6 +112,9 @@ fun MainStopwatchScreen(
                 onStartAll = {
                     viewModel.startAll()
                     haptics.playStart(uiState.settings.soundEnabled, uiState.settings.hapticsEnabled)
+                },
+                onNameAllSessions = {
+                    showNameAllDialog = true
                 },
                 onStopAll = {
                     viewModel.pauseAll()
@@ -246,6 +252,9 @@ fun MainStopwatchScreen(
                                 viewModel.startStopwatch(id)
                                 haptics.playStart(uiState.settings.soundEnabled, uiState.settings.hapticsEnabled)
                             },
+                            onNameSession = { id ->
+                                namingSingleWatchId = id
+                            },
                             onPause = { id ->
                                 viewModel.pauseStopwatch(id)
                                 haptics.playStop(uiState.settings.soundEnabled, uiState.settings.hapticsEnabled)
@@ -280,6 +289,10 @@ fun MainStopwatchScreen(
             settings = uiState.settings,
             tickerFlow = viewModel.tickerFlow,
             onDeleteRuns = { watchId -> viewModel.resetStopwatchFull(watchId) },
+            onUpdateRunSessionName = { watchId, runIndex, newName ->
+                viewModel.updateRunSessionName(watchId, runIndex, newName)
+            },
+            onRemoveProposedSessionName = { viewModel.removeProposedSessionName(it) },
             onDismiss = { detailWatchItem = null }
         )
     }
@@ -321,11 +334,13 @@ fun MainStopwatchScreen(
             onToggleHardwareKeys = { viewModel.toggleHardwareKeys() },
             onToggleAutoSort = { viewModel.toggleAutoSort() },
             onToggleKeepScreenOn = { viewModel.toggleKeepScreenOn() },
+            onToggleDynamicColor = { viewModel.toggleDynamicColor() },
             onSetPrecision = { viewModel.setPrecision(it) },
             onSetRunningDisplayPrecision = { viewModel.setRunningDisplayPrecision(it) },
             onLanguageSelected = { viewModel.setLanguage(it) },
             onSetThemeMode = { viewModel.setThemeMode(it) },
             onSetFontSizeScale = { viewModel.setFontSizeScale(it) },
+            onResetSettingsToDefault = { viewModel.resetSettingsToDefault() },
             onDismiss = { showSettingsDialog = false }
         )
     }
@@ -368,6 +383,34 @@ fun MainStopwatchScreen(
                 )
             },
             onDismiss = { showShareFormatDialog = false }
+        )
+    }
+
+    namingSingleWatchId?.let { watchId ->
+        val watch = uiState.stopwatches.find { it.id == watchId }
+        val initialName = watch?.activeRun?.name ?: ""
+        NameSessionDialog(
+            initialName = initialName,
+            proposedSessionNames = uiState.settings.proposedSessionNames,
+            onConfirm = { newName ->
+                viewModel.updateActiveRunSessionName(watchId, newName)
+                namingSingleWatchId = null
+            },
+            onDismiss = { namingSingleWatchId = null },
+            onRemoveProposedSessionName = { viewModel.removeProposedSessionName(it) }
+        )
+    }
+
+    if (showNameAllDialog) {
+        NameSessionDialog(
+            initialName = "",
+            proposedSessionNames = uiState.settings.proposedSessionNames,
+            onConfirm = { newName ->
+                viewModel.updateAllActiveRunSessionNames(newName)
+                showNameAllDialog = false
+            },
+            onDismiss = { showNameAllDialog = false },
+            onRemoveProposedSessionName = { viewModel.removeProposedSessionName(it) }
         )
     }
 }

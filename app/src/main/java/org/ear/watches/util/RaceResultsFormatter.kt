@@ -5,6 +5,8 @@ import org.ear.watches.R
 import org.ear.watches.data.model.AppPrecision
 import org.ear.watches.data.model.StopwatchItem
 import org.ear.watches.data.util.TimeFormatter
+import java.text.SimpleDateFormat
+import java.util.Date
 
 /**
  * Utility responsible for formatting stopwatch data (laps, runs, elapsed times) into plain text reports.
@@ -64,11 +66,12 @@ object RaceResultsFormatter {
 
             if (effectiveRuns.isNotEmpty()) {
                 effectiveRuns.forEach { run ->
-                    val runTitle = getString(context, R.string.label_run, run.runIndex) ?: "Run ${run.runIndex}"
+                    val defaultRunTitle = getString(context, R.string.label_run, run.runIndex) ?: "Run ${run.runIndex}"
+                    val runTitle = run.getDisplayName(defaultRunTitle)
                     val runStartMillis = run.startTimeMillis
                     val runStartTimeVal = if (runStartMillis > 0L) {
-                        val sdf = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
-                        sdf.format(java.util.Date(runStartMillis))
+                        val sdf = SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
+                        sdf.format(Date(runStartMillis))
                     } else "-"
                     val startTimeLabel = getString(context, R.string.label_start_time) ?: "Start Time"
 
@@ -157,10 +160,11 @@ object RaceResultsFormatter {
         stopwatches.forEach { watch ->
             val escapedName = watch.name.replace("\"", "\"\"")
             watch.runs.forEach { run ->
+                val sessionName = run.getDisplayName("Run ${run.runIndex}").replace("\"", "\"\"")
                 run.laps.forEach { lap ->
                     val formattedLapTime = TimeFormatter.formatTime(lap.lapTimeMillis, precision)
                     val formattedTotalTime = TimeFormatter.formatTime(lap.totalTimeMillis, precision)
-                    sb.appendLine("\"$escapedName\",\"Run ${run.runIndex}\",\"${lap.lapNumber}\",\"$formattedLapTime\",\"$formattedTotalTime\"")
+                    sb.appendLine("\"$escapedName\",\"$sessionName\",\"${lap.lapNumber}\",\"$formattedLapTime\",\"$formattedTotalTime\"")
                 }
             }
         }

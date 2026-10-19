@@ -1,6 +1,7 @@
 package org.ear.watches.data.model
 
 import androidx.compose.runtime.Stable
+import kotlinx.serialization.Serializable
 
 /**
  * Represents a recorded lap within a specific [RunSession].
@@ -8,6 +9,7 @@ import androidx.compose.runtime.Stable
  * at the point of recording, and any delta compared to previous laps.
  */
 @Stable
+@Serializable
 data class LapRecord(
     val lapNumber: Int,
     val lapTimeNanos: Long,

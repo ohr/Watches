@@ -72,6 +72,7 @@ import org.ear.watches.data.model.StopwatchItem
 import org.ear.watches.data.util.TimeFormatter
 import org.ear.watches.ui.theme.WatchesTheme
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.withTimeoutOrNull
 
 private object StopwatchTileDefaults {
     val CardShape = RoundedCornerShape(20.dp)
@@ -106,7 +107,8 @@ fun StopwatchTile(
     onSelectFocus: (String) -> Unit,
     modifier: Modifier = Modifier,
     runningDisplayPrecision: AppPrecision = timePrecision,
-    onFullReset: (String) -> Unit = onReset
+    onFullReset: (String) -> Unit = onReset,
+    onNameSession: (String) -> Unit = {}
 ) {
     val haptic = LocalHapticFeedback.current
     var showCurrentLapTime by rememberSaveable { mutableStateOf(false) }
@@ -408,63 +410,74 @@ fun StopwatchTile(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Start / Stop Toggle Button
-                if (watch.isRunning) {
-                    Button(
-                        onClick = {},
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFD32F2F),
+                Box(
+                    modifier = Modifier
+                        .weight(1.2f)
+                        .onStartInstantPressWithLongPressNaming(
+                            enabled = true,
+                            isRunning = watch.isRunning,
+                            onStart = { onStart(watch.id) },
+                            onPause = { onPause(watch.id) },
+                            onLongPressNameSession = { onNameSession(watch.id) },
+                            onLongPressHaptic = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            }
+                        )
+                ) {
+                    if (watch.isRunning) {
+                        Surface(
+                            color = Color(0xFFD32F2F),
                             contentColor = Color.White,
-                            disabledContainerColor = Color(0xFFB0BEC5),
-                            disabledContentColor = Color(0xFF546E7A)
-                        ),
-                        contentPadding = StopwatchTileDefaults.ActionButtonContentPadding,
-                        modifier = Modifier
-                            .weight(1.2f)
-                            .onInstantPress(enabled = true) { onPause(watch.id) },
-                        shape = StopwatchTileDefaults.ActionButtonShape
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Pause,
-                            contentDescription = stringResource(R.string.btn_stop),
-                            modifier = Modifier.size(StopwatchTileDefaults.ActionButtonIconSize)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = stringResource(R.string.btn_stop).uppercase(),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 12.sp,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                } else {
-                    Button(
-                        onClick = {},
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF2E7D32),
+                            shape = StopwatchTileDefaults.ActionButtonShape,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(StopwatchTileDefaults.ActionButtonContentPadding),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Pause,
+                                    contentDescription = stringResource(R.string.btn_stop),
+                                    modifier = Modifier.size(StopwatchTileDefaults.ActionButtonIconSize)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = stringResource(R.string.btn_stop).uppercase(),
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 12.sp,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
+                    } else {
+                        Surface(
+                            color = Color(0xFF2E7D32),
                             contentColor = Color.White,
-                            disabledContainerColor = Color(0xFFB0BEC5),
-                            disabledContentColor = Color(0xFF546E7A)
-                        ),
-                        contentPadding = StopwatchTileDefaults.ActionButtonContentPadding,
-                        modifier = Modifier
-                            .weight(1.2f)
-                            .onInstantPress(enabled = true) { onStart(watch.id) },
-                        shape = StopwatchTileDefaults.ActionButtonShape
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.PlayArrow,
-                            contentDescription = stringResource(R.string.btn_start),
-                            modifier = Modifier.size(StopwatchTileDefaults.ActionButtonIconSize)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = stringResource(R.string.btn_start).uppercase(),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 12.sp,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                            shape = StopwatchTileDefaults.ActionButtonShape,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(StopwatchTileDefaults.ActionButtonContentPadding),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.PlayArrow,
+                                    contentDescription = stringResource(R.string.btn_start),
+                                    modifier = Modifier.size(StopwatchTileDefaults.ActionButtonIconSize)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = stringResource(R.string.btn_start).uppercase(),
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 12.sp,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
                     }
                 }
 
@@ -542,17 +555,85 @@ fun StopwatchTile(
 }
 
 @Composable
+fun Modifier.onStartInstantPressWithLongPressNaming(
+    enabled: Boolean = true,
+    isRunning: Boolean = false,
+    onStart: () -> Unit,
+    onPause: () -> Unit = {},
+    onLongPressNameSession: () -> Unit,
+    onLongPressHaptic: () -> Unit = {}
+): Modifier {
+    val currentEnabled by rememberUpdatedState(enabled)
+    val currentIsRunning by rememberUpdatedState(isRunning)
+    val currentOnStart by rememberUpdatedState(onStart)
+    val currentOnPause by rememberUpdatedState(onPause)
+    val currentOnLongPressNameSession by rememberUpdatedState(onLongPressNameSession)
+    val currentOnLongPressHaptic by rememberUpdatedState(onLongPressHaptic)
+
+    return this.pointerInput(Unit) {
+        awaitPointerEventScope {
+            while (true) {
+                val event = awaitPointerEvent()
+                if (!currentEnabled) continue
+                if (event.type == PointerEventType.Press || event.changes.any { it.pressed }) {
+                    event.changes.forEach { it.consume() }
+                    val wasRunning = currentIsRunning
+                    if (wasRunning) {
+                        currentOnPause()
+                        while (true) {
+                            val nextEvent = awaitPointerEvent()
+                            nextEvent.changes.forEach { it.consume() }
+                            if (nextEvent.type == PointerEventType.Release || nextEvent.changes.all { !it.pressed }) {
+                                break
+                            }
+                        }
+                    } else {
+                        currentOnStart()
+                        var isReleased = false
+                        val releasedBeforeTimeout = withTimeoutOrNull(500L) {
+                            while (true) {
+                                val nextEvent = awaitPointerEvent()
+                                nextEvent.changes.forEach { it.consume() }
+                                if (nextEvent.type == PointerEventType.Release || nextEvent.changes.all { !it.pressed }) {
+                                    isReleased = true
+                                    break
+                                }
+                            }
+                            true
+                        }
+
+                        if (releasedBeforeTimeout == null && !isReleased) {
+                            currentOnLongPressHaptic()
+                            currentOnLongPressNameSession()
+                            while (true) {
+                                val nextEvent = awaitPointerEvent()
+                                nextEvent.changes.forEach { it.consume() }
+                                if (nextEvent.type == PointerEventType.Release || nextEvent.changes.all { !it.pressed }) {
+                                    break
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun Modifier.onInstantPress(
     enabled: Boolean = true,
     onPress: () -> Unit
 ): Modifier {
-    if (!enabled) return this
+    val currentEnabled by rememberUpdatedState(enabled)
     val currentOnPress by rememberUpdatedState(onPress)
     return this.pointerInput(Unit) {
         awaitPointerEventScope {
             while (true) {
                 val event = awaitPointerEvent()
+                if (!currentEnabled) continue
                 if (event.type == PointerEventType.Press) {
+                    event.changes.forEach { it.consume() }
                     currentOnPress()
                 }
             }
@@ -567,7 +648,7 @@ fun Modifier.onResetInstantPress(
     onFullReset: () -> Unit,
     onLongPressHaptic: () -> Unit = {}
 ): Modifier {
-    if (!enabled) return this
+    val currentEnabled by rememberUpdatedState(enabled)
     val currentOnReset by rememberUpdatedState(onReset)
     val currentOnFullReset by rememberUpdatedState(onFullReset)
     val currentOnLongPressHaptic by rememberUpdatedState(onLongPressHaptic)
@@ -576,11 +657,14 @@ fun Modifier.onResetInstantPress(
         awaitPointerEventScope {
             while (true) {
                 val event = awaitPointerEvent()
+                if (!currentEnabled) continue
                 if (event.type == PointerEventType.Press || event.changes.any { it.pressed }) {
+                    event.changes.forEach { it.consume() }
                     var isReleased = false
                     val releasedBeforeTimeout = withTimeoutOrNull(500L) {
                         while (true) {
                             val nextEvent = awaitPointerEvent()
+                            nextEvent.changes.forEach { it.consume() }
                             if (nextEvent.type == PointerEventType.Release || nextEvent.changes.all { !it.pressed }) {
                                 isReleased = true
                                 break
@@ -598,6 +682,7 @@ fun Modifier.onResetInstantPress(
                         currentOnFullReset()
                         while (true) {
                             val nextEvent = awaitPointerEvent()
+                            nextEvent.changes.forEach { it.consume() }
                             if (nextEvent.type == PointerEventType.Release || nextEvent.changes.all { !it.pressed }) {
                                 break
                             }

@@ -19,10 +19,13 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Timeout
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
+import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@Timeout(value = 10, unit = TimeUnit.SECONDS)
 class SettingsRepositoryTest {
 
     @TempDir
@@ -57,6 +60,7 @@ class SettingsRepositoryTest {
         assertEquals(AppThemeMode.SYSTEM_DEFAULT, settings.themeMode)
         assertEquals(AppFontSize.NORMAL, settings.fontSizeScale)
         assertTrue(settings.keepScreenOnWhileRunning)
+        assertTrue(settings.useDynamicColor)
     }
 
     @Test
@@ -111,6 +115,39 @@ class SettingsRepositoryTest {
     }
 
     @Test
+    fun setUseDynamicColor_updatesDataStoreAndFlow() = testScope.runTest {
+        repository.setUseDynamicColor(false)
+        val settings = repository.settingsFlow.first()
+        assertFalse(settings.useDynamicColor)
+    }
+
+    @Test
+    fun resetSettingsToDefault_restoresDefaultAppSettings() = testScope.runTest {
+        repository.saveSettings(
+            AppSettings(
+                soundEnabled = false,
+                hapticsEnabled = false,
+                hardwareVolumeKeysEnabled = false,
+                runningDisplayPrecision = AppPrecision.SECONDS,
+                timePrecision = AppPrecision.HUNDREDTHS,
+                language = AppLanguage.GERMAN,
+                autoSortEnabled = true,
+                themeMode = AppThemeMode.DARK,
+                fontSizeScale = AppFontSize.LARGE,
+                keepScreenOnWhileRunning = false,
+                useDynamicColor = false
+            )
+        )
+        val modified = repository.settingsFlow.first()
+        assertFalse(modified.soundEnabled)
+        assertFalse(modified.useDynamicColor)
+
+        repository.resetSettingsToDefault()
+        val restored = repository.settingsFlow.first()
+        assertEquals(AppSettings(), restored)
+    }
+
+    @Test
     fun setAppLanguage_updatesDataStoreAndFlow() = testScope.runTest {
         repository.setAppLanguage(AppLanguage.GERMAN)
         val settings = repository.settingsFlow.first()
@@ -143,7 +180,8 @@ class SettingsRepositoryTest {
             autoSortEnabled = true,
             themeMode = AppThemeMode.DARK,
             fontSizeScale = AppFontSize.SMALL,
-            keepScreenOnWhileRunning = false
+            keepScreenOnWhileRunning = false,
+            useDynamicColor = false
         )
         repository.saveSettings(customSettings)
         val loaded = repository.settingsFlow.first()
@@ -172,6 +210,7 @@ class SettingsRepositoryTest {
         assertEquals(AppThemeMode.SYSTEM_DEFAULT, settings.themeMode)
         assertEquals(AppFontSize.NORMAL, settings.fontSizeScale)
         assertTrue(settings.keepScreenOnWhileRunning)
+        assertTrue(settings.useDynamicColor)
     }
 
     @Test
@@ -204,5 +243,37 @@ class SettingsRepositoryTest {
         repository.removeProposedAthleteName("Athlete A")
         val settings = repository.settingsFlow.first()
         assertEquals(listOf("Athlete B"), settings.proposedAthleteNames)
+    }
+
+    @Test
+    fun addProposedSessionName_addsTrimmedNonBlankUniqueNames() = testScope.runTest {
+        repository.addProposedSessionName("  Warm-up  ")
+        var settings = repository.settingsFlow.first()
+        assertEquals(listOf("Warm-up"), settings.proposedSessionNames)
+
+        // Blank name ignored
+        repository.addProposedSessionName("   ")
+        settings = repository.settingsFlow.first()
+        assertEquals(listOf("Warm-up"), settings.proposedSessionNames)
+
+        // Duplicate name not added again
+        repository.addProposedSessionName("Warm-up")
+        settings = repository.settingsFlow.first()
+        assertEquals(listOf("Warm-up"), settings.proposedSessionNames)
+
+        // Distinct new name added
+        repository.addProposedSessionName("Heat 1")
+        settings = repository.settingsFlow.first()
+        assertEquals(listOf("Warm-up", "Heat 1"), settings.proposedSessionNames)
+    }
+
+    @Test
+    fun removeProposedSessionName_removesExistingNameFromList() = testScope.runTest {
+        repository.addProposedSessionName("Warm-up")
+        repository.addProposedSessionName("Heat 1")
+
+        repository.removeProposedSessionName("Warm-up")
+        val settings = repository.settingsFlow.first()
+        assertEquals(listOf("Heat 1"), settings.proposedSessionNames)
     }
 }

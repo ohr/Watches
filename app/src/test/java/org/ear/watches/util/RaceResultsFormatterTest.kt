@@ -7,7 +7,10 @@ import org.ear.watches.data.model.StopwatchItem
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Timeout
+import java.util.concurrent.TimeUnit
 
+@Timeout(value = 10, unit = TimeUnit.SECONDS)
 class RaceResultsFormatterTest {
 
     @Test
@@ -223,5 +226,37 @@ class RaceResultsFormatterTest {
         ).joinToString("\n")
 
         assertEquals(expected, csv)
+    }
+
+    @Test
+    fun formatRaceResults_and_csv_withCustomSessionNames() {
+        val item = StopwatchItem(
+            name = "Athlete Alpha",
+            pastelColorHex = 0xFFEF9A9AL,
+            isRunning = false,
+            runs = listOf(
+                RunSession(
+                    runIndex = 1,
+                    startTimeNanos = 0L,
+                    endTimeNanos = 20_000_000_000L,
+                    accumulatedNanos = 20_000_000_000L,
+                    startTimeMillis = 0L,
+                    laps = listOf(
+                        LapRecord(lapNumber = 1, lapTimeNanos = 20_000_000_000L, totalTimeNanos = 20_000_000_000L)
+                    ),
+                    name = "Heat 1"
+                )
+            )
+        )
+
+        val report = RaceResultsFormatter.formatRaceResults(
+            stopwatches = listOf(item),
+            precision = AppPrecision.HUNDREDTHS,
+            nowNanos = 100_000_000_000L
+        )
+        assertTrue(report.contains("Heat 1"))
+
+        val csv = RaceResultsFormatter.formatSingleAsCsv(item, precision = AppPrecision.HUNDREDTHS)
+        assertTrue(csv.contains("\"Athlete Alpha\",\"Heat 1\",\"1\",\"00:20.00\",\"00:20.00\""))
     }
 }

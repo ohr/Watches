@@ -2,6 +2,7 @@ package org.ear.watches.ui.components
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -82,7 +83,8 @@ fun GlobalControlBar(
     onOpenSettings: () -> Unit,
     onOpenHelp: () -> Unit,
     onOpenAbout: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onNameAllSessions: () -> Unit = {}
 ) {
     val hasWatches = uiState.stopwatches.isNotEmpty()
     val anyRunning = uiState.stopwatches.any { it.isRunning }
@@ -183,56 +185,69 @@ fun GlobalControlBar(
                 }
 
                 // Start All / Stop All
-                if (anyRunning) {
-                    // Stop All Button
-                    Button(
-                        onClick = onStopAll,
-                        enabled = true,
-                        shape = GlobalControlBarDefaults.ButtonShape,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFD32F2F),
-                            contentColor = Color.White
-                        ),
-                        contentPadding = GlobalControlBarDefaults.ButtonContentPadding
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Stop,
-                            contentDescription = null,
-                            modifier = Modifier.size(GlobalControlBarDefaults.ButtonIconSize)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = stringResource(R.string.action_stop_all),
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                } else {
-                    // Start All Button
-                    Button(
-                        onClick = onStartAll,
+                val haptic = LocalHapticFeedback.current
+                Box(
+                    modifier = Modifier.onStartInstantPressWithLongPressNaming(
                         enabled = hasWatches,
-                        shape = GlobalControlBarDefaults.ButtonShape,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF2E7D32),
+                        isRunning = anyRunning,
+                        onStart = onStartAll,
+                        onPause = onStopAll,
+                        onLongPressNameSession = onNameAllSessions,
+                        onLongPressHaptic = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        }
+                    )
+                ) {
+                    if (anyRunning) {
+                        Surface(
+                            shape = GlobalControlBarDefaults.ButtonShape,
+                            color = Color(0xFFD32F2F),
                             contentColor = Color.White
-                        ),
-                        contentPadding = GlobalControlBarDefaults.ButtonContentPadding
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.PlayArrow,
-                            contentDescription = null,
-                            modifier = Modifier.size(GlobalControlBarDefaults.ButtonIconSize)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = stringResource(R.string.action_start_all),
-                            fontWeight = FontWeight.Bold
-                        )
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(GlobalControlBarDefaults.ButtonContentPadding),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Stop,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(GlobalControlBarDefaults.ButtonIconSize)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = stringResource(R.string.action_stop_all),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    } else {
+                        Surface(
+                            shape = GlobalControlBarDefaults.ButtonShape,
+                            color = if (hasWatches) Color(0xFF2E7D32) else Color(0xFFB0BEC5),
+                            contentColor = if (hasWatches) Color.White else Color(0xFF546E7A)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(GlobalControlBarDefaults.ButtonContentPadding),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.PlayArrow,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(GlobalControlBarDefaults.ButtonIconSize)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = stringResource(R.string.action_start_all),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
                     }
                 }
 
                 // Reset All Button
-                val haptic = LocalHapticFeedback.current
                 val resetEnabled = hasWatches && allStopped
                 TooltipBox(
                     positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),

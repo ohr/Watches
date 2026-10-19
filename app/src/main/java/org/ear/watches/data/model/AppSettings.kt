@@ -21,5 +21,7 @@ data class AppSettings(
     val themeMode: AppThemeMode = AppThemeMode.SYSTEM_DEFAULT,
     val fontSizeScale: AppFontSize = AppFontSize.NORMAL,
     val keepScreenOnWhileRunning: Boolean = true,
-    val proposedAthleteNames: List<String> = emptyList()
+    val useDynamicColor: Boolean = true,
+    val proposedAthleteNames: List<String> = emptyList(),
+    val proposedSessionNames: List<String> = emptyList()
 )

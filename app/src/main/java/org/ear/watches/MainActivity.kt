@@ -67,7 +67,8 @@ class MainActivity : ComponentActivity() {
 
             WatchesTheme(
                 themeMode = uiState.settings.themeMode,
-                fontSizeScale = uiState.settings.fontSizeScale
+                fontSizeScale = uiState.settings.fontSizeScale,
+                dynamicColor = uiState.settings.useDynamicColor
             ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     MainStopwatchScreen(

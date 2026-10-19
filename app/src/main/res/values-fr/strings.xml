@@ -28,6 +28,16 @@
     <string name="dialog_edit_watch_name_label">Nom</string>
     <string name="dialog_edit_watch_color_label">Couleur</string>
 
+    <string name="dialog_name_session_title">Nommer la session</string>
+    <string name="dialog_name_session_subtitle">Le chronomètre continue de tourner en arrière-plan</string>
+    <string name="dialog_name_session_label">Nom de la session</string>
+    <string name="hint_hold_to_name_session">Maintenir pour nommer la session active</string>
+    <string name="cd_edit_session_name">Modifier le nom de la session</string>
+    <string name="dialog_name_session_saved_proposals">Noms de session enregistrés</string>
+    <string name="dialog_name_session_proposed">Noms de session enregistrés</string>
+    <string name="cd_remove_proposed_session_name">Supprimer le nom de session</string>
+    <string name="cd_remove_proposed_session">Supprimer le nom de session</string>
+
     <string name="dialog_batch_add_title">Ajouter plusieurs chronomètres</string>
     <string name="dialog_batch_add_count_label">Nombre</string>
     <string name="dialog_batch_add_prefix_label">Préfixe de nom</string>
@@ -69,6 +79,11 @@
     <string name="theme_system_default">Par défaut du système</string>
     <string name="theme_light">Clair</string>
     <string name="theme_dark">Sombre</string>
+    <string name="setting_dynamic_color">Couleurs dynamiques</string>
+    <string name="setting_dynamic_color_desc">Adapter les couleurs au fond d\'écran (Android 12+)</string>
+    <string name="btn_reset_settings_default">Réinitialiser les paramètres</string>
+    <string name="btn_settings_open_help">Aide &amp; Guide rapide</string>
+    <string name="btn_settings_open_about">À propos &amp; Licences</string>
 
     <!-- Font Size Options -->
     <string name="setting_font_size">Taille du texte</string>
@@ -173,6 +188,8 @@
     <string name="help_detail_view_desc">Appuyez sur l\'icône info d\'un chronomètre pour consulter l\'historique des sessions et exporter les résultats individuels. Les chronomètres arrêtés disposent d\'un bouton \"Supprimer les sessions\" dans la vue détaillée pour effacer l\'historique.</string>
     <string name="help_settings_title">Paramètres de précision &amp; d\'affichage</string>
     <string name="help_settings_desc">Configurez séparément la précision du temps en cours et des résultats/tours, les thèmes, la taille du texte, le tri automatique, le maintien de l\'écran allumé et la langue.</string>
+    <string name="help_session_naming_title">Nommer les sessions</string>
+    <string name="help_session_naming_desc">Appuyez longuement sur Démarrer (&gt;0,5s) pour nommer une session avec des puces rapides. Vous pouvez aussi renommer les sessions dans les détails.</string>
     <string name="help_precision_sort_title">Paramètres de précision &amp; d\'affichage</string>
     <string name="help_precision_sort_desc">Configurez séparément la précision du temps en cours et des résultats/tours, les thèmes, la taille du texte, le tri automatique, le maintien de l\'écran allumé et la langue.</string>
 

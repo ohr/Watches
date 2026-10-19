@@ -28,6 +28,16 @@
     <string name="dialog_edit_watch_name_label">Name</string>
     <string name="dialog_edit_watch_color_label">Color</string>
 
+    <string name="dialog_name_session_title">Name Run Session</string>
+    <string name="dialog_name_session_subtitle">Stopwatch continues ticking in background</string>
+    <string name="dialog_name_session_label">Session Name</string>
+    <string name="hint_hold_to_name_session">Hold to name active session</string>
+    <string name="cd_edit_session_name">Edit Session Name</string>
+    <string name="dialog_name_session_saved_proposals">Saved Session Names</string>
+    <string name="dialog_name_session_proposed">Saved Session Names</string>
+    <string name="cd_remove_proposed_session_name">Remove session name</string>
+    <string name="cd_remove_proposed_session">Remove session name</string>
+
     <string name="dialog_batch_add_title">Batch Add Stopwatches</string>
     <string name="dialog_batch_add_count_label">Count</string>
     <string name="dialog_batch_add_prefix_label">Name Prefix</string>
@@ -69,6 +79,11 @@
     <string name="theme_system_default">System Default</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
+    <string name="setting_dynamic_color">Dynamic Colors</string>
+    <string name="setting_dynamic_color_desc">Match theme colors to phone wallpaper (Android 12+)</string>
+    <string name="btn_reset_settings_default">Reset Settings to Default</string>
+    <string name="btn_settings_open_help">Help &amp; Quick Guide</string>
+    <string name="btn_settings_open_about">About App &amp; Licenses</string>
 
     <!-- Font Size Options -->
     <string name="setting_font_size">Text Size</string>
@@ -173,6 +188,8 @@
     <string name="help_detail_view_desc">Tap info icon on any watch tile to view run session history and export individual results. Stopped stopwatches feature a \"Delete Runs\" button in the Detail View to clear history.</string>
     <string name="help_settings_title">Precision &amp; Display Settings</string>
     <string name="help_settings_desc">Configure separate running time vs result/lap precision, themes, text scaling, auto-sorting, Keep Screen Awake, and language settings.</string>
+    <string name="help_session_naming_title">Custom Session Naming</string>
+    <string name="help_session_naming_desc">Long-press Start or Start All (&gt;0.5s) to name a session using quick preset chips while timing. You can also rename any session retroactively in the Detail View.</string>
     <string name="help_precision_sort_title">Precision &amp; Display Settings</string>
     <string name="help_precision_sort_desc">Configure separate running time vs result/lap precision, themes, text scaling, auto-sorting, Keep Screen Awake, and language settings.</string>
 

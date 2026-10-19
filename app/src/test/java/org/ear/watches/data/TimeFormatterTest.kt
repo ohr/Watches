@@ -5,7 +5,10 @@ import org.ear.watches.data.util.TimeFormatter.formatDeltaTime
 import org.ear.watches.data.util.TimeFormatter.formatTime
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Timeout
+import java.util.concurrent.TimeUnit
 
+@Timeout(value = 10, unit = TimeUnit.SECONDS)
 class TimeFormatterTest {
 
     @Test
