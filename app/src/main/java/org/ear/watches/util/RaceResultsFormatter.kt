@@ -20,7 +20,7 @@ object RaceResultsFormatter {
         context: Context?,
         stopwatches: List<StopwatchItem>,
         precision: AppPrecision = AppPrecision.HUNDREDTHS,
-        nowMillis: Long = System.currentTimeMillis(),
+        nowNanos: Long = 0L,
         subsecondSeparator: String? = null
     ): String {
         if (stopwatches.isEmpty()) {
@@ -44,7 +44,7 @@ object RaceResultsFormatter {
         sb.appendLine()
 
         stopwatches.forEachIndexed { index, watch ->
-            val totalTime = watch.getTotalCumulativeMillis(nowMillis)
+            val totalTime = watch.getTotalCumulativeMillis(nowNanos)
             val formattedTotalTime = TimeFormatter.formatTime(totalTime, precision, effectiveSeparator)
 
             val runnerText = getString(context, R.string.report_runner_format, index + 1, watch.name)
@@ -60,7 +60,7 @@ object RaceResultsFormatter {
             sb.appendLine("   $statusLabel: $statusValue")
             sb.appendLine("   $totalAllRunsLabel: $formattedTotalTime")
 
-            val effectiveRuns = watch.runs.filter { it.startTimeMillis > 0L || it.endTimeMillis > 0L || it.accumulatedMillis > 0L || it.laps.isNotEmpty() }
+            val effectiveRuns = watch.runs.filter { it.startTimeNanos > 0L || it.endTimeNanos > 0L || it.accumulatedNanos > 0L || it.laps.isNotEmpty() }
 
             if (effectiveRuns.isNotEmpty()) {
                 effectiveRuns.forEach { run ->
@@ -72,8 +72,8 @@ object RaceResultsFormatter {
                     } else "-"
                     val startTimeLabel = getString(context, R.string.label_start_time) ?: "Start Time"
 
-                    val runDurationMillis = if (run.endTimeMillis == 0L && watch.isRunning) {
-                        (nowMillis - run.startTimeMillis).coerceAtLeast(0L)
+                    val runDurationMillis = if (run.endTimeNanos == 0L && watch.isRunning) {
+                        watch.getElapsedMillis(nowNanos)
                     } else {
                         run.accumulatedMillis
                     }
@@ -127,29 +127,29 @@ object RaceResultsFormatter {
     fun formatRaceResults(
         stopwatches: List<StopwatchItem>,
         precision: AppPrecision = AppPrecision.HUNDREDTHS,
-        nowMillis: Long = System.currentTimeMillis(),
+        nowNanos: Long = 0L,
         subsecondSeparator: String = "."
-    ): String = formatRaceResults(null, stopwatches, precision, nowMillis, subsecondSeparator)
+    ): String = formatRaceResults(null, stopwatches, precision, nowNanos, subsecondSeparator)
 
     fun formatSingleStopwatchResults(
         context: Context?,
         watch: StopwatchItem,
         precision: AppPrecision = AppPrecision.HUNDREDTHS,
-        nowMillis: Long = System.currentTimeMillis(),
+        nowNanos: Long = 0L,
         subsecondSeparator: String? = null
-    ): String = formatRaceResults(context, listOf(watch), precision, nowMillis, subsecondSeparator)
+    ): String = formatRaceResults(context, listOf(watch), precision, nowNanos, subsecondSeparator)
 
     fun formatSingleStopwatchResults(
         watch: StopwatchItem,
         precision: AppPrecision = AppPrecision.HUNDREDTHS,
-        nowMillis: Long = System.currentTimeMillis(),
+        nowNanos: Long = 0L,
         subsecondSeparator: String = "."
-    ): String = formatSingleStopwatchResults(null, watch, precision, nowMillis, subsecondSeparator)
+    ): String = formatSingleStopwatchResults(null, watch, precision, nowNanos, subsecondSeparator)
 
     fun formatAsCsv(
         stopwatches: List<StopwatchItem>,
         precision: AppPrecision = AppPrecision.HUNDREDTHS,
-        nowMillis: Long = System.currentTimeMillis()
+        nowNanos: Long = 0L
     ): String {
         val sb = StringBuilder()
         sb.appendLine("\"Athlete\",\"Run Session\",\"Lap Number\",\"Lap Time\",\"Total Time\"")
@@ -171,6 +171,6 @@ object RaceResultsFormatter {
     fun formatSingleAsCsv(
         watch: StopwatchItem,
         precision: AppPrecision = AppPrecision.HUNDREDTHS,
-        nowMillis: Long = System.currentTimeMillis()
-    ): String = formatAsCsv(listOf(watch), precision, nowMillis)
+        nowNanos: Long = 0L
+    ): String = formatAsCsv(listOf(watch), precision, nowNanos)
 }

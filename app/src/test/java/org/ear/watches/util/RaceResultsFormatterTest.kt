@@ -25,12 +25,13 @@ class RaceResultsFormatterTest {
             runs = listOf(
                 RunSession(
                     runIndex = 1,
+                    startTimeNanos = 0L,
+                    endTimeNanos = 50_000_000_000L,
+                    accumulatedNanos = 50_000_000_000L,
                     startTimeMillis = 0L,
-                    endTimeMillis = 50000L,
-                    accumulatedMillis = 50000L,
                     laps = listOf(
-                        LapRecord(lapNumber = 1, lapTimeMillis = 20000L, totalTimeMillis = 20000L),
-                        LapRecord(lapNumber = 2, lapTimeMillis = 30000L, totalTimeMillis = 50000L)
+                        LapRecord(lapNumber = 1, lapTimeNanos = 20_000_000_000L, totalTimeNanos = 20_000_000_000L),
+                        LapRecord(lapNumber = 2, lapTimeNanos = 30_000_000_000L, totalTimeNanos = 50_000_000_000L)
                     )
                 )
             )
@@ -46,7 +47,7 @@ class RaceResultsFormatterTest {
         val report = RaceResultsFormatter.formatRaceResults(
             stopwatches = listOf(item1, item2),
             precision = AppPrecision.HUNDREDTHS,
-            nowMillis = 100000L
+            nowNanos = 100_000_000_000L
         )
 
         assertTrue(report.contains("Runner: Athlete Alpha"))
@@ -69,12 +70,13 @@ class RaceResultsFormatterTest {
             runs = listOf(
                 RunSession(
                     runIndex = 1,
+                    startTimeNanos = 0L,
+                    endTimeNanos = 50_000_000_000L,
+                    accumulatedNanos = 50_000_000_000L,
                     startTimeMillis = 0L,
-                    endTimeMillis = 50000L,
-                    accumulatedMillis = 50000L,
                     laps = listOf(
-                        LapRecord(lapNumber = 1, lapTimeMillis = 20450L, totalTimeMillis = 20450L),
-                        LapRecord(lapNumber = 2, lapTimeMillis = 29550L, totalTimeMillis = 50000L)
+                        LapRecord(lapNumber = 1, lapTimeNanos = 20_450_000_000L, totalTimeNanos = 20_450_000_000L),
+                        LapRecord(lapNumber = 2, lapTimeNanos = 29_550_000_000L, totalTimeNanos = 50_000_000_000L)
                     )
                 )
             )
@@ -83,7 +85,7 @@ class RaceResultsFormatterTest {
         val report = RaceResultsFormatter.formatRaceResults(
             stopwatches = listOf(item),
             precision = AppPrecision.HUNDREDTHS,
-            nowMillis = 100000L,
+            nowNanos = 100_000_000_000L,
             subsecondSeparator = ","
         )
 
@@ -98,21 +100,23 @@ class RaceResultsFormatterTest {
     fun formatRaceResults_withMultiRunSessions() {
         val run1 = RunSession(
             runIndex = 1,
+            startTimeNanos = 1_000_000_000L,
+            endTimeNanos = 20_000_000_000L,
+            accumulatedNanos = 19_000_000_000L,
             startTimeMillis = 1000L,
-            endTimeMillis = 20000L,
-            accumulatedMillis = 19000L,
             laps = listOf(
-                LapRecord(lapNumber = 1, lapTimeMillis = 19000L, totalTimeMillis = 19000L)
+                LapRecord(lapNumber = 1, lapTimeNanos = 19_000_000_000L, totalTimeNanos = 19_000_000_000L)
             )
         )
         val run2 = RunSession(
             runIndex = 2,
+            startTimeNanos = 25_000_000_000L,
+            endTimeNanos = 55_000_000_000L,
+            accumulatedNanos = 30_000_000_000L,
             startTimeMillis = 25000L,
-            endTimeMillis = 55000L,
-            accumulatedMillis = 30000L,
             laps = listOf(
-                LapRecord(lapNumber = 1, lapTimeMillis = 10000L, totalTimeMillis = 10000L),
-                LapRecord(lapNumber = 2, lapTimeMillis = 20000L, totalTimeMillis = 30000L)
+                LapRecord(lapNumber = 1, lapTimeNanos = 10_000_000_000L, totalTimeNanos = 10_000_000_000L),
+                LapRecord(lapNumber = 2, lapTimeNanos = 20_000_000_000L, totalTimeNanos = 30_000_000_000L)
             )
         )
 
@@ -125,7 +129,7 @@ class RaceResultsFormatterTest {
         val report = RaceResultsFormatter.formatRaceResults(
             stopwatches = listOf(item),
             precision = AppPrecision.HUNDREDTHS,
-            nowMillis = 60000L
+            nowNanos = 60_000_000_000L
         )
 
         assertTrue(report.contains("Runner: Sprint Champion"))
@@ -151,12 +155,13 @@ class RaceResultsFormatterTest {
             runs = listOf(
                 RunSession(
                     runIndex = 1,
+                    startTimeNanos = 1_000_000_000L,
+                    endTimeNanos = 51_000_000_000L,
+                    accumulatedNanos = 50_000_000_000L,
                     startTimeMillis = 1000L,
-                    endTimeMillis = 51000L,
-                    accumulatedMillis = 50000L,
                     laps = listOf(
-                        LapRecord(lapNumber = 1, lapTimeMillis = 20000L, totalTimeMillis = 20000L),
-                        LapRecord(lapNumber = 2, lapTimeMillis = 30000L, totalTimeMillis = 50000L)
+                        LapRecord(lapNumber = 1, lapTimeNanos = 20_000_000_000L, totalTimeNanos = 20_000_000_000L),
+                        LapRecord(lapNumber = 2, lapTimeNanos = 30_000_000_000L, totalTimeNanos = 50_000_000_000L)
                     )
                 )
             )
@@ -180,11 +185,12 @@ class RaceResultsFormatterTest {
             runs = listOf(
                 RunSession(
                     runIndex = 1,
+                    startTimeNanos = 0L,
+                    endTimeNanos = 15_000_000_000L,
+                    accumulatedNanos = 15_000_000_000L,
                     startTimeMillis = 0L,
-                    endTimeMillis = 15000L,
-                    accumulatedMillis = 15000L,
                     laps = listOf(
-                        LapRecord(lapNumber = 1, lapTimeMillis = 15000L, totalTimeMillis = 15000L)
+                        LapRecord(lapNumber = 1, lapTimeNanos = 15_000_000_000L, totalTimeNanos = 15_000_000_000L)
                     )
                 )
             )
@@ -196,12 +202,13 @@ class RaceResultsFormatterTest {
             runs = listOf(
                 RunSession(
                     runIndex = 1,
+                    startTimeNanos = 0L,
+                    endTimeNanos = 26_000_000_000L,
+                    accumulatedNanos = 26_000_000_000L,
                     startTimeMillis = 0L,
-                    endTimeMillis = 26000L,
-                    accumulatedMillis = 26000L,
                     laps = listOf(
-                        LapRecord(lapNumber = 1, lapTimeMillis = 12000L, totalTimeMillis = 12000L),
-                        LapRecord(lapNumber = 2, lapTimeMillis = 14000L, totalTimeMillis = 26000L)
+                        LapRecord(lapNumber = 1, lapTimeNanos = 12_000_000_000L, totalTimeNanos = 12_000_000_000L),
+                        LapRecord(lapNumber = 2, lapTimeNanos = 14_000_000_000L, totalTimeNanos = 26_000_000_000L)
                     )
                 )
             )

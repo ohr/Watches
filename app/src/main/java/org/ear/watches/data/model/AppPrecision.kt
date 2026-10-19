@@ -9,9 +9,10 @@ import kotlinx.serialization.Serializable
 @Serializable
 enum class AppPrecision(
     val displayName: String,
-    val decimalDigits: Int
+    val decimalDigits: Int,
+    val refreshMillis: Long,
 ) {
-    TENTHS("0.1s", 1),
-    HUNDREDTHS("0.01s", 2),
-    SECONDS("1s", 0)
+    TENTHS("0.1s", 1, 50L),
+    HUNDREDTHS("0.01s", 2, 16L),
+    SECONDS("1s", 0, 500L)
 }

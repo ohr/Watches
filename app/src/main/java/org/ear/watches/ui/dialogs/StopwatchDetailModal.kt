@@ -1,5 +1,6 @@
 package org.ear.watches.ui.dialogs
 
+import android.os.SystemClock
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -82,17 +83,17 @@ fun StopwatchDetailModal(
     val timeFormatter = remember(locale) { SimpleDateFormat("HH:mm:ss", locale) }
     val subsecondSeparator = stringResource(R.string.subsecond_separator)
 
-    val currentTick by produceState(initialValue = System.currentTimeMillis(), watch.isRunning, tickerFlow) {
+    val currentTick by produceState(initialValue = SystemClock.elapsedRealtimeNanos(), watch.isRunning, tickerFlow) {
         if (watch.isRunning) {
             tickerFlow.collect { value = it }
         }
     }
-    val nowMillis = if (watch.isRunning) currentTick else System.currentTimeMillis()
+    val nowNanos = if (watch.isRunning) currentTick else SystemClock.elapsedRealtimeNanos()
 
     var showShareFormatDialog by remember { mutableStateOf(false) }
 
-    val effectiveRuns = watch.runs.filter { it.startTimeMillis > 0L || it.endTimeMillis > 0L || it.accumulatedMillis > 0L || it.laps.isNotEmpty() }
-    val hasRunData = watch.runs.any { it.laps.isNotEmpty() || it.accumulatedMillis > 0L || it.endTimeMillis > 0L }
+    val effectiveRuns = watch.runs.filter { it.startTimeNanos > 0L || it.endTimeNanos > 0L || it.accumulatedNanos > 0L || it.laps.isNotEmpty() }
+    val hasRunData = watch.runs.any { it.laps.isNotEmpty() || it.accumulatedNanos > 0L || it.endTimeNanos > 0L }
     val canDeleteRuns = !watch.isRunning && watch.runs.isNotEmpty()
 
     Dialog(onDismissRequest = onDismiss) {
@@ -158,7 +159,7 @@ fun StopwatchDetailModal(
                 ) {
                     // Total Cumulative Time across all runs
                     item {
-                        val totalCumulativeMillis = watch.getTotalCumulativeMillis(nowMillis)
+                        val totalCumulativeMillis = watch.getTotalCumulativeMillis(nowNanos)
                         val totalPrecision = if (watch.isRunning) settings.runningDisplayPrecision else settings.timePrecision
                         val formattedTotalCumulative = TimeFormatter.formatTime(totalCumulativeMillis, totalPrecision, subsecondSeparator)
                         Card(
@@ -213,20 +214,24 @@ fun StopwatchDetailModal(
                             } else {
                                 "-"
                             }
-                            val runEndString = if (run.endTimeMillis > 0L) {
-                                timeFormatter.format(Date(run.endTimeMillis))
+                            val runEndString = if (run.endTimeNanos > 0L) {
+                                if (run.startTimeMillis > 0L) {
+                                    timeFormatter.format(Date(run.startTimeMillis + run.accumulatedMillis))
+                                } else {
+                                    "-"
+                                }
                             } else if (watch.isRunning && run.runIndex == effectiveRuns.size) {
                                 stringResource(R.string.status_running)
                             } else {
                                 "-"
                             }
-                            val runDurationMillis = if (run.endTimeMillis == 0L && watch.isRunning && run.runIndex == effectiveRuns.size) {
-                                (nowMillis - run.startTimeMillis).coerceAtLeast(0L)
+                            val runDurationMillis = if (run.endTimeNanos == 0L && watch.isRunning && run.runIndex == effectiveRuns.size) {
+                                watch.getElapsedMillis(nowNanos)
                             } else {
                                 run.accumulatedMillis
                             }
                             
-                            val isRunActive = watch.isRunning && run.endTimeMillis == 0L
+                            val isRunActive = watch.isRunning && run.endTimeNanos == 0L
                             val runPrecision = if (isRunActive) settings.runningDisplayPrecision else settings.timePrecision
                             val formattedRunDuration = TimeFormatter.formatTime(runDurationMillis, runPrecision, subsecondSeparator)
 
@@ -505,11 +510,11 @@ fun StopwatchDetailModal(
         ShareFormatDialog(
             onSelectText = {
                 showShareFormatDialog = false
-                ShareHelper.shareSingleStopwatchResults(context, watch, settings.timePrecision, nowMillis)
+                ShareHelper.shareSingleStopwatchResults(context, watch, settings.timePrecision, nowNanos)
             },
             onSelectCsv = {
                 showShareFormatDialog = false
-                ShareHelper.shareSingleStopwatchResultsCsv(context, watch, settings.timePrecision, nowMillis)
+                ShareHelper.shareSingleStopwatchResultsCsv(context, watch, settings.timePrecision, nowNanos)
             },
             onDismiss = { showShareFormatDialog = false }
         )
@@ -527,17 +532,19 @@ fun StopwatchDetailModalPreview() {
                 runs = listOf(
                     RunSession(
                         runIndex = 1,
+                        startTimeNanos = 1_000_000_000L,
+                        endTimeNanos = 16_000_000_000L,
+                        accumulatedNanos = 15_000_000_000L,
                         startTimeMillis = 1700000000000L,
-                        endTimeMillis = 1700000015000L,
-                        accumulatedMillis = 15000L,
-                        laps = listOf(LapRecord(1, 15000L, 15000L))
+                        laps = listOf(LapRecord(1, 15_000_000_000L, 15_000_000_000L))
                     ),
                     RunSession(
                         runIndex = 2,
+                        startTimeNanos = 16_000_000_000L,
+                        endTimeNanos = 46_200_000_000L,
+                        accumulatedNanos = 30_200_000_000L,
                         startTimeMillis = 1700000015000L,
-                        endTimeMillis = 1700000045200L,
-                        accumulatedMillis = 30200L,
-                        laps = listOf(LapRecord(1, 30200L, 30200L))
+                        laps = listOf(LapRecord(1, 30_200_000_000L, 30_200_000_000L))
                     )
                 )
             ),

@@ -1,5 +1,6 @@
 package org.ear.watches.ui.components
 
+import android.os.SystemClock
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -119,14 +120,14 @@ fun StopwatchTile(
     val cardBackgroundColor = Color(watch.pastelColorHex)
     val darkContentColor = Color(0xFF1F1F1F)
 
-    val currentTick by produceState(initialValue = System.currentTimeMillis(), watch.isRunning, tickerFlow) {
+    val currentTick by produceState(initialValue = SystemClock.elapsedRealtimeNanos(), watch.isRunning, tickerFlow) {
         if (watch.isRunning) {
             tickerFlow.collect { value = it }
         }
     }
-    val nowMillis = if (watch.isRunning) currentTick else System.currentTimeMillis()
+    val nowNanos = if (watch.isRunning) currentTick else SystemClock.elapsedRealtimeNanos()
 
-    val currentTotalTime = watch.getElapsedMillis(nowMillis)
+    val currentTotalTime = watch.getElapsedMillis(nowNanos)
     val lastLapRecordedTotalTime = watch.currentRunLaps.lastOrNull()?.totalTimeMillis ?: 0L
     val displayedTimeMillis = if (showCurrentLapTime) {
         (currentTotalTime - lastLapRecordedTotalTime).coerceAtLeast(0L)
@@ -622,16 +623,17 @@ fun StopwatchTilePreview() {
                     runs = listOf(
                         RunSession(
                             runIndex = 1,
+                            startTimeNanos = 0L,
                             startTimeMillis = 0L,
                             laps = listOf(
-                                LapRecord(1, 12400L, 12400L)
+                                LapRecord(1, 12_400_000_000L, 12_400_000_000L)
                             )
                         )
                     )
                 ),
                 timePrecision = AppPrecision.TENTHS,
                 runningDisplayPrecision = AppPrecision.TENTHS,
-                tickerFlow = kotlinx.coroutines.flow.MutableStateFlow(15000L),
+                tickerFlow = kotlinx.coroutines.flow.MutableStateFlow(15_000_000_000L),
                 onStart = {},
                 onPause = {},
                 onLap = {},

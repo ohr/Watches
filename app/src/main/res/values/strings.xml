@@ -124,7 +124,7 @@
     <string name="label_total_time">Total Time</string>
     <string name="btn_share_stopwatch">Share Stopwatch</string>
     <string name="btn_close">Close</string>
-    <string name="btn_delete_runs">Delete Runs</string>
+    <string name="btn_delete_runs">Delete</string>
     <string name="label_lap_breakdown">Lap Breakdown</string>
     <string name="header_lap_num">Lap</string>
     <string name="header_lap_time">Lap Time</string>

@@ -124,7 +124,7 @@
     <string name="label_total_time">Gesamtzeit</string>
     <string name="btn_share_stopwatch">Stoppuhr Teilen</string>
     <string name="btn_close">Schließen</string>
-    <string name="btn_delete_runs">Läufe löschen</string>
+    <string name="btn_delete_runs">Löschen</string>
     <string name="label_lap_breakdown">Runden-Aufschlüsselung</string>
     <string name="header_lap_num">Runde</string>
     <string name="header_lap_time">Rundenzeit</string>

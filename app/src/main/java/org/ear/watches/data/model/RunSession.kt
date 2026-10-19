@@ -9,8 +9,11 @@ import androidx.compose.runtime.Stable
 @Stable
 data class RunSession(
     val runIndex: Int,
-    val startTimeMillis: Long,
-    val endTimeMillis: Long = 0L,
-    val accumulatedMillis: Long = 0L,
+    val startTimeNanos: Long = 0L,
+    val endTimeNanos: Long = 0L,
+    val accumulatedNanos: Long = 0L,
+    val startTimeMillis: Long = 0L,
     val laps: List<LapRecord> = emptyList()
-)
+) {
+    val accumulatedMillis: Long get() = accumulatedNanos / 1_000_000L
+}

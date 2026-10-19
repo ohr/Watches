@@ -124,7 +124,7 @@
     <string name="label_total_time">Temps total</string>
     <string name="btn_share_stopwatch">Partager le chronomètre</string>
     <string name="btn_close">Fermer</string>
-    <string name="btn_delete_runs">Supprimer les sessions</string>
+    <string name="btn_delete_runs">Supprimer</string>
     <string name="label_lap_breakdown">Détail des tours</string>
     <string name="header_lap_num">Tour</string>
     <string name="header_lap_time">Temps au tour</string>

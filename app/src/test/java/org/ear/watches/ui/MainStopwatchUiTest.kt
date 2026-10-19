@@ -27,7 +27,7 @@ class MainStopwatchUiTest {
     @BeforeEach
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        timeProvider = TestTimeProvider(1000L)
+        timeProvider = TestTimeProvider(1_000_000_000L, 1_000L)
         viewModel = StopwatchViewModel(
             timeProvider = timeProvider,
             dispatcher = testDispatcher
@@ -76,7 +76,7 @@ class MainStopwatchUiTest {
         viewModel.startAll()
         assertTrue(viewModel.uiState.value.stopwatches.all { it.isRunning })
 
-        timeProvider.advanceTimeBy(3500L)
+        timeProvider.advanceTimeBy(3_500_000_000L)
 
         // Lap first runner
         val id0 = viewModel.uiState.value.stopwatches[0].id
@@ -90,7 +90,7 @@ class MainStopwatchUiTest {
         val report = RaceResultsFormatter.formatRaceResults(
             stopwatches = viewModel.uiState.value.stopwatches,
             precision = AppPrecision.TENTHS,
-            nowMillis = timeProvider.currentTimeMillis()
+            nowNanos = timeProvider.currentTimeNanos()
         )
 
         assertTrue(report.contains("Runner 1"))
@@ -151,7 +151,7 @@ class MainStopwatchUiTest {
         val watchId = viewModel.uiState.value.stopwatches[0].id
 
         viewModel.startStopwatch(watchId)
-        timeProvider.advanceTimeBy(5000L)
+        timeProvider.advanceTimeBy(5_000_000_000L)
         viewModel.lapStopwatch(watchId)
         viewModel.pauseStopwatch(watchId)
 

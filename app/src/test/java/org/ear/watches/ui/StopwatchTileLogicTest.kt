@@ -20,15 +20,16 @@ class StopwatchTileLogicTest {
             runs = listOf(
                 RunSession(
                     runIndex = 1,
+                    startTimeNanos = 0L,
+                    endTimeNanos = 5_000_000_000L,
+                    accumulatedNanos = 5_000_000_000L,
                     startTimeMillis = 0L,
-                    endTimeMillis = 5000L,
-                    accumulatedMillis = 5000L,
                     laps = emptyList()
                 )
             )
         )
-        val nowMillis = 10000L
-        val currentTotalTime = watch.getElapsedMillis(nowMillis)
+        val nowNanos = 10_000_000_000L
+        val currentTotalTime = watch.getElapsedMillis(nowNanos)
         val lastLapRecordedTotalTime = watch.currentRunLaps.lastOrNull()?.totalTimeMillis ?: 0L
         val ongoingLapMillis = (currentTotalTime - lastLapRecordedTotalTime).coerceAtLeast(0L)
 
@@ -39,8 +40,8 @@ class StopwatchTileLogicTest {
     @Test
     fun currentLapTimeCalculation_withLapsRecorded_returnsDurationSinceLastLap() {
         val laps = listOf(
-            LapRecord(lapNumber = 1, lapTimeMillis = 5000L, totalTimeMillis = 5000L),
-            LapRecord(lapNumber = 2, lapTimeMillis = 4000L, totalTimeMillis = 9000L)
+            LapRecord(lapNumber = 1, lapTimeNanos = 5_000_000_000L, totalTimeNanos = 5_000_000_000L),
+            LapRecord(lapNumber = 2, lapTimeNanos = 4_000_000_000L, totalTimeNanos = 9_000_000_000L)
         )
         val watch = StopwatchItem(
             name = "Runner",
@@ -49,15 +50,16 @@ class StopwatchTileLogicTest {
             runs = listOf(
                 RunSession(
                     runIndex = 1,
+                    startTimeNanos = 0L,
+                    endTimeNanos = 14_000_000_000L,
+                    accumulatedNanos = 14_000_000_000L,
                     startTimeMillis = 0L,
-                    endTimeMillis = 14000L,
-                    accumulatedMillis = 14000L,
                     laps = laps
                 )
             )
         )
-        val nowMillis = 20000L
-        val currentTotalTime = watch.getElapsedMillis(nowMillis)
+        val nowNanos = 20_000_000_000L
+        val currentTotalTime = watch.getElapsedMillis(nowNanos)
         val lastLapRecordedTotalTime = watch.currentRunLaps.lastOrNull()?.totalTimeMillis ?: 0L
         val ongoingLapMillis = (currentTotalTime - lastLapRecordedTotalTime).coerceAtLeast(0L)
 
@@ -117,8 +119,8 @@ class StopwatchTileLogicTest {
     @Test
     fun lastLapPaceTrendLogic_extractsDeltaAndFormatsCorrectly() {
         val laps = listOf(
-            LapRecord(lapNumber = 1, lapTimeMillis = 14200L, totalTimeMillis = 14200L, lapDeltaMillis = null),
-            LapRecord(lapNumber = 2, lapTimeMillis = 13000L, totalTimeMillis = 27200L, lapDeltaMillis = -1200L)
+            LapRecord(lapNumber = 1, lapTimeNanos = 14_200_000_000L, totalTimeNanos = 14_200_000_000L, lapDeltaNanos = null),
+            LapRecord(lapNumber = 2, lapTimeNanos = 13_000_000_000L, totalTimeNanos = 27_200_000_000L, lapDeltaNanos = -1_200_000_000L)
         )
         val watch = StopwatchItem(
             name = "Runner",
@@ -127,7 +129,7 @@ class StopwatchTileLogicTest {
             runs = listOf(
                 RunSession(
                     runIndex = 1,
-                    startTimeMillis = 0L,
+                    startTimeNanos = 0L,
                     laps = laps
                 )
             )
@@ -157,9 +159,10 @@ class StopwatchTileLogicTest {
             runs = listOf(
                 RunSession(
                     runIndex = 1,
+                    startTimeNanos = 1_000_000_000L,
                     startTimeMillis = 1000L,
                     laps = listOf(
-                        LapRecord(lapNumber = 1, lapTimeMillis = 12345L, totalTimeMillis = 12345L)
+                        LapRecord(lapNumber = 1, lapTimeNanos = 12_345_000_000L, totalTimeNanos = 12_345_000_000L)
                     )
                 )
             )
@@ -172,19 +175,20 @@ class StopwatchTileLogicTest {
             runs = listOf(
                 RunSession(
                     runIndex = 1,
+                    startTimeNanos = 1_000_000_000L,
+                    endTimeNanos = 16_432_000_000L,
+                    accumulatedNanos = 15_432_000_000L,
                     startTimeMillis = 1000L,
-                    endTimeMillis = 16432L,
-                    accumulatedMillis = 15432L,
                     laps = listOf(
-                        LapRecord(lapNumber = 1, lapTimeMillis = 12345L, totalTimeMillis = 12345L)
+                        LapRecord(lapNumber = 1, lapTimeNanos = 12_345_000_000L, totalTimeNanos = 12_345_000_000L)
                     )
                 )
             )
         )
 
-        val nowMillis = 16000L
-        val runningElapsed = runningWatch.getElapsedMillis(nowMillis) // 16000 - 1000 = 15000ms
-        val stoppedElapsed = stoppedWatch.getElapsedMillis(nowMillis) // 15432ms
+        val nowNanos = 16_000_000_000L
+        val runningElapsed = runningWatch.getElapsedMillis(nowNanos) // 16000000000 - 1000000000 = 15000ms
+        val stoppedElapsed = stoppedWatch.getElapsedMillis(nowNanos) // 15432ms
 
         // When running: clock precision uses runningDisplayPrecision (SECONDS -> "00:15")
         val activeRunningPrecision = if (runningWatch.isRunning) runningDisplayPrecision else timePrecision

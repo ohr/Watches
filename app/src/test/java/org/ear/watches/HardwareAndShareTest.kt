@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -26,7 +27,7 @@ class HardwareAndShareTest {
     @BeforeEach
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        timeProvider = TestTimeProvider(1000L)
+        timeProvider = TestTimeProvider(1_000_000_000L, 1_000L)
         viewModel = StopwatchViewModel(
             timeProvider = timeProvider,
             dispatcher = testDispatcher
@@ -56,21 +57,22 @@ class HardwareAndShareTest {
         val watch1Id = viewModel.uiState.value.stopwatches[1].id
 
         // 1. First volume up: Runner 0 receives a lap
-        timeProvider.advanceTimeBy(3000L)
+        timeProvider.advanceTimeBy(3_000_000_000L)
         viewModel.handleVolumeUp()
 
         val watch0Laps1 = viewModel.uiState.value.stopwatches[0].currentRunLaps
         assertEquals(1, watch0Laps1.size)
         assertEquals(3000L, watch0Laps1[0].lapTimeMillis)
+        assertEquals(3_000_000_000L, watch0Laps1[0].lapTimeNanos)
 
         // 2. Give Runner 1 a lap so all running watches have recorded laps
-        timeProvider.advanceTimeBy(2000L)
+        timeProvider.advanceTimeBy(2_000_000_000L)
         viewModel.lapStopwatch(watch1Id)
         assertEquals(1, viewModel.uiState.value.stopwatches[1].currentRunLaps.size)
 
         // 3. Now all watches have laps: next volume up cycles round-robin from Runner 1 (index 1) to Runner 0 (index 0)
         viewModel.setFocusedWatch(watch1Id)
-        timeProvider.advanceTimeBy(4000L)
+        timeProvider.advanceTimeBy(4_000_000_000L)
         viewModel.handleVolumeUp()
 
         val watch0Laps2 = viewModel.uiState.value.stopwatches[0].currentRunLaps
@@ -96,7 +98,7 @@ class HardwareAndShareTest {
 
         // Volume Down when all stopped -> Resets all
         viewModel.handleVolumeDown()
-        val now = timeProvider.currentTimeMillis()
+        val now = timeProvider.currentTimeNanos()
         assertEquals(0L, viewModel.uiState.value.stopwatches[0].getElapsedMillis(now))
         assertEquals(0L, viewModel.uiState.value.stopwatches[1].getElapsedMillis(now))
     }
@@ -105,7 +107,7 @@ class HardwareAndShareTest {
     fun raceResultsFormatting_generatesReportForSharing() {
         viewModel.batchAddStopwatches(2, "Runner")
         viewModel.startAll()
-        timeProvider.advanceTimeBy(5000L)
+        timeProvider.advanceTimeBy(5_000_000_000L)
 
         val id0 = viewModel.uiState.value.stopwatches[0].id
         viewModel.lapStopwatch(id0)
@@ -113,7 +115,7 @@ class HardwareAndShareTest {
         val reportText = RaceResultsFormatter.formatRaceResults(
             stopwatches = viewModel.uiState.value.stopwatches,
             precision = AppPrecision.HUNDREDTHS,
-            nowMillis = timeProvider.currentTimeMillis()
+            nowNanos = timeProvider.currentTimeNanos()
         )
 
         assertTrue(reportText.contains("COACH STOPWATCH RESULTS"))
@@ -129,14 +131,14 @@ class HardwareAndShareTest {
         val watchId = viewModel.uiState.value.stopwatches[0].id
 
         viewModel.startStopwatch(watchId)
-        timeProvider.advanceTimeBy(3000L)
+        timeProvider.advanceTimeBy(3_000_000_000L)
         viewModel.lapStopwatch(watchId)
 
         val watch = viewModel.uiState.value.stopwatches[0]
         val singleReport = RaceResultsFormatter.formatSingleStopwatchResults(
             watch = watch,
             precision = AppPrecision.HUNDREDTHS,
-            nowMillis = timeProvider.currentTimeMillis()
+            nowNanos = timeProvider.currentTimeNanos()
         )
 
         assertTrue(singleReport.contains("Solo Runner"))
@@ -149,14 +151,14 @@ class HardwareAndShareTest {
     fun hasRunData_evaluatesTrueOnlyWhenRunDataExists() {
         viewModel.addStopwatch("Athlete", "Clean Watch")
         val emptyWatch = viewModel.uiState.value.stopwatches[0]
-        val emptyHasRunData = emptyWatch.runs.any { it.laps.isNotEmpty() || it.accumulatedMillis > 0L || it.endTimeMillis > 0L }
+        val emptyHasRunData = emptyWatch.runs.any { it.laps.isNotEmpty() || it.accumulatedNanos > 0L || it.endTimeNanos > 0L }
         assertFalse(emptyHasRunData)
 
         viewModel.startStopwatch(emptyWatch.id)
-        timeProvider.advanceTimeBy(1000L)
+        timeProvider.advanceTimeBy(1_000_000_000L)
         viewModel.lapStopwatch(emptyWatch.id)
         val watchWithData = viewModel.uiState.value.stopwatches[0]
-        val activeHasRunData = watchWithData.runs.any { it.laps.isNotEmpty() || it.accumulatedMillis > 0L || it.endTimeMillis > 0L }
+        val activeHasRunData = watchWithData.runs.any { it.laps.isNotEmpty() || it.accumulatedNanos > 0L || it.endTimeNanos > 0L }
         assertTrue(activeHasRunData)
     }
 }

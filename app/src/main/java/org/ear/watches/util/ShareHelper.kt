@@ -2,6 +2,7 @@ package org.ear.watches.util
 
 import android.content.Context
 import android.content.Intent
+import android.os.SystemClock
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import org.ear.watches.R
@@ -43,14 +44,14 @@ object ShareHelper {
         context: Context,
         watch: StopwatchItem,
         precision: AppPrecision = AppPrecision.HUNDREDTHS,
-        nowMillis: Long = System.currentTimeMillis()
+        nowNanos: Long = SystemClock.elapsedRealtimeNanos()
     ) {
         val subsecondSeparator = context.getString(R.string.subsecond_separator)
         val resultsText = RaceResultsFormatter.formatSingleStopwatchResults(
             context = context,
             watch = watch,
             precision = precision,
-            nowMillis = nowMillis,
+            nowNanos = nowNanos,
             subsecondSeparator = subsecondSeparator
         )
         shareRaceResults(context, resultsText)
@@ -60,7 +61,7 @@ object ShareHelper {
         context: Context,
         stopwatches: List<StopwatchItem>,
         precision: AppPrecision = AppPrecision.HUNDREDTHS,
-        nowMillis: Long = System.currentTimeMillis(),
+        nowNanos: Long = SystemClock.elapsedRealtimeNanos(),
         subject: String? = null,
         chooserTitle: String? = null
     ) {
@@ -71,7 +72,7 @@ object ShareHelper {
         val csvText = RaceResultsFormatter.formatAsCsv(
             stopwatches = stopwatches,
             precision = precision,
-            nowMillis = nowMillis
+            nowNanos = nowNanos
         )
 
         try {
@@ -102,13 +103,13 @@ object ShareHelper {
         context: Context,
         watch: StopwatchItem,
         precision: AppPrecision = AppPrecision.HUNDREDTHS,
-        nowMillis: Long = System.currentTimeMillis()
+        nowNanos: Long = SystemClock.elapsedRealtimeNanos()
     ) {
         shareRaceResultsCsv(
             context = context,
             stopwatches = listOf(watch),
             precision = precision,
-            nowMillis = nowMillis
+            nowNanos = nowNanos
         )
     }
 }

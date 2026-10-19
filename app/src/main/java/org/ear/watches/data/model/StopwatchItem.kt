@@ -30,33 +30,47 @@ data class StopwatchItem(
         get() = runs.firstOrNull()?.startTimeMillis ?: 0L
 
     val totalCumulativeMillis: Long
-        get() = getTotalCumulativeMillis()
+        get() = getTotalCumulativeMillis(0L)
 
-    fun getTotalCumulativeMillis(nowMillis: Long = System.currentTimeMillis()): Long {
-        val completedSum = runs.filter { it.endTimeMillis > 0L }.sumOf { it.accumulatedMillis }
-        val activeElapsed = if (isRunning && activeRun != null && activeRun?.endTimeMillis == 0L && activeRun!!.startTimeMillis > 0L) {
-            (nowMillis - activeRun!!.startTimeMillis).coerceAtLeast(0L)
+    fun getTotalCumulativeNanos(nowNanos: Long = 0L): Long {
+        val completedSum = runs.filter { it.endTimeNanos > 0L }.sumOf { it.accumulatedNanos }
+        val active = activeRun
+        val activeElapsed = if (isRunning && active != null && active.endTimeNanos == 0L && active.startTimeNanos > 0L) {
+            (nowNanos - active.startTimeNanos).coerceAtLeast(0L)
         } else {
             0L
         }
         return completedSum + activeElapsed
     }
 
-    fun getElapsedMillis(nowMillis: Long = System.currentTimeMillis()): Long {
+    fun getTotalCumulativeMillis(nowNanos: Long = 0L): Long =
+        getTotalCumulativeNanos(nowNanos) / 1_000_000L
+
+    fun getElapsedNanos(nowNanos: Long = 0L): Long {
         val currentRun = activeRun ?: return 0L
         return if (isRunning) {
-            if (currentRun.startTimeMillis > 0L && currentRun.endTimeMillis == 0L) {
-                (nowMillis - currentRun.startTimeMillis).coerceAtLeast(0L)
+            if (currentRun.startTimeNanos > 0L && currentRun.endTimeNanos == 0L) {
+                (nowNanos - currentRun.startTimeNanos).coerceAtLeast(0L)
             } else {
-                currentRun.accumulatedMillis
+                currentRun.accumulatedNanos
             }
         } else {
-            if (currentRun.endTimeMillis > 0L) {
-                currentRun.accumulatedMillis
+            if (currentRun.endTimeNanos > 0L) {
+                currentRun.accumulatedNanos
             } else {
                 0L
             }
         }
+    }
+
+    fun getElapsedMillis(nowNanos: Long = 0L): Long =
+        getElapsedNanos(nowNanos) / 1_000_000L
+
+    fun calculateExpectedNextLapTime(): Long {
+        if (currentRunLaps.isEmpty()) return 0L
+        val lastTotalTime = currentRunLaps.last().totalTimeNanos
+        val lapCount = currentRunLaps.size
+        return lastTotalTime + (lastTotalTime / lapCount)
     }
 
     companion object {
@@ -72,5 +86,41 @@ data class StopwatchItem(
             0xFFB0BEC5L, // Pastel Blue Grey
             0xFFB39DDBL  // Pastel Deep Purple
         )
+
+        fun calculateNextFocusedWatchId(
+            stopwatches: List<StopwatchItem>,
+            currentFocusedId: String? = null
+        ): String? {
+            if (stopwatches.isEmpty()) return null
+
+            val runningWatches = stopwatches.filter { it.isRunning }
+            val candidates = runningWatches.ifEmpty { stopwatches }
+
+            val zeroLapCandidates = candidates.filter { it.currentRunLaps.isEmpty() }
+            if (zeroLapCandidates.isNotEmpty()) {
+                return if (currentFocusedId != null && zeroLapCandidates.any { it.id == currentFocusedId }) {
+                    currentFocusedId
+                } else {
+                    zeroLapCandidates.first().id
+                }
+            }
+
+            val bestWatch = candidates.minByOrNull { watch ->
+                watch.calculateExpectedNextLapTime()
+            }
+
+            return bestWatch?.id ?: currentFocusedId ?: stopwatches.firstOrNull()?.id
+        }
+
+        fun sortStopwatches(
+            stopwatches: List<StopwatchItem>
+        ): List<StopwatchItem> {
+            return stopwatches.sortedWith(
+                compareBy<StopwatchItem> { watch ->
+                    if (watch.currentRunLaps.isEmpty()) 0L
+                    else watch.calculateExpectedNextLapTime()
+                }
+            )
+        }
     }
 }
