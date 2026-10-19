@@ -60,7 +60,7 @@ object RaceResultsFormatter {
             sb.appendLine("   $statusLabel: $statusValue")
             sb.appendLine("   $totalAllRunsLabel: $formattedTotalTime")
 
-            val effectiveRuns = watch.runs.filter { it.startTimeNanos > 0L || it.endTimeNanos > 0L || it.accumulatedNanos > 0L || it.laps.isNotEmpty() }
+            val effectiveRuns = watch.runs.filter { it.isStarted || it.isFinished || it.accumulatedNanos > 0L || it.laps.isNotEmpty() }
 
             if (effectiveRuns.isNotEmpty()) {
                 effectiveRuns.forEach { run ->
@@ -72,7 +72,7 @@ object RaceResultsFormatter {
                     } else "-"
                     val startTimeLabel = getString(context, R.string.label_start_time) ?: "Start Time"
 
-                    val runDurationMillis = if (run.endTimeNanos == 0L && watch.isRunning) {
+                    val runDurationMillis = if (run.isRunning && watch.isRunning) {
                         watch.getElapsedMillis(nowNanos)
                     } else {
                         run.accumulatedMillis

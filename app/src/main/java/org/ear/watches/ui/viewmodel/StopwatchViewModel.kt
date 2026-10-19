@@ -6,8 +6,6 @@ import org.ear.watches.data.model.AppFontSize
 import org.ear.watches.data.model.AppLanguage
 import org.ear.watches.data.model.AppPrecision
 import org.ear.watches.data.model.AppThemeMode
-import org.ear.watches.data.model.LapRecord
-import org.ear.watches.data.model.RunSession
 import org.ear.watches.data.model.StopwatchItem
 import org.ear.watches.data.model.StopwatchUiState
 import org.ear.watches.data.repository.SettingsRepository
@@ -52,9 +50,9 @@ class StopwatchViewModel(
     private fun observeSettings() {
         if (settingsRepository != null) {
             viewModelScope.launch(dispatcher) {
-                settingsRepository.settingsFlow.collect { newSettings ->
+                settingsRepository.settingsFlow.collect {
                     _uiState.update { state ->
-                        state.copy(settings = newSettings)
+                        state.copy(settings = it)
                             .applyFocusAndSort()
                     }
                 }
@@ -87,14 +85,14 @@ class StopwatchViewModel(
         val determinedFocusedId = newFocusedId
             ?: StopwatchItem.calculateNextFocusedWatchId(stopwatches, activeFocusedWatchId)
 
-        val sortedList = if (settings.autoSortEnabled) StopwatchItem.sortStopwatches(stopwatches) else stopwatches
+        val sortedWatchList = if (settings.autoSortEnabled) StopwatchItem.sortStopwatches(stopwatches) else stopwatches
 
-        val updatedList = sortedList.map { item ->
-            item.copy(isFocused = (item.id == determinedFocusedId))
+        val updatedWatchList = sortedWatchList.map {
+            it.copy(isFocused = (it.id == determinedFocusedId))
         }
 
         return copy(
-            stopwatches = updatedList,
+            stopwatches = updatedWatchList,
             activeFocusedWatchId = determinedFocusedId
         )
     }
@@ -172,14 +170,8 @@ class StopwatchViewModel(
 
     fun updateStopwatch(id: String, newName: String, newColorHex: Long) {
         val trimmedName = newName.trim()
-        _uiState.update { state ->
-            val newList = state.stopwatches.map { item ->
-                if (item.id == id) {
-                    item.copy(name = trimmedName, pastelColorHex = newColorHex)
-                } else item
-            }
-            state.copy(stopwatches = newList)
-                .applyFocusAndSort()
+        updateWatch(id) {
+            it.copy(name = trimmedName, pastelColorHex = newColorHex)
         }
         if (trimmedName.isNotBlank()) {
             addProposedAthleteName(trimmedName)
@@ -189,264 +181,59 @@ class StopwatchViewModel(
     fun startStopwatch(id: String) {
         val nowNanos = timeProvider.currentTimeNanos()
         val nowMillis = timeProvider.currentTimeMillis()
-        _uiState.update { state ->
-            val newList = state.stopwatches.map { item ->
-                if (item.id == id && !item.isRunning) {
-                    val newRuns = if (item.runs.isEmpty()) {
-                        listOf(
-                            RunSession(
-                                runIndex = 1,
-                                startTimeNanos = nowNanos,
-                                startTimeMillis = nowMillis
-                            )
-                        )
-                    } else {
-                        val lastRun = item.runs.last()
-                        if (lastRun.endTimeNanos > 0L) {
-                            val runIndex = item.runs.size + 1
-                            item.runs + RunSession(
-                                runIndex = runIndex,
-                                startTimeNanos = nowNanos,
-                                startTimeMillis = nowMillis
-                            )
-                        } else {
-                            val updatedLastRun = lastRun.copy(
-                                startTimeNanos = nowNanos,
-                                startTimeMillis = if (lastRun.startTimeMillis == 0L) nowMillis else lastRun.startTimeMillis
-                            )
-                            item.runs.dropLast(1) + updatedLastRun
-                        }
-                    }
-                    item.copy(
-                        isRunning = true,
-                        runs = newRuns
-                    )
-                } else item
-            }
-            state.copy(stopwatches = newList)
-                .applyFocusAndSort()
-        }
+        updateWatch(id) { it.start(nowNanos, nowMillis) }
         checkTicker()
     }
 
     fun pauseStopwatch(id: String) {
         val nowNanos = timeProvider.currentTimeNanos()
-        _uiState.update { state ->
-            val newList = state.stopwatches.map { item ->
-                if (item.id == id && item.isRunning) {
-                    val newRuns = if (item.runs.isNotEmpty()) {
-                        val activeRun = item.runs.last()
-                        val runDuration = (nowNanos - activeRun.startTimeNanos).coerceAtLeast(0L)
-                        val completedRun = activeRun.copy(
-                            endTimeNanos = nowNanos,
-                            accumulatedNanos = runDuration
-                        )
-                        item.runs.dropLast(1) + completedRun
-                    } else {
-                        emptyList()
-                    }
-                    item.copy(
-                        isRunning = false,
-                        runs = newRuns
-                    )
-                } else item
-            }
-            state.copy(stopwatches = newList)
-                .applyFocusAndSort()
-        }
+        updateWatch(id) { it.pause(nowNanos) }
         checkTicker()
     }
 
     fun lapStopwatch(id: String) {
         val nowNanos = timeProvider.currentTimeNanos()
-        val nowMillis = timeProvider.currentTimeMillis()
-        _uiState.update { state ->
-            val newList = state.stopwatches.map { item ->
-                if (item.id == id && item.isRunning) {
-                    val activeRun = item.activeRun ?: RunSession(
-                        runIndex = 1,
-                        startTimeNanos = nowNanos,
-                        startTimeMillis = nowMillis
-                    )
-                    val currentRunTime = (nowNanos - activeRun.startTimeNanos).coerceAtLeast(0L)
-                    val lastLap = activeRun.laps.lastOrNull()
-                    val lastTotalTime = lastLap?.totalTimeNanos ?: 0L
-                    val lapTime = currentRunTime - lastTotalTime
-                    val lapDeltaNanos = lastLap?.let { lapTime - it.lapTimeNanos }
-                    val newLap = LapRecord(
-                        lapNumber = activeRun.laps.size + 1,
-                        lapTimeNanos = lapTime,
-                        totalTimeNanos = currentRunTime,
-                        lapDeltaNanos = lapDeltaNanos
-                    )
-                    val updatedLaps = activeRun.laps + newLap
-                    val updatedRun = activeRun.copy(laps = updatedLaps)
-                    val newRuns = if (item.runs.isNotEmpty()) {
-                        item.runs.dropLast(1) + updatedRun
-                    } else {
-                        listOf(updatedRun)
-                    }
-                    item.copy(runs = newRuns)
-                } else item
-            }
-            val nextFocusedId = StopwatchItem.calculateNextFocusedWatchId(newList)
-            state.copy(stopwatches = newList, activeFocusedWatchId = nextFocusedId)
-                .applyFocusAndSort(newFocusedId = nextFocusedId)
-        }
+        updateWatch(id) { it.lap(nowNanos) }
     }
 
     fun resetStopwatch(id: String) {
         val nowNanos = timeProvider.currentTimeNanos()
-        _uiState.update { state ->
-            val newList = state.stopwatches.map { item ->
-                if (item.id == id) {
-                    val finalizedRuns = if (item.runs.isNotEmpty()) {
-                        val lastRun = item.runs.last()
-                        if (lastRun.endTimeNanos == 0L && lastRun.startTimeNanos > 0L) {
-                            val duration = (nowNanos - lastRun.startTimeNanos).coerceAtLeast(0L)
-                            item.runs.dropLast(1) + lastRun.copy(
-                                endTimeNanos = nowNanos,
-                                accumulatedNanos = duration
-                            )
-                        } else {
-                            item.runs
-                        }
-                    } else {
-                        emptyList()
-                    }
-
-                    val preparedRuns = if (finalizedRuns.isNotEmpty() &&
-                        finalizedRuns.last().startTimeNanos == 0L &&
-                        finalizedRuns.last().endTimeNanos == 0L
-                    ) {
-                        finalizedRuns
-                    } else {
-                        finalizedRuns + RunSession(
-                            runIndex = finalizedRuns.size + 1,
-                            startTimeNanos = 0L,
-                            endTimeNanos = 0L,
-                            accumulatedNanos = 0L,
-                            startTimeMillis = 0L,
-                            laps = emptyList()
-                        )
-                    }
-
-                    item.copy(
-                        isRunning = false,
-                        runs = preparedRuns
-                    )
-                } else item
-            }
-            state.copy(stopwatches = newList)
-                .applyFocusAndSort()
-        }
+        updateWatch(id) { it.reset(nowNanos) }
         checkTicker()
     }
 
     fun resetStopwatchFull(id: String) {
-        _uiState.update { state ->
-            val newList = state.stopwatches.map { item ->
-                if (item.id == id) {
-                    item.copy(
-                        isRunning = false,
-                        runs = emptyList()
-                    )
-                } else item
-            }
-            state.copy(stopwatches = newList)
-                .applyFocusAndSort()
-        }
+        updateWatch(id) { it.resetFull() }
         checkTicker()
     }
 
     fun startAll() {
         val nowNanos = timeProvider.currentTimeNanos()
         val nowMillis = timeProvider.currentTimeMillis()
-        _uiState.update { state ->
-            val newList = state.stopwatches.map { item ->
-                if (!item.isRunning) {
-                    val newRuns = if (item.runs.isEmpty()) {
-                        listOf(
-                            RunSession(
-                                runIndex = 1,
-                                startTimeNanos = nowNanos,
-                                startTimeMillis = nowMillis
-                            )
-                        )
-                    } else {
-                        val lastRun = item.runs.last()
-                        if (lastRun.endTimeNanos > 0L) {
-                            val runIndex = item.runs.size + 1
-                            item.runs + RunSession(
-                                runIndex = runIndex,
-                                startTimeNanos = nowNanos,
-                                startTimeMillis = nowMillis
-                            )
-                        } else {
-                            val updatedLastRun = lastRun.copy(
-                                startTimeNanos = nowNanos,
-                                startTimeMillis = if (lastRun.startTimeMillis == 0L) nowMillis else lastRun.startTimeMillis
-                            )
-                            item.runs.dropLast(1) + updatedLastRun
-                        }
-                    }
-                    item.copy(
-                        isRunning = true,
-                        runs = newRuns
-                    )
-                } else item
-            }
-            state.copy(stopwatches = newList)
-                .applyFocusAndSort()
-        }
+        updateAllWatches { it.start(nowNanos, nowMillis) }
         checkTicker()
     }
 
     fun pauseAll() {
         val nowNanos = timeProvider.currentTimeNanos()
-        _uiState.update { state ->
-            val newList = state.stopwatches.map { item ->
-                if (item.isRunning) {
-                    val newRuns = if (item.runs.isNotEmpty()) {
-                        val activeRun = item.runs.last()
-                        val runDuration = (nowNanos - activeRun.startTimeNanos).coerceAtLeast(0L)
-                        val completedRun = activeRun.copy(
-                            endTimeNanos = nowNanos,
-                            accumulatedNanos = runDuration
-                        )
-                        item.runs.dropLast(1) + completedRun
-                    } else {
-                        emptyList()
-                    }
-                    item.copy(
-                        isRunning = false,
-                        runs = newRuns
-                    )
-                } else item
-            }
-            state.copy(stopwatches = newList)
-                .applyFocusAndSort()
-        }
+        updateAllWatches { it.pause(nowNanos) }
         checkTicker()
     }
 
     fun resetAll() {
-        val ids = _uiState.value.stopwatches.map { it.id }
-        ids.forEach { id ->
-            resetStopwatch(id)
-        }
+        val nowNanos = timeProvider.currentTimeNanos()
+        updateAllWatches { it.reset(nowNanos) }
+        checkTicker()
     }
 
     fun resetAllFull() {
-        val ids = _uiState.value.stopwatches.map { it.id }
-        ids.forEach { id ->
-            resetStopwatchFull(id)
-        }
+        updateAllWatches { it.resetFull() }
+        checkTicker()
     }
 
     fun setFocusedWatch(id: String) {
-        _uiState.update { state ->
-            state.copy(activeFocusedWatchId = id)
+        _uiState.update {
+            it.copy(activeFocusedWatchId = id)
                 .applyFocusAndSort(newFocusedId = id)
         }
     }
@@ -494,18 +281,14 @@ class StopwatchViewModel(
     }
 
     fun setSoundEnabled(enabled: Boolean) {
-        _uiState.update { state ->
-            state.copy(settings = state.settings.copy(soundEnabled = enabled))
-        }
+        _uiState.update { it.copy(settings = it.settings.copy(soundEnabled = enabled)) }
         viewModelScope.launch(dispatcher) {
             settingsRepository?.setSoundEnabled(enabled)
         }
     }
 
     fun setHapticsEnabled(enabled: Boolean) {
-        _uiState.update { state ->
-            state.copy(settings = state.settings.copy(hapticsEnabled = enabled))
-        }
+        _uiState.update { it.copy(settings = it.settings.copy(hapticsEnabled = enabled)) }
         viewModelScope.launch(dispatcher) {
             settingsRepository?.setHapticsEnabled(enabled)
         }
@@ -513,9 +296,7 @@ class StopwatchViewModel(
 
     fun toggleHardwareKeys() {
         val newValue = !_uiState.value.settings.hardwareVolumeKeysEnabled
-        _uiState.update { state ->
-            state.copy(settings = state.settings.copy(hardwareVolumeKeysEnabled = newValue))
-        }
+        _uiState.update { it.copy(settings = it.settings.copy(hardwareVolumeKeysEnabled = newValue)) }
         viewModelScope.launch(dispatcher) {
             settingsRepository?.setHardwareKeysEnabled(newValue)
         }
@@ -523,9 +304,9 @@ class StopwatchViewModel(
 
     fun toggleAutoSort() {
         val newValue = !_uiState.value.settings.autoSortEnabled
-        _uiState.update { state ->
-            val newSettings = state.settings.copy(autoSortEnabled = newValue)
-            state.copy(settings = newSettings)
+        _uiState.update {
+            val newSettings = it.settings.copy(autoSortEnabled = newValue)
+            it.copy(settings = newSettings)
                 .applyFocusAndSort()
         }
         viewModelScope.launch(dispatcher) {
@@ -539,8 +320,8 @@ class StopwatchViewModel(
     }
 
     fun setKeepScreenOnWhileRunning(enabled: Boolean) {
-        _uiState.update { state ->
-            state.copy(settings = state.settings.copy(keepScreenOnWhileRunning = enabled))
+        _uiState.update {
+            it.copy(settings = it.settings.copy(keepScreenOnWhileRunning = enabled))
         }
         viewModelScope.launch(dispatcher) {
             settingsRepository?.setKeepScreenOnWhileRunning(enabled)
@@ -548,44 +329,36 @@ class StopwatchViewModel(
     }
 
     fun setRunningDisplayPrecision(precision: AppPrecision) {
-        _uiState.update { state ->
-            state.copy(settings = state.settings.copy(runningDisplayPrecision = precision))
-        }
+        _uiState.update { it.copy(settings = it.settings.copy(runningDisplayPrecision = precision)) }
         viewModelScope.launch(dispatcher) {
             settingsRepository?.setRunningDisplayPrecision(precision)
         }
     }
 
     fun setPrecision(precision: AppPrecision) {
-        _uiState.update { state ->
-            state.copy(settings = state.settings.copy(timePrecision = precision))
-        }
+        _uiState.update { it.copy(settings = it.settings.copy(timePrecision = precision)) }
         viewModelScope.launch(dispatcher) {
             settingsRepository?.setTimePrecision(precision)
         }
     }
 
     fun setLanguage(language: AppLanguage) {
-        _uiState.update { state ->
-            state.copy(settings = state.settings.copy(language = language))
-        }
+        _uiState.update { it.copy(settings = it.settings.copy(language = language)) }
         viewModelScope.launch(dispatcher) {
             settingsRepository?.setAppLanguage(language)
         }
     }
 
     fun setThemeMode(themeMode: AppThemeMode) {
-        _uiState.update { state ->
-            state.copy(settings = state.settings.copy(themeMode = themeMode))
-        }
+        _uiState.update { it.copy(settings = it.settings.copy(themeMode = themeMode)) }
         viewModelScope.launch(dispatcher) {
             settingsRepository?.setThemeMode(themeMode)
         }
     }
 
     fun setFontSizeScale(fontSizeScale: AppFontSize) {
-        _uiState.update { state ->
-            state.copy(settings = state.settings.copy(fontSizeScale = fontSizeScale))
+        _uiState.update {
+            it.copy(settings = it.settings.copy(fontSizeScale = fontSizeScale))
         }
         viewModelScope.launch(dispatcher) {
             settingsRepository?.setFontSizeScale(fontSizeScale)
@@ -595,13 +368,13 @@ class StopwatchViewModel(
     fun addProposedAthleteName(name: String) {
         val trimmed = name.trim()
         if (trimmed.isBlank()) return
-        _uiState.update { state ->
-            if (state.settings.proposedAthleteNames.contains(trimmed)) {
-                state
+        _uiState.update {
+            if (it.settings.proposedAthleteNames.contains(trimmed)) {
+                it
             } else {
-                state.copy(
-                    settings = state.settings.copy(
-                        proposedAthleteNames = state.settings.proposedAthleteNames + trimmed
+                it.copy(
+                    settings = it.settings.copy(
+                        proposedAthleteNames = it.settings.proposedAthleteNames + trimmed
                     )
                 )
             }
@@ -612,10 +385,10 @@ class StopwatchViewModel(
     }
 
     fun removeProposedAthleteName(name: String) {
-        _uiState.update { state ->
-            state.copy(
-                settings = state.settings.copy(
-                    proposedAthleteNames = state.settings.proposedAthleteNames - name
+        _uiState.update {
+            it.copy(
+                settings = it.settings.copy(
+                    proposedAthleteNames = it.settings.proposedAthleteNames - name
                 )
             )
         }
@@ -637,8 +410,44 @@ class StopwatchViewModel(
     }
 
     private fun syncFocusState() {
+        _uiState.update { it.applyFocusAndSort() }
+    }
+
+    private inline fun updateWatch(
+        id: String,
+        crossinline transform: (StopwatchItem) -> StopwatchItem
+    ) {
+        updateWatchesState { list ->
+            list.map { item -> if (item.id == id) transform(item) else item }
+        }
+    }
+
+    private inline fun updateAllWatches(
+        crossinline transform: (StopwatchItem) -> StopwatchItem
+    ) {
+        updateWatchesState { list ->
+            list.map { item -> transform(item) }
+        }
+    }
+
+    private inline fun updateWatchesState(
+        crossinline transformList: (List<StopwatchItem>) -> List<StopwatchItem>
+    ) {
         _uiState.update { state ->
-            state.applyFocusAndSort()
+            val updatedWatches = transformList(state.stopwatches)
+            val activeFocusedWatchId = if (state.activeFocusedWatchId == null || !updatedWatches.any { it.id == state.activeFocusedWatchId }) {
+                StopwatchItem.calculateNextFocusedWatchId(updatedWatches)
+            } else {
+                StopwatchItem.calculateNextFocusedWatchId(updatedWatches, state.activeFocusedWatchId)
+            }
+            val sortedWatchList = if (state.settings.autoSortEnabled) StopwatchItem.sortStopwatches(updatedWatches) else updatedWatches
+            val refreshedWatchList = sortedWatchList.map {
+                it.copy(isFocused = (it.id == activeFocusedWatchId))
+            }
+            state.copy(
+                stopwatches = refreshedWatchList,
+                activeFocusedWatchId = activeFocusedWatchId
+            )
         }
     }
 }

@@ -92,8 +92,8 @@ fun StopwatchDetailModal(
 
     var showShareFormatDialog by remember { mutableStateOf(false) }
 
-    val effectiveRuns = watch.runs.filter { it.startTimeNanos > 0L || it.endTimeNanos > 0L || it.accumulatedNanos > 0L || it.laps.isNotEmpty() }
-    val hasRunData = watch.runs.any { it.laps.isNotEmpty() || it.accumulatedNanos > 0L || it.endTimeNanos > 0L }
+    val effectiveRuns = watch.runs.filter { it.isStarted || it.isFinished || it.accumulatedNanos > 0L || it.laps.isNotEmpty() }
+    val hasRunData = watch.runs.any { it.laps.isNotEmpty() || it.accumulatedNanos > 0L || it.isFinished }
     val canDeleteRuns = !watch.isRunning && watch.runs.isNotEmpty()
 
     Dialog(onDismissRequest = onDismiss) {
@@ -214,7 +214,7 @@ fun StopwatchDetailModal(
                             } else {
                                 "-"
                             }
-                            val runEndString = if (run.endTimeNanos > 0L) {
+                            val runEndString = if (run.isFinished) {
                                 if (run.startTimeMillis > 0L) {
                                     timeFormatter.format(Date(run.startTimeMillis + run.accumulatedMillis))
                                 } else {
@@ -225,13 +225,13 @@ fun StopwatchDetailModal(
                             } else {
                                 "-"
                             }
-                            val runDurationMillis = if (run.endTimeNanos == 0L && watch.isRunning && run.runIndex == effectiveRuns.size) {
+                            val runDurationMillis = if (run.isRunning && watch.isRunning && run.runIndex == effectiveRuns.size) {
                                 watch.getElapsedMillis(nowNanos)
                             } else {
                                 run.accumulatedMillis
                             }
                             
-                            val isRunActive = watch.isRunning && run.endTimeNanos == 0L
+                            val isRunActive = watch.isRunning && run.isRunning
                             val runPrecision = if (isRunActive) settings.runningDisplayPrecision else settings.timePrecision
                             val formattedRunDuration = TimeFormatter.formatTime(runDurationMillis, runPrecision, subsecondSeparator)
 

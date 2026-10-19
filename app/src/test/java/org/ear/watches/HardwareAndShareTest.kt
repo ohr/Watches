@@ -151,14 +151,14 @@ class HardwareAndShareTest {
     fun hasRunData_evaluatesTrueOnlyWhenRunDataExists() {
         viewModel.addStopwatch("Athlete", "Clean Watch")
         val emptyWatch = viewModel.uiState.value.stopwatches[0]
-        val emptyHasRunData = emptyWatch.runs.any { it.laps.isNotEmpty() || it.accumulatedNanos > 0L || it.endTimeNanos > 0L }
+        val emptyHasRunData = emptyWatch.runs.any { it.laps.isNotEmpty() || it.accumulatedNanos > 0L || it.isFinished }
         assertFalse(emptyHasRunData)
 
         viewModel.startStopwatch(emptyWatch.id)
         timeProvider.advanceTimeBy(1_000_000_000L)
         viewModel.lapStopwatch(emptyWatch.id)
         val watchWithData = viewModel.uiState.value.stopwatches[0]
-        val activeHasRunData = watchWithData.runs.any { it.laps.isNotEmpty() || it.accumulatedNanos > 0L || it.endTimeNanos > 0L }
+        val activeHasRunData = watchWithData.runs.any { it.laps.isNotEmpty() || it.accumulatedNanos > 0L || it.isFinished }
         assertTrue(activeHasRunData)
     }
 }
