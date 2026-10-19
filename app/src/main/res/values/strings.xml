@@ -153,6 +153,7 @@
     <string name="cd_increase_count">Increase count</string>
     <string name="cd_edit_watch">Edit Watch Name</string>
     <string name="cd_delete_watch">Delete Stopwatch</string>
+    <string name="cd_drag_handle">Drag handle</string>
     <string name="cd_selected">Selected</string>
     <string name="default_athlete_prefix">Athlete</string>
 

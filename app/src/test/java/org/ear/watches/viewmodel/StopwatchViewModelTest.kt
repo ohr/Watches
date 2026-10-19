@@ -973,4 +973,44 @@ class StopwatchViewModelTest {
         vm.updateRunSessionName(id, runIndex = 1, newName = "Interval 1")
         assertTrue(vm.uiState.value.settings.proposedSessionNames.contains("Interval 1"))
     }
+
+    @Test
+    fun reorderStopwatches_movesItem_whenAutoSortDisabled() {
+        viewModel.batchAddStopwatches(3, "Runner")
+        val initialList = viewModel.uiState.value.stopwatches
+        assertEquals(3, initialList.size)
+        val id0 = initialList[0].id
+        val id1 = initialList[1].id
+        val id2 = initialList[2].id
+
+        assertFalse(viewModel.uiState.value.settings.autoSortEnabled)
+
+        viewModel.reorderStopwatches(0, 2)
+
+        val updatedList = viewModel.uiState.value.stopwatches
+        assertEquals(3, updatedList.size)
+        assertEquals(id1, updatedList[0].id)
+        assertEquals(id2, updatedList[1].id)
+        assertEquals(id0, updatedList[2].id)
+    }
+
+    @Test
+    fun reorderStopwatches_ignored_whenAutoSortEnabled() {
+        viewModel.batchAddStopwatches(3, "Runner")
+        viewModel.toggleAutoSort()
+        assertTrue(viewModel.uiState.value.settings.autoSortEnabled)
+
+        val initialList = viewModel.uiState.value.stopwatches
+        val id0 = initialList[0].id
+        val id1 = initialList[1].id
+        val id2 = initialList[2].id
+
+        viewModel.reorderStopwatches(0, 2)
+
+        val updatedList = viewModel.uiState.value.stopwatches
+        assertEquals(3, updatedList.size)
+        assertEquals(id0, updatedList[0].id)
+        assertEquals(id1, updatedList[1].id)
+        assertEquals(id2, updatedList[2].id)
+    }
 }

@@ -1,5 +1,6 @@
 package org.ear.watches.ui.screens
 
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,7 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -36,11 +37,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.ear.watches.R
 import org.ear.watches.data.model.StopwatchItem
@@ -76,6 +83,7 @@ fun MainStopwatchScreen(
     val defaultPrefix = stringResource(R.string.default_athlete_prefix)
 
     val haptics = feedbackManager ?: remember(context) { FeedbackManager(context) }
+    val haptic = LocalHapticFeedback.current
 
     var editingWatchItem by remember { mutableStateOf<StopwatchItem?>(null) }
     var detailWatchItem by remember { mutableStateOf<StopwatchItem?>(null) }
@@ -87,7 +95,17 @@ fun MainStopwatchScreen(
     var namingSingleWatchId by remember { mutableStateOf<String?>(null) }
     var showNameAllDialog by remember { mutableStateOf(false) }
 
+    var draggedIndex by remember { mutableStateOf<Int?>(null) }
+    var dragOffset by remember { mutableStateOf(Offset.Zero) }
+
     val lazyGridState = rememberLazyGridState()
+
+    LaunchedEffect(uiState.settings.autoSortEnabled) {
+        if (uiState.settings.autoSortEnabled) {
+            draggedIndex = null
+            dragOffset = Offset.Zero
+        }
+    }
 
     // Auto-Scroll Grid to Focused Tile
     LaunchedEffect(uiState.activeFocusedWatchId) {
@@ -231,23 +249,96 @@ fun MainStopwatchScreen(
                 }
             } else {
                 // Adaptive Tile Grid
+                val gridModifier = Modifier
+                    .fillMaxSize()
+                    .then(
+                        if (!uiState.settings.autoSortEnabled) {
+                            Modifier.pointerInput(Unit) {
+                                detectDragGesturesAfterLongPress(
+                                    onDragStart = { offset ->
+                                        val hitItem = lazyGridState.layoutInfo.visibleItemsInfo.firstOrNull { item ->
+                                            offset.x >= item.offset.x && offset.x <= (item.offset.x + item.size.width) &&
+                                            offset.y >= item.offset.y && offset.y <= (item.offset.y + item.size.height)
+                                        }
+                                        if (hitItem != null) {
+                                            draggedIndex = hitItem.index
+                                            dragOffset = Offset.Zero
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        }
+                                    },
+                                    onDragEnd = {
+                                        draggedIndex = null
+                                        dragOffset = Offset.Zero
+                                    },
+                                    onDragCancel = {
+                                        draggedIndex = null
+                                        dragOffset = Offset.Zero
+                                    },
+                                    onDrag = { change, dragAmount ->
+                                        change.consume()
+                                        val currentIndex = draggedIndex ?: return@detectDragGesturesAfterLongPress
+                                        dragOffset += dragAmount
+                                        val visibleItems = lazyGridState.layoutInfo.visibleItemsInfo
+                                        val currentItemInfo = visibleItems.firstOrNull { it.index == currentIndex } ?: return@detectDragGesturesAfterLongPress
+                                        val draggedCenter = Offset(
+                                            x = currentItemInfo.offset.x + currentItemInfo.size.width / 2f + dragOffset.x,
+                                            y = currentItemInfo.offset.y + currentItemInfo.size.height / 2f + dragOffset.y
+                                        )
+                                        val targetItem = visibleItems.firstOrNull { item ->
+                                            item.index != currentIndex &&
+                                            draggedCenter.x >= item.offset.x && draggedCenter.x <= (item.offset.x + item.size.width) &&
+                                            draggedCenter.y >= item.offset.y && draggedCenter.y <= (item.offset.y + item.size.height)
+                                        }
+                                        if (targetItem != null) {
+                                            val targetIndex = targetItem.index
+                                            viewModel.reorderStopwatches(currentIndex, targetIndex)
+                                            dragOffset -= Offset(
+                                                (targetItem.offset.x - currentItemInfo.offset.x).toFloat(),
+                                                (targetItem.offset.y - currentItemInfo.offset.y).toFloat()
+                                            )
+                                            draggedIndex = targetIndex
+                                        }
+                                    }
+                                )
+                            }
+                        } else {
+                            Modifier
+                        }
+                    )
+
                 LazyVerticalGrid(
                     state = lazyGridState,
                     columns = GridCells.Adaptive(minSize = 340.dp),
                     contentPadding = PaddingValues(16.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.fillMaxSize()
+                    modifier = gridModifier
                 ) {
-                    items(
+                    itemsIndexed(
                         items = uiState.stopwatches,
-                        key = { it.id }
-                    ) { watch ->
+                        key = { _, watch -> watch.id }
+                    ) { index, watch ->
+                        val isBeingDragged = index == draggedIndex
+                        val tileModifier = if (isBeingDragged) {
+                            Modifier
+                                .zIndex(1f)
+                                .graphicsLayer {
+                                    scaleX = 1.04f
+                                    scaleY = 1.04f
+                                    translationX = dragOffset.x
+                                    translationY = dragOffset.y
+                                    shadowElevation = 8.dp.toPx()
+                                }
+                        } else {
+                            Modifier
+                        }
+
                         StopwatchTile(
                             watch = watch,
                             timePrecision = uiState.settings.timePrecision,
                             runningDisplayPrecision = uiState.settings.runningDisplayPrecision,
                             tickerFlow = viewModel.tickerFlow,
+                            autoSortEnabled = uiState.settings.autoSortEnabled,
                             onStart = { id ->
                                 viewModel.startStopwatch(id)
                                 haptics.playStart(uiState.settings.soundEnabled, uiState.settings.hapticsEnabled)
@@ -274,7 +365,8 @@ fun MainStopwatchScreen(
                             onDelete = { viewModel.deleteStopwatch(it) },
                             onEdit = { editingWatchItem = it },
                             onOpenDetails = { detailWatchItem = it },
-                            onSelectFocus = { viewModel.setFocusedWatch(it) }
+                            onSelectFocus = { viewModel.setFocusedWatch(it) },
+                            modifier = tileModifier
                         )
                     }
                 }

@@ -153,6 +153,7 @@
     <string name="cd_increase_count">Anzahl erhöhen</string>
     <string name="cd_edit_watch">Stoppuhr-Namen bearbeiten</string>
     <string name="cd_delete_watch">Stoppuhr löschen</string>
+    <string name="cd_drag_handle">Ziehpunkte</string>
     <string name="cd_selected">Ausgewählt</string>
     <string name="default_athlete_prefix">Athlet</string>
 

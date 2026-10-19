@@ -2,6 +2,15 @@ package org.ear.watches.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import org.ear.watches.data.model.AppFontSize
 import org.ear.watches.data.model.AppLanguage
 import org.ear.watches.data.model.AppPrecision
@@ -12,17 +21,6 @@ import org.ear.watches.data.model.StopwatchUiState
 import org.ear.watches.data.repository.SettingsRepository
 import org.ear.watches.data.util.SystemTimeProvider
 import org.ear.watches.data.util.TimeProvider
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Primary ViewModel for the application, responsible for maintaining the state of all stopwatches,
@@ -343,6 +341,25 @@ class StopwatchViewModel(
         }
         viewModelScope.launch(dispatcher) {
             settingsRepository?.setAutoSortEnabled(newValue)
+        }
+    }
+
+    fun reorderStopwatches(fromIndex: Int, toIndex: Int) {
+        if (_uiState.value.settings.autoSortEnabled) return
+        val currentStopwatches = _uiState.value.stopwatches
+        if (fromIndex !in currentStopwatches.indices || toIndex !in currentStopwatches.indices) return
+        if (fromIndex == toIndex) return
+
+        _uiState.update { state ->
+            if (state.settings.autoSortEnabled) return@update state
+            val stopwatches = state.stopwatches
+            if (fromIndex !in stopwatches.indices || toIndex !in stopwatches.indices) return@update state
+
+            val newList = stopwatches.toMutableList().apply {
+                val item = removeAt(fromIndex)
+                add(toIndex, item)
+            }
+            state.copy(stopwatches = newList)
         }
     }
 

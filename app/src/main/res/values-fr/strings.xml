@@ -153,6 +153,7 @@
     <string name="cd_increase_count">Augmenter le nombre</string>
     <string name="cd_edit_watch">Modifier le nom du chronomètre</string>
     <string name="cd_delete_watch">Supprimer le chronomètre</string>
+    <string name="cd_drag_handle">Poignée de glissement</string>
     <string name="cd_selected">Sélectionné</string>
     <string name="default_athlete_prefix">Athlète</string>
 

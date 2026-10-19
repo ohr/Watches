@@ -5,6 +5,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Info
@@ -108,7 +110,8 @@ fun StopwatchTile(
     modifier: Modifier = Modifier,
     runningDisplayPrecision: AppPrecision = timePrecision,
     onFullReset: (String) -> Unit = onReset,
-    onNameSession: (String) -> Unit = {}
+    onNameSession: (String) -> Unit = {},
+    autoSortEnabled: Boolean = true
 ) {
     val haptic = LocalHapticFeedback.current
     var showCurrentLapTime by rememberSaveable { mutableStateOf(false) }
@@ -151,7 +154,11 @@ fun StopwatchTile(
                 elevation = if (isFocused) 8.dp else StopwatchTileDefaults.CardElevation,
                 shape = StopwatchTileDefaults.CardShape
             )
-            .clickable { onSelectFocus(watch.id) },
+            .pointerInput(watch.id) {
+                detectTapGestures(
+                    onTap = { onSelectFocus(watch.id) }
+                )
+            },
         shape = StopwatchTileDefaults.CardShape,
         colors = CardDefaults.cardColors(
             containerColor = cardBackgroundColor
@@ -178,6 +185,15 @@ fun StopwatchTile(
                         .clickable { onEdit(watch) },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    if (!autoSortEnabled) {
+                        Icon(
+                            imageVector = Icons.Default.DragHandle,
+                            contentDescription = stringResource(R.string.cd_drag_handle),
+                            tint = darkContentColor.copy(alpha = 0.5f),
+                            modifier = Modifier.size(StopwatchTileDefaults.SmallIconSize)
+                        )
+                        Spacer(modifier = Modifier.width(StopwatchTileDefaults.ElementSpacing))
+                    }
                     Text(
                         text = watch.name,
                         style = MaterialTheme.typography.titleMedium.copy(
