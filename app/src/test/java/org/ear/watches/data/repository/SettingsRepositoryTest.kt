@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import org.ear.watches.data.model.AppAutoSortOption
 import org.ear.watches.data.model.AppFontSize
 import org.ear.watches.data.model.AppLanguage
 import org.ear.watches.data.model.AppPrecision
@@ -56,7 +57,7 @@ class SettingsRepositoryTest {
         assertEquals(AppPrecision.TENTHS, settings.runningDisplayPrecision)
         assertEquals(AppPrecision.TENTHS, settings.timePrecision)
         assertEquals(AppLanguage.SYSTEM, settings.language)
-        assertFalse(settings.autoSortEnabled)
+        assertEquals(AppAutoSortOption.NONE, settings.autoSortOption)
         assertEquals(AppThemeMode.SYSTEM_DEFAULT, settings.themeMode)
         assertEquals(AppFontSize.NORMAL, settings.fontSizeScale)
         assertTrue(settings.keepScreenOnWhileRunning)
@@ -101,10 +102,10 @@ class SettingsRepositoryTest {
     }
 
     @Test
-    fun setAutoSortEnabled_updatesDataStoreAndFlow() = testScope.runTest {
-        repository.setAutoSortEnabled(true)
+    fun setAutoSortOption_updatesDataStoreAndFlow() = testScope.runTest {
+        repository.setAutoSortOption(AppAutoSortOption.BY_NAME)
         val settings = repository.settingsFlow.first()
-        assertTrue(settings.autoSortEnabled)
+        assertEquals(AppAutoSortOption.BY_NAME, settings.autoSortOption)
     }
 
     @Test
@@ -131,7 +132,7 @@ class SettingsRepositoryTest {
                 runningDisplayPrecision = AppPrecision.SECONDS,
                 timePrecision = AppPrecision.HUNDREDTHS,
                 language = AppLanguage.GERMAN,
-                autoSortEnabled = true,
+                autoSortOption = AppAutoSortOption.BY_FASTEST_LAP,
                 themeMode = AppThemeMode.DARK,
                 fontSizeScale = AppFontSize.LARGE,
                 keepScreenOnWhileRunning = false,
@@ -177,7 +178,7 @@ class SettingsRepositoryTest {
             runningDisplayPrecision = AppPrecision.HUNDREDTHS,
             timePrecision = AppPrecision.SECONDS,
             language = AppLanguage.ENGLISH,
-            autoSortEnabled = true,
+            autoSortOption = AppAutoSortOption.BY_NAME,
             themeMode = AppThemeMode.DARK,
             fontSizeScale = AppFontSize.SMALL,
             keepScreenOnWhileRunning = false,
@@ -205,12 +206,28 @@ class SettingsRepositoryTest {
         assertTrue(settings.hardwareVolumeKeysEnabled)
         assertEquals(AppPrecision.SECONDS, settings.runningDisplayPrecision)
         assertEquals(AppPrecision.HUNDREDTHS, settings.timePrecision)
-        assertTrue(settings.autoSortEnabled)
+        assertEquals(AppAutoSortOption.BY_FASTEST_LAP, settings.autoSortOption)
         assertEquals(AppLanguage.GERMAN, settings.language)
         assertEquals(AppThemeMode.SYSTEM_DEFAULT, settings.themeMode)
         assertEquals(AppFontSize.NORMAL, settings.fontSizeScale)
         assertTrue(settings.keepScreenOnWhileRunning)
         assertTrue(settings.useDynamicColor)
+    }
+
+    @Test
+    fun migrationFromLegacyAutoSortEnabled_mapsTrueToByFastestLapAndFalseToNone() = testScope.runTest {
+        dataStore.edit { preferences ->
+            preferences[SettingsRepository.AUTO_SORT_ENABLED] = true
+        }
+        var settings = repository.settingsFlow.first()
+        assertEquals(AppAutoSortOption.BY_FASTEST_LAP, settings.autoSortOption)
+
+        dataStore.edit { preferences ->
+            preferences.clear()
+            preferences[SettingsRepository.AUTO_SORT_ENABLED] = false
+        }
+        settings = repository.settingsFlow.first()
+        assertEquals(AppAutoSortOption.NONE, settings.autoSortOption)
     }
 
     @Test

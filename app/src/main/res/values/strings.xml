@@ -56,7 +56,10 @@
     <string name="setting_haptics_desc">Vibrate on control button presses</string>
     <string name="setting_hardware_keys">Hardware Volume Keys</string>
     <string name="setting_hardware_keys_desc">Vol Up = Start/Lap (Focus), Vol Down = Stop/Reset</string>
-    <string name="setting_auto_sort">Auto-sort tiles by fastest/next lap</string>
+    <string name="setting_auto_sort">Auto-Sort</string>
+    <string name="auto_sort_none">None (Manual / Drag &amp; Drop)</string>
+    <string name="auto_sort_fastest_lap">By Fastest / Next Lap</string>
+    <string name="auto_sort_by_name">By Stopwatch Name (A-Z)</string>
     <string name="setting_keep_screen_on">Keep Screen Awake</string>
     <string name="setting_keep_screen_on_desc">Keep display active while any stopwatch is running</string>
     <string name="setting_running_display_precision">Running Time Precision</string>

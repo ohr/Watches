@@ -199,4 +199,40 @@ class StopwatchItemTest {
         assertEquals("Warm-up Final", updated.runs[0].name)
         assertEquals("Run 2 Name", updated.runs[1].name)
     }
+
+    @Test
+    fun sortStopwatches_none_preservesOriginalOrder() {
+        val w1 = StopwatchItem(name = "Charlie", pastelColorHex = 1L)
+        val w2 = StopwatchItem(name = "Alice", pastelColorHex = 2L)
+        val w3 = StopwatchItem(name = "Bob", pastelColorHex = 3L)
+
+        val sorted = StopwatchItem.sortStopwatches(listOf(w1, w2, w3), AppAutoSortOption.NONE)
+
+        assertEquals(listOf("Charlie", "Alice", "Bob"), sorted.map { it.name })
+    }
+
+    @Test
+    fun sortStopwatches_byFastestLap_ordersZeroLapsFirstThenExpectedNextLapTime() {
+        val w1 = StopwatchItem(name = "Slow Lap", pastelColorHex = 1L)
+            .start(0L, 0L).lap(10_000_000_000L)
+        val w2 = StopwatchItem(name = "Fast Lap", pastelColorHex = 2L)
+            .start(0L, 0L).lap(4_000_000_000L)
+        val w3 = StopwatchItem(name = "Zero Laps", pastelColorHex = 3L)
+            .start(0L, 0L)
+
+        val sorted = StopwatchItem.sortStopwatches(listOf(w1, w2, w3), AppAutoSortOption.BY_FASTEST_LAP)
+
+        assertEquals(listOf("Zero Laps", "Fast Lap", "Slow Lap"), sorted.map { it.name })
+    }
+
+    @Test
+    fun sortStopwatches_byName_sortsAlphabeticallyCaseInsensitive() {
+        val w1 = StopwatchItem(name = "charlie", pastelColorHex = 1L)
+        val w2 = StopwatchItem(name = "Alice", pastelColorHex = 2L)
+        val w3 = StopwatchItem(name = "bob", pastelColorHex = 3L)
+
+        val sorted = StopwatchItem.sortStopwatches(listOf(w1, w2, w3), AppAutoSortOption.BY_NAME)
+
+        assertEquals(listOf("Alice", "bob", "charlie"), sorted.map { it.name })
+    }
 }

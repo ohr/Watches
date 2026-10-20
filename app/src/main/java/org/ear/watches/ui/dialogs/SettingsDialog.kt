@@ -42,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.ear.watches.R
+import org.ear.watches.data.model.AppAutoSortOption
 import org.ear.watches.data.model.AppFontSize
 import org.ear.watches.data.model.AppLanguage
 import org.ear.watches.data.model.AppPrecision
@@ -60,7 +61,8 @@ fun SettingsDialog(
     onToggleSound: () -> Unit,
     onToggleHaptics: () -> Unit,
     onToggleHardwareKeys: () -> Unit,
-    onToggleAutoSort: () -> Unit,
+    onSetAutoSortOption: (AppAutoSortOption) -> Unit = {},
+    onToggleAutoSort: () -> Unit = {},
     onToggleKeepScreenOn: () -> Unit = {},
     onToggleDynamicColor: () -> Unit = {},
     onSetPrecision: (AppPrecision) -> Unit,
@@ -421,24 +423,50 @@ fun SettingsDialog(
 
                 HorizontalDivider()
 
-                // Auto-Sort Switch
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onToggleAutoSort() },
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                // Auto-Sort Dropdown
+                var autoSortExpanded by remember { mutableStateOf(false) }
+                ExposedDropdownMenuBox(
+                    expanded = autoSortExpanded,
+                    onExpandedChange = { autoSortExpanded = !autoSortExpanded },
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(R.string.setting_auto_sort),
-                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
-                        )
-                    }
-                    Switch(
-                        checked = settings.autoSortEnabled,
-                        onCheckedChange = { onToggleAutoSort() }
+                    OutlinedTextField(
+                        modifier = Modifier
+                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                            .fillMaxWidth(),
+                        readOnly = true,
+                        value = when (settings.autoSortOption) {
+                            AppAutoSortOption.NONE -> stringResource(R.string.auto_sort_none)
+                            AppAutoSortOption.BY_FASTEST_LAP -> stringResource(R.string.auto_sort_fastest_lap)
+                            AppAutoSortOption.BY_NAME -> stringResource(R.string.auto_sort_by_name)
+                        },
+                        onValueChange = {},
+                        label = { Text(text = stringResource(R.string.setting_auto_sort)) },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = autoSortExpanded)
+                        },
+                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
                     )
+                    ExposedDropdownMenu(
+                        expanded = autoSortExpanded,
+                        onDismissRequest = { autoSortExpanded = false }
+                    ) {
+                        AppAutoSortOption.entries.forEach { option ->
+                            val label = when (option) {
+                                AppAutoSortOption.NONE -> stringResource(R.string.auto_sort_none)
+                                AppAutoSortOption.BY_FASTEST_LAP -> stringResource(R.string.auto_sort_fastest_lap)
+                                AppAutoSortOption.BY_NAME -> stringResource(R.string.auto_sort_by_name)
+                            }
+                            DropdownMenuItem(
+                                text = { Text(text = label) },
+                                onClick = {
+                                    onSetAutoSortOption(option)
+                                    autoSortExpanded = false
+                                },
+                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                            )
+                        }
+                    }
                 }
 
                 HorizontalDivider()
@@ -514,6 +542,7 @@ fun SettingsDialogPreview() {
             onToggleSound = {},
             onToggleHaptics = {},
             onToggleHardwareKeys = {},
+            onSetAutoSortOption = {},
             onToggleAutoSort = {},
             onToggleKeepScreenOn = {},
             onToggleDynamicColor = {},

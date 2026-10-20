@@ -1,6 +1,7 @@
 package org.ear.watches.viewmodel
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import org.ear.watches.data.model.AppAutoSortOption
 import org.ear.watches.data.model.AppFontSize
 import org.ear.watches.data.model.AppLanguage
 import org.ear.watches.data.model.AppPrecision
@@ -380,41 +381,47 @@ class StopwatchViewModelTest {
     }
 
     @Test
-    fun autoSortingBehavior_whenEnabled() {
-        viewModel.batchAddStopwatches(3, "Athlete")
-        val id0 = viewModel.uiState.value.stopwatches[0].id
-        val id1 = viewModel.uiState.value.stopwatches[1].id
-        val id2 = viewModel.uiState.value.stopwatches[2].id
+    fun autoSortingBehavior_byFastestLapAndByNameAndNone() {
+        viewModel.batchAddStopwatchesWithNames(listOf("Charlie", "Alice", "Bob"))
+        val charlieId = viewModel.uiState.value.stopwatches.find { it.name == "Charlie" }!!.id
+        val aliceId = viewModel.uiState.value.stopwatches.find { it.name == "Alice" }!!.id
+        val bobId = viewModel.uiState.value.stopwatches.find { it.name == "Bob" }!!.id
 
         viewModel.startAll()
 
-        // Lap watch1 at 40_000_000_000ns
+        // Lap Alice at 40_000_000_000ns
         timeProvider.advanceTimeBy(40_000_000_000L)
-        viewModel.lapStopwatch(id1)
+        viewModel.lapStopwatch(aliceId)
 
-        // Reset watch2 and record lap at earlier time
-        viewModel.resetStopwatchFull(id2)
-        viewModel.startStopwatch(id2)
+        // Reset Bob and record lap at earlier time (20s)
+        viewModel.resetStopwatchFull(bobId)
+        viewModel.startStopwatch(bobId)
         timeProvider.advanceTimeBy(20_000_000_000L)
-        viewModel.lapStopwatch(id2)
+        viewModel.lapStopwatch(bobId)
 
-        // Enable auto-sort
-        viewModel.toggleAutoSort()
-        assertTrue(viewModel.uiState.value.settings.autoSortEnabled)
+        // Set auto-sort BY_FASTEST_LAP
+        viewModel.setAutoSortOption(AppAutoSortOption.BY_FASTEST_LAP)
+        assertEquals(AppAutoSortOption.BY_FASTEST_LAP, viewModel.uiState.value.settings.autoSortOption)
 
-        val sortedList = viewModel.uiState.value.stopwatches
+        var sortedList = viewModel.uiState.value.stopwatches
         assertEquals(3, sortedList.size)
+        // 1st: Charlie (0-lap watch at top)
+        // 2nd: Bob (1 lap, expected next 40s)
+        // 3rd: Alice (1 lap, expected next 80s)
+        assertEquals(charlieId, sortedList[0].id)
+        assertEquals(bobId, sortedList[1].id)
+        assertEquals(aliceId, sortedList[2].id)
 
-        // 1st: watch0 (0-lap watch at top)
-        // 2nd: watch2 (1 lap, expected next 40s)
-        // 3rd: watch1 (1 lap, expected next 80s)
-        assertEquals(id0, sortedList[0].id)
-        assertEquals(id2, sortedList[1].id)
-        assertEquals(id1, sortedList[2].id)
+        // Set auto-sort BY_NAME
+        viewModel.setAutoSortOption(AppAutoSortOption.BY_NAME)
+        assertEquals(AppAutoSortOption.BY_NAME, viewModel.uiState.value.settings.autoSortOption)
 
-        // Disable auto-sort -> reverts to unsorted/original list order
-        viewModel.toggleAutoSort()
-        assertFalse(viewModel.uiState.value.settings.autoSortEnabled)
+        sortedList = viewModel.uiState.value.stopwatches
+        assertEquals(listOf("Alice", "Bob", "Charlie"), sortedList.map { it.name })
+
+        // Set auto-sort NONE
+        viewModel.setAutoSortOption(AppAutoSortOption.NONE)
+        assertEquals(AppAutoSortOption.NONE, viewModel.uiState.value.settings.autoSortOption)
     }
 
     @Test
@@ -462,8 +469,8 @@ class StopwatchViewModelTest {
         viewModel.toggleHardwareKeys()
         assertFalse(viewModel.uiState.value.settings.hardwareVolumeKeysEnabled)
 
-        viewModel.toggleAutoSort()
-        assertTrue(viewModel.uiState.value.settings.autoSortEnabled)
+        viewModel.setAutoSortOption(AppAutoSortOption.BY_NAME)
+        assertEquals(AppAutoSortOption.BY_NAME, viewModel.uiState.value.settings.autoSortOption)
 
         viewModel.toggleKeepScreenOn()
         assertFalse(viewModel.uiState.value.settings.keepScreenOnWhileRunning)
@@ -713,10 +720,10 @@ class StopwatchViewModelTest {
         assertEquals(AppLanguage.GERMAN, vm.uiState.value.settings.language)
         assertEquals(AppLanguage.GERMAN, settingsRepository.settingsFlow.first().language)
 
-        // Toggle auto sort
-        vm.toggleAutoSort()
-        assertTrue(vm.uiState.value.settings.autoSortEnabled)
-        assertTrue(settingsRepository.settingsFlow.first().autoSortEnabled)
+        // Set auto sort option
+        vm.setAutoSortOption(AppAutoSortOption.BY_NAME)
+        assertEquals(AppAutoSortOption.BY_NAME, vm.uiState.value.settings.autoSortOption)
+        assertEquals(AppAutoSortOption.BY_NAME, settingsRepository.settingsFlow.first().autoSortOption)
 
         // Toggle keep screen awake
         vm.toggleKeepScreenOn()
@@ -764,7 +771,7 @@ class StopwatchViewModelTest {
             runningDisplayPrecision = AppPrecision.SECONDS,
             timePrecision = AppPrecision.HUNDREDTHS,
             language = AppLanguage.ENGLISH,
-            autoSortEnabled = true
+            autoSortOption = AppAutoSortOption.BY_FASTEST_LAP
         )
 
         settingsRepository.saveSettings(updatedSettings)
@@ -975,7 +982,7 @@ class StopwatchViewModelTest {
     }
 
     @Test
-    fun reorderStopwatches_movesItem_whenAutoSortDisabled() {
+    fun reorderStopwatches_movesItem_whenAutoSortNone() {
         viewModel.batchAddStopwatches(3, "Runner")
         val initialList = viewModel.uiState.value.stopwatches
         assertEquals(3, initialList.size)
@@ -983,7 +990,7 @@ class StopwatchViewModelTest {
         val id1 = initialList[1].id
         val id2 = initialList[2].id
 
-        assertFalse(viewModel.uiState.value.settings.autoSortEnabled)
+        assertEquals(AppAutoSortOption.NONE, viewModel.uiState.value.settings.autoSortOption)
 
         viewModel.reorderStopwatches(0, 2)
 
@@ -995,10 +1002,10 @@ class StopwatchViewModelTest {
     }
 
     @Test
-    fun reorderStopwatches_ignored_whenAutoSortEnabled() {
+    fun reorderStopwatches_ignored_whenAutoSortNotNone() {
         viewModel.batchAddStopwatches(3, "Runner")
-        viewModel.toggleAutoSort()
-        assertTrue(viewModel.uiState.value.settings.autoSortEnabled)
+        viewModel.setAutoSortOption(AppAutoSortOption.BY_NAME)
+        assertEquals(AppAutoSortOption.BY_NAME, viewModel.uiState.value.settings.autoSortOption)
 
         val initialList = viewModel.uiState.value.stopwatches
         val id0 = initialList[0].id

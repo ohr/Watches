@@ -67,6 +67,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.ear.watches.R
+import org.ear.watches.data.model.AppAutoSortOption
 import org.ear.watches.data.model.AppPrecision
 import org.ear.watches.data.model.LapRecord
 import org.ear.watches.data.model.RunSession
@@ -74,19 +75,32 @@ import org.ear.watches.data.model.StopwatchItem
 import org.ear.watches.data.util.TimeFormatter
 import org.ear.watches.ui.theme.WatchesTheme
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.withTimeoutOrNull
 
 private object StopwatchTileDefaults {
     val CardShape = RoundedCornerShape(20.dp)
     val CardElevation = 2.dp
     val FocusBorderWidth = 3.5.dp
+    val FocusBorderColor = Color(0xFF1976D2)
+    val TimeDisplayShape = RoundedCornerShape(12.dp)
+    val TimeDisplayPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
     val ActionButtonShape = RoundedCornerShape(12.dp)
     val ActionButtonContentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp)
     val ActionButtonIconSize = 18.dp
+    val StartButtonColor = Color(0xFF2E7D32)
+    val StopButtonColor = Color(0xFFD32F2F)
+    val LapButtonColor = Color(0xFF00796B)
+    val ResetButtonColor = Color(0xFFE65100)
+    val DisabledButtonContainerColor = Color(0xFFB0BEC5)
+    val DisabledButtonContentColor = Color(0xFF546E7A)
+    val PaceFasterColor = Color(0xFF2E7D32)
+    val PaceSlowerColor = Color(0xFFD32F2F)
     val SmallIconSize = 16.dp
     val TileContentPadding = 16.dp
     val SectionSpacing = 10.dp
     val ElementSpacing = 6.dp
+
+    val ActionButtonTextStyle: TextStyle
+        @Composable get() = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
 }
 
 /**
@@ -111,7 +125,7 @@ fun StopwatchTile(
     runningDisplayPrecision: AppPrecision = timePrecision,
     onFullReset: (String) -> Unit = onReset,
     onNameSession: (String) -> Unit = {},
-    autoSortEnabled: Boolean = true
+    autoSortOption: AppAutoSortOption = AppAutoSortOption.NONE
 ) {
     val haptic = LocalHapticFeedback.current
     var showCurrentLapTime by rememberSaveable { mutableStateOf(false) }
@@ -165,7 +179,7 @@ fun StopwatchTile(
         ),
         border = BorderStroke(
             width = borderThickness,
-            color = if (isFocused) Color(0xFF1E88E5) else Color.Black.copy(alpha = 0.12f)
+            color = if (isFocused) StopwatchTileDefaults.FocusBorderColor else Color.Black.copy(alpha = 0.12f)
         )
     ) {
         Column(
@@ -185,7 +199,7 @@ fun StopwatchTile(
                         .clickable { onEdit(watch) },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    if (!autoSortEnabled) {
+                    if (autoSortOption == AppAutoSortOption.NONE) {
                         Icon(
                             imageVector = Icons.Default.DragHandle,
                             contentDescription = stringResource(R.string.cd_drag_handle),
@@ -215,7 +229,7 @@ fun StopwatchTile(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (isFocused) {
                         Surface(
-                            color = Color(0xFF1E88E5),
+                            color = StopwatchTileDefaults.FocusBorderColor,
                             contentColor = Color.White,
                             shape = StopwatchTileDefaults.ActionButtonShape
                         ) {
@@ -277,9 +291,9 @@ fun StopwatchTile(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(StopwatchTileDefaults.ActionButtonShape)
+                    .clip(StopwatchTileDefaults.TimeDisplayShape)
                     .background(Color.White.copy(alpha = 0.65f))
-                    .padding(vertical = 10.dp, horizontal = 12.dp),
+                    .padding(StopwatchTileDefaults.TimeDisplayPadding),
                 contentAlignment = Alignment.Center
             ) {
                 Row(
@@ -357,7 +371,7 @@ fun StopwatchTile(
                             .size(10.dp)
                             .clip(CircleShape)
                             .background(
-                                if (watch.isRunning) Color(0xFF2E7D32) else Color.Gray
+                                if (watch.isRunning) StopwatchTileDefaults.StartButtonColor else Color.Gray
                             )
                     )
                     Spacer(modifier = Modifier.width(StopwatchTileDefaults.ElementSpacing))
@@ -386,12 +400,12 @@ fun StopwatchTile(
                         val (indicatorText, color, cdRes) = when {
                             delta < 0 -> Triple(
                                 "▼ ${TimeFormatter.formatDeltaTime(delta, timePrecision, subsecondSeparator)}",
-                                Color(0xFF2E7D32),
+                                StopwatchTileDefaults.PaceFasterColor,
                                 R.string.cd_pace_faster
                             )
                             delta > 0 -> Triple(
                                 "▲ ${TimeFormatter.formatDeltaTime(delta, timePrecision, subsecondSeparator)}",
-                                Color(0xFFD32F2F),
+                                StopwatchTileDefaults.PaceSlowerColor,
                                 R.string.cd_pace_slower
                             )
                             else -> Triple(
@@ -442,7 +456,7 @@ fun StopwatchTile(
                 ) {
                     if (watch.isRunning) {
                         Surface(
-                            color = Color(0xFFD32F2F),
+                            color = StopwatchTileDefaults.StopButtonColor,
                             contentColor = Color.White,
                             shape = StopwatchTileDefaults.ActionButtonShape,
                             modifier = Modifier.fillMaxWidth()
@@ -460,8 +474,7 @@ fun StopwatchTile(
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
                                     text = stringResource(R.string.btn_stop).uppercase(),
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 12.sp,
+                                    style = StopwatchTileDefaults.ActionButtonTextStyle,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
@@ -469,7 +482,7 @@ fun StopwatchTile(
                         }
                     } else {
                         Surface(
-                            color = Color(0xFF2E7D32),
+                            color = StopwatchTileDefaults.StartButtonColor,
                             contentColor = Color.White,
                             shape = StopwatchTileDefaults.ActionButtonShape,
                             modifier = Modifier.fillMaxWidth()
@@ -487,8 +500,7 @@ fun StopwatchTile(
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
                                     text = stringResource(R.string.btn_start).uppercase(),
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 12.sp,
+                                    style = StopwatchTileDefaults.ActionButtonTextStyle,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
@@ -502,10 +514,10 @@ fun StopwatchTile(
                     onClick = {},
                     enabled = watch.isRunning,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF00796B),
+                        containerColor = StopwatchTileDefaults.LapButtonColor,
                         contentColor = Color.White,
-                        disabledContainerColor = Color(0xFFB0BEC5),
-                        disabledContentColor = Color(0xFF546E7A)
+                        disabledContainerColor = StopwatchTileDefaults.DisabledButtonContainerColor,
+                        disabledContentColor = StopwatchTileDefaults.DisabledButtonContentColor
                     ),
                     contentPadding = StopwatchTileDefaults.ActionButtonContentPadding,
                     modifier = Modifier
@@ -521,8 +533,7 @@ fun StopwatchTile(
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = stringResource(R.string.btn_lap).uppercase(),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 12.sp,
+                        style = StopwatchTileDefaults.ActionButtonTextStyle,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -541,8 +552,8 @@ fun StopwatchTile(
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             }
                         ),
-                    color = if (!watch.isRunning) Color(0xFFE65100) else Color(0xFFB0BEC5),
-                    contentColor = if (!watch.isRunning) Color.White else Color(0xFF546E7A),
+                    color = if (!watch.isRunning) StopwatchTileDefaults.ResetButtonColor else StopwatchTileDefaults.DisabledButtonContainerColor,
+                    contentColor = if (!watch.isRunning) Color.White else StopwatchTileDefaults.DisabledButtonContentColor,
                     shape = StopwatchTileDefaults.ActionButtonShape
                 ) {
                     Row(
@@ -558,8 +569,7 @@ fun StopwatchTile(
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = stringResource(R.string.btn_reset).uppercase(),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 12.sp,
+                            style = StopwatchTileDefaults.ActionButtonTextStyle,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )

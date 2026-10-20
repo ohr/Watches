@@ -17,7 +17,7 @@ data class AppSettings(
     val runningDisplayPrecision: AppPrecision = AppPrecision.TENTHS,
     val timePrecision: AppPrecision = AppPrecision.TENTHS,
     val language: AppLanguage = AppLanguage.SYSTEM,
-    val autoSortEnabled: Boolean = false,
+    val autoSortOption: AppAutoSortOption = AppAutoSortOption.NONE,
     val themeMode: AppThemeMode = AppThemeMode.SYSTEM_DEFAULT,
     val fontSizeScale: AppFontSize = AppFontSize.NORMAL,
     val keepScreenOnWhileRunning: Boolean = true,

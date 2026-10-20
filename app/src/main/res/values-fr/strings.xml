@@ -56,7 +56,10 @@
     <string name="setting_haptics_desc">Vibrer lors des clics</string>
     <string name="setting_hardware_keys">Boutons de volume physiques</string>
     <string name="setting_hardware_keys_desc">Vol + = Démarrer/Tour (Focus), Vol - = Arrêter/Réinitialiser</string>
-    <string name="setting_auto_sort">Tri automatique par tour le plus rapide/suivant</string>
+    <string name="setting_auto_sort">Tri automatique</string>
+    <string name="auto_sort_none">Aucun (Manuel / Glisser-déplacer)</string>
+    <string name="auto_sort_fastest_lap">Par tour le plus rapide/prochain</string>
+    <string name="auto_sort_by_name">Par nom de chronomètre (A-Z)</string>
     <string name="setting_keep_screen_on">Garder l\'écran allumé</string>
     <string name="setting_keep_screen_on_desc">Empêcher la mise en veille pendant le chrono</string>
     <string name="setting_running_display_precision">Précision du temps en cours</string>

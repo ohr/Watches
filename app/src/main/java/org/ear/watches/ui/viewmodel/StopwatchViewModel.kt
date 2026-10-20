@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import org.ear.watches.data.model.AppAutoSortOption
 import org.ear.watches.data.model.AppFontSize
 import org.ear.watches.data.model.AppLanguage
 import org.ear.watches.data.model.AppPrecision
@@ -83,8 +84,7 @@ class StopwatchViewModel(
         val determinedFocusedId = newFocusedId
             ?: StopwatchItem.calculateNextFocusedWatchId(stopwatches, activeFocusedWatchId)
 
-        val sortedWatchList = if (settings.autoSortEnabled)
-            StopwatchItem.sortStopwatches(stopwatches) else stopwatches
+        val sortedWatchList = StopwatchItem.sortStopwatches(stopwatches, settings.autoSortOption)
         val updatedWatchList = sortedWatchList.map {
             it.copy(isFocused = (it.id == determinedFocusedId))
         }
@@ -332,26 +332,34 @@ class StopwatchViewModel(
         }
     }
 
-    fun toggleAutoSort() {
-        val newValue = !_uiState.value.settings.autoSortEnabled
+    fun setAutoSortOption(option: AppAutoSortOption) {
         _uiState.update {
-            val newSettings = it.settings.copy(autoSortEnabled = newValue)
+            val newSettings = it.settings.copy(autoSortOption = option)
             it.copy(settings = newSettings)
                 .applyFocusAndSort()
         }
         viewModelScope.launch(dispatcher) {
-            settingsRepository?.setAutoSortEnabled(newValue)
+            settingsRepository?.setAutoSortOption(option)
         }
     }
 
+    fun toggleAutoSort() {
+        val nextOption = when (_uiState.value.settings.autoSortOption) {
+            AppAutoSortOption.NONE -> AppAutoSortOption.BY_FASTEST_LAP
+            AppAutoSortOption.BY_FASTEST_LAP -> AppAutoSortOption.BY_NAME
+            AppAutoSortOption.BY_NAME -> AppAutoSortOption.NONE
+        }
+        setAutoSortOption(nextOption)
+    }
+
     fun reorderStopwatches(fromIndex: Int, toIndex: Int) {
-        if (_uiState.value.settings.autoSortEnabled) return
+        if (_uiState.value.settings.autoSortOption != AppAutoSortOption.NONE) return
         val currentStopwatches = _uiState.value.stopwatches
         if (fromIndex !in currentStopwatches.indices || toIndex !in currentStopwatches.indices) return
         if (fromIndex == toIndex) return
 
         _uiState.update { state ->
-            if (state.settings.autoSortEnabled) return@update state
+            if (state.settings.autoSortOption != AppAutoSortOption.NONE) return@update state
             val stopwatches = state.stopwatches
             if (fromIndex !in stopwatches.indices || toIndex !in stopwatches.indices) return@update state
 
@@ -546,7 +554,7 @@ class StopwatchViewModel(
             } else {
                 StopwatchItem.calculateNextFocusedWatchId(updatedWatches, state.activeFocusedWatchId)
             }
-            val sortedWatchList = if (state.settings.autoSortEnabled) StopwatchItem.sortStopwatches(updatedWatches) else updatedWatches
+            val sortedWatchList = StopwatchItem.sortStopwatches(updatedWatches, state.settings.autoSortOption)
             val refreshedWatchList = sortedWatchList.map {
                 it.copy(isFocused = (it.id == activeFocusedWatchId))
             }

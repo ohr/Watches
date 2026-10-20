@@ -373,23 +373,19 @@ data class StopwatchItem(
         }
 
         /**
-         * Auto-sorts a list of stopwatches based on predictive next-lap completion algorithms.
+         * Auto-sorts a list of stopwatches based on the specified [AppAutoSortOption].
          *
-         * Stopwatches with zero recorded laps in their current run are placed first (expected time 0), followed by
-         * stopwatches sorted in ascending order of their predicted next-lap completion times.
+         * - [AppAutoSortOption.NONE]: Returns the list as-is without reordering.
+         * - [AppAutoSortOption.BY_FASTEST_LAP]: Stopwatches with zero recorded laps in their current run are placed first (expected time 0), followed by stopwatches sorted in ascending order of their predicted next-lap completion times.
+         * - [AppAutoSortOption.BY_NAME]: Stopwatches are sorted alphabetically by [name] using [String.CASE_INSENSITIVE_ORDER].
          *
          * @param stopwatches List of stopwatches to sort.
+         * @param autoSortOption Sorting algorithm option to apply. Defaults to [AppAutoSortOption.BY_FASTEST_LAP].
          * @return A sorted list of [StopwatchItem] instances.
          */
         fun sortStopwatches(
-            stopwatches: List<StopwatchItem>
-        ): List<StopwatchItem> {
-            return stopwatches.sortedWith(
-                compareBy<StopwatchItem> { watch ->
-                    if (watch.currentRunLaps.isEmpty()) 0L
-                    else watch.calculateExpectedNextLapTime()
-                }
-            )
-        }
+            stopwatches: List<StopwatchItem>,
+            autoSortOption: AppAutoSortOption = AppAutoSortOption.BY_FASTEST_LAP
+        ): List<StopwatchItem> = autoSortOption.sort(stopwatches)
     }
 }

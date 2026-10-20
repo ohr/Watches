@@ -56,7 +56,10 @@
     <string name="setting_haptics_desc">Vibration bei Tastendruck ausführen</string>
     <string name="setting_hardware_keys">Lautstärketasten</string>
     <string name="setting_hardware_keys_desc">Lauter = Start/Runde (Fokus), Leiser = Stopp/Zurücksetzen</string>
-    <string name="setting_auto_sort">Automatisches Sortieren nach nächster Runde</string>
+    <string name="setting_auto_sort">Automatisches Sortieren</string>
+    <string name="auto_sort_none">Keine (Manuell / Drag &amp; Drop)</string>
+    <string name="auto_sort_fastest_lap">Nach schnellster/nächster Runde</string>
+    <string name="auto_sort_by_name">Nach Stoppuhr-Name (A-Z)</string>
     <string name="setting_keep_screen_on">Bildschirm anlassen</string>
     <string name="setting_keep_screen_on_desc">Bildschirm während aktiver Zeitmessung nicht ausschalten</string>
     <string name="setting_running_display_precision">Laufende Zeitanzeige</string>

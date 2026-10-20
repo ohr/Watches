@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import org.ear.watches.data.model.AppAutoSortOption
 import org.ear.watches.data.model.AppFontSize
 import org.ear.watches.data.model.AppLanguage
 import org.ear.watches.data.model.AppPrecision
@@ -39,6 +40,7 @@ class SettingsRepository(
         val HARDWARE_KEYS_ENABLED = booleanPreferencesKey("hardware_keys_enabled")
         val RUNNING_DISPLAY_PRECISION = stringPreferencesKey("running_display_precision")
         val TIME_PRECISION = stringPreferencesKey("time_precision")
+        val AUTO_SORT_OPTION = stringPreferencesKey("auto_sort_option")
         val AUTO_SORT_ENABLED = booleanPreferencesKey("auto_sort_enabled")
         val APP_LANGUAGE = stringPreferencesKey("app_language")
         val KEEP_SCREEN_ON_WHILE_RUNNING = booleanPreferencesKey("keep_screen_on_while_running")
@@ -84,11 +86,27 @@ class SettingsRepository(
                     } else {
                         preferences[USE_DYNAMIC_COLOR] ?: decoded.useDynamicColor
                     }
+                    val autoSortOption = if (jsonString.contains("autoSortOption")) {
+                        decoded.autoSortOption
+                    } else if (jsonString.contains("\"autoSortEnabled\":true")) {
+                        AppAutoSortOption.BY_FASTEST_LAP
+                    } else {
+                        val optionStr = preferences[AUTO_SORT_OPTION]
+                        val legacyAutoSort = preferences[AUTO_SORT_ENABLED]
+                        if (optionStr != null) {
+                            AppAutoSortOption.entries.find { it.code == optionStr || it.name == optionStr } ?: AppAutoSortOption.NONE
+                        } else if (legacyAutoSort == true) {
+                            AppAutoSortOption.BY_FASTEST_LAP
+                        } else {
+                            decoded.autoSortOption
+                        }
+                    }
                     decoded.copy(
                         soundEnabled = sound,
                         hapticsEnabled = haptics,
                         keepScreenOnWhileRunning = keepScreenOn,
-                        useDynamicColor = dynamicColor
+                        useDynamicColor = dynamicColor,
+                        autoSortOption = autoSortOption
                     )
                 } catch (_: Exception) {
                     fallbackFromPreferences(preferences)
@@ -111,7 +129,13 @@ class SettingsRepository(
         val precision = precisionStr?.let { str ->
             AppPrecision.entries.find { it.name == str }
         } ?: AppPrecision.TENTHS
-        val autoSort = preferences[AUTO_SORT_ENABLED] ?: false
+        val autoSortOptionStr = preferences[AUTO_SORT_OPTION]
+        val autoSortOption = if (autoSortOptionStr != null) {
+            AppAutoSortOption.entries.find { it.code == autoSortOptionStr || it.name == autoSortOptionStr } ?: AppAutoSortOption.NONE
+        } else {
+            val legacyAutoSort = preferences[AUTO_SORT_ENABLED] ?: false
+            if (legacyAutoSort) AppAutoSortOption.BY_FASTEST_LAP else AppAutoSortOption.NONE
+        }
         val languageStr = preferences[APP_LANGUAGE]
         val language = languageStr?.let { str ->
             AppLanguage.entries.find { it.name == str }
@@ -126,7 +150,7 @@ class SettingsRepository(
             runningDisplayPrecision = runningPrecision,
             timePrecision = precision,
             language = language,
-            autoSortEnabled = autoSort,
+            autoSortOption = autoSortOption,
             themeMode = AppThemeMode.SYSTEM_DEFAULT,
             fontSizeScale = AppFontSize.NORMAL,
             keepScreenOnWhileRunning = keepScreenOn,
@@ -161,11 +185,27 @@ class SettingsRepository(
                     } else {
                         preferences[USE_DYNAMIC_COLOR] ?: decoded.useDynamicColor
                     }
+                    val autoSortOption = if (currentJson.contains("autoSortOption")) {
+                        decoded.autoSortOption
+                    } else if (currentJson.contains("\"autoSortEnabled\":true")) {
+                        AppAutoSortOption.BY_FASTEST_LAP
+                    } else {
+                        val optionStr = preferences[AUTO_SORT_OPTION]
+                        val legacyAutoSort = preferences[AUTO_SORT_ENABLED]
+                        if (optionStr != null) {
+                            AppAutoSortOption.entries.find { it.code == optionStr || it.name == optionStr } ?: AppAutoSortOption.NONE
+                        } else if (legacyAutoSort == true) {
+                            AppAutoSortOption.BY_FASTEST_LAP
+                        } else {
+                            decoded.autoSortOption
+                        }
+                    }
                     decoded.copy(
                         soundEnabled = sound,
                         hapticsEnabled = haptics,
                         keepScreenOnWhileRunning = keepScreenOn,
-                        useDynamicColor = dynamicColor
+                        useDynamicColor = dynamicColor,
+                        autoSortOption = autoSortOption
                     )
                 } catch (_: Exception) {
                     fallbackFromPreferences(preferences)
@@ -180,7 +220,8 @@ class SettingsRepository(
             preferences[HARDWARE_KEYS_ENABLED] = updated.hardwareVolumeKeysEnabled
             preferences[RUNNING_DISPLAY_PRECISION] = updated.runningDisplayPrecision.name
             preferences[TIME_PRECISION] = updated.timePrecision.name
-            preferences[AUTO_SORT_ENABLED] = updated.autoSortEnabled
+            preferences[AUTO_SORT_OPTION] = updated.autoSortOption.code
+            preferences[AUTO_SORT_ENABLED] = (updated.autoSortOption != AppAutoSortOption.NONE)
             preferences[APP_LANGUAGE] = updated.language.name
             preferences[KEEP_SCREEN_ON_WHILE_RUNNING] = updated.keepScreenOnWhileRunning
             preferences[USE_DYNAMIC_COLOR] = updated.useDynamicColor
@@ -195,7 +236,8 @@ class SettingsRepository(
             preferences[HARDWARE_KEYS_ENABLED] = settings.hardwareVolumeKeysEnabled
             preferences[RUNNING_DISPLAY_PRECISION] = settings.runningDisplayPrecision.name
             preferences[TIME_PRECISION] = settings.timePrecision.name
-            preferences[AUTO_SORT_ENABLED] = settings.autoSortEnabled
+            preferences[AUTO_SORT_OPTION] = settings.autoSortOption.code
+            preferences[AUTO_SORT_ENABLED] = (settings.autoSortOption != AppAutoSortOption.NONE)
             preferences[APP_LANGUAGE] = settings.language.name
             preferences[KEEP_SCREEN_ON_WHILE_RUNNING] = settings.keepScreenOnWhileRunning
             preferences[USE_DYNAMIC_COLOR] = settings.useDynamicColor
@@ -222,8 +264,12 @@ class SettingsRepository(
         updateSettings { it.copy(timePrecision = precision) }
     }
 
+    suspend fun setAutoSortOption(option: AppAutoSortOption) {
+        updateSettings { it.copy(autoSortOption = option) }
+    }
+
     suspend fun setAutoSortEnabled(enabled: Boolean) {
-        updateSettings { it.copy(autoSortEnabled = enabled) }
+        setAutoSortOption(if (enabled) AppAutoSortOption.BY_FASTEST_LAP else AppAutoSortOption.NONE)
     }
 
     suspend fun setKeepScreenOnWhileRunning(enabled: Boolean) {

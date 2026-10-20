@@ -48,6 +48,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -62,6 +63,15 @@ private object GlobalControlBarDefaults {
     val HeaderIconSize = 24.dp
     val RowSpacing = 8.dp
     val RowPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp)
+
+    val StartButtonColor = Color(0xFF2E7D32)
+    val StopButtonColor = Color(0xFFD32F2F)
+    val ResetButtonColor = Color(0xFFE65100)
+    val DisabledButtonContainerColor = Color(0xFFB0BEC5)
+    val DisabledButtonContentColor = Color(0xFF546E7A)
+
+    val ButtonTextStyle: TextStyle
+        @Composable get() = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
 }
 
 /**
@@ -165,7 +175,7 @@ fun GlobalControlBar(
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = stringResource(R.string.action_add_watch),
-                        fontWeight = FontWeight.Bold
+                        style = GlobalControlBarDefaults.ButtonTextStyle
                     )
                 }
 
@@ -181,7 +191,10 @@ fun GlobalControlBar(
                         modifier = Modifier.size(GlobalControlBarDefaults.ButtonIconSize)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = stringResource(R.string.action_batch_add))
+                    Text(
+                        text = stringResource(R.string.action_batch_add),
+                        style = GlobalControlBarDefaults.ButtonTextStyle
+                    )
                 }
 
                 // Start All / Stop All
@@ -201,7 +214,7 @@ fun GlobalControlBar(
                     if (anyRunning) {
                         Surface(
                             shape = GlobalControlBarDefaults.ButtonShape,
-                            color = Color(0xFFD32F2F),
+                            color = GlobalControlBarDefaults.StopButtonColor,
                             contentColor = Color.White
                         ) {
                             Row(
@@ -217,15 +230,15 @@ fun GlobalControlBar(
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
                                     text = stringResource(R.string.action_stop_all),
-                                    fontWeight = FontWeight.Bold
+                                    style = GlobalControlBarDefaults.ButtonTextStyle
                                 )
                             }
                         }
                     } else {
                         Surface(
                             shape = GlobalControlBarDefaults.ButtonShape,
-                            color = if (hasWatches) Color(0xFF2E7D32) else Color(0xFFB0BEC5),
-                            contentColor = if (hasWatches) Color.White else Color(0xFF546E7A)
+                            color = if (hasWatches) GlobalControlBarDefaults.StartButtonColor else GlobalControlBarDefaults.DisabledButtonContainerColor,
+                            contentColor = if (hasWatches) Color.White else GlobalControlBarDefaults.DisabledButtonContentColor
                         ) {
                             Row(
                                 modifier = Modifier.padding(GlobalControlBarDefaults.ButtonContentPadding),
@@ -240,7 +253,7 @@ fun GlobalControlBar(
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
                                     text = stringResource(R.string.action_start_all),
-                                    fontWeight = FontWeight.Bold
+                                    style = GlobalControlBarDefaults.ButtonTextStyle
                                 )
                             }
                         }
@@ -269,8 +282,8 @@ fun GlobalControlBar(
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 }
                             ),
-                        color = if (resetEnabled) Color(0xFFE65100) else Color(0xFFB0BEC5),
-                        contentColor = if (resetEnabled) Color.White else Color(0xFF546E7A),
+                        color = if (resetEnabled) GlobalControlBarDefaults.ResetButtonColor else GlobalControlBarDefaults.DisabledButtonContainerColor,
+                        contentColor = if (resetEnabled) Color.White else GlobalControlBarDefaults.DisabledButtonContentColor,
                         shape = GlobalControlBarDefaults.ButtonShape
                     ) {
                         Row(
@@ -286,10 +299,7 @@ fun GlobalControlBar(
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 text = stringResource(R.string.action_reset_all),
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                                letterSpacing = MaterialTheme.typography.labelLarge.letterSpacing
+                                style = GlobalControlBarDefaults.ButtonTextStyle
                             )
                         }
                     }
@@ -307,7 +317,10 @@ fun GlobalControlBar(
                         modifier = Modifier.size(GlobalControlBarDefaults.ButtonIconSize)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = stringResource(R.string.action_share))
+                    Text(
+                        text = stringResource(R.string.action_share),
+                        style = GlobalControlBarDefaults.ButtonTextStyle
+                    )
                 }
             }
         }

@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.ear.watches.R
+import org.ear.watches.data.model.AppAutoSortOption
 import org.ear.watches.data.model.StopwatchItem
 import org.ear.watches.ui.components.GlobalControlBar
 import org.ear.watches.ui.components.StopwatchTile
@@ -100,8 +101,8 @@ fun MainStopwatchScreen(
 
     val lazyGridState = rememberLazyGridState()
 
-    LaunchedEffect(uiState.settings.autoSortEnabled) {
-        if (uiState.settings.autoSortEnabled) {
+    LaunchedEffect(uiState.settings.autoSortOption) {
+        if (uiState.settings.autoSortOption != AppAutoSortOption.NONE) {
             draggedIndex = null
             dragOffset = Offset.Zero
         }
@@ -252,7 +253,7 @@ fun MainStopwatchScreen(
                 val gridModifier = Modifier
                     .fillMaxSize()
                     .then(
-                        if (!uiState.settings.autoSortEnabled) {
+                        if (uiState.settings.autoSortOption == AppAutoSortOption.NONE) {
                             Modifier.pointerInput(Unit) {
                                 detectDragGesturesAfterLongPress(
                                     onDragStart = { offset ->
@@ -338,7 +339,7 @@ fun MainStopwatchScreen(
                             timePrecision = uiState.settings.timePrecision,
                             runningDisplayPrecision = uiState.settings.runningDisplayPrecision,
                             tickerFlow = viewModel.tickerFlow,
-                            autoSortEnabled = uiState.settings.autoSortEnabled,
+                            autoSortOption = uiState.settings.autoSortOption,
                             onStart = { id ->
                                 viewModel.startStopwatch(id)
                                 haptics.playStart(uiState.settings.soundEnabled, uiState.settings.hapticsEnabled)
@@ -424,6 +425,7 @@ fun MainStopwatchScreen(
             onToggleSound = { viewModel.toggleSound() },
             onToggleHaptics = { viewModel.toggleHaptics() },
             onToggleHardwareKeys = { viewModel.toggleHardwareKeys() },
+            onSetAutoSortOption = { viewModel.setAutoSortOption(it) },
             onToggleAutoSort = { viewModel.toggleAutoSort() },
             onToggleKeepScreenOn = { viewModel.toggleKeepScreenOn() },
             onToggleDynamicColor = { viewModel.toggleDynamicColor() },
