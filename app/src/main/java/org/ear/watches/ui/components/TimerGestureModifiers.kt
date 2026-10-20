@@ -8,6 +8,12 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 
 /**
+ * Timeout duration in milliseconds for button long-press detection (e.g. Full Reset or Session Naming).
+ * Set to 300ms to trigger before the system drag-and-drop reorder long-press threshold (~500ms).
+ */
+private const val LONG_PRESS_TIMEOUT_MS = 300L
+
+/**
  * Custom pointer-input gesture modifier for instant response start/pause press
  * with long-press detection for session naming.
  */
@@ -47,7 +53,7 @@ fun Modifier.onStartInstantPressWithLongPressNaming(
                     } else {
                         currentOnStart()
                         var isReleased = false
-                        val releasedBeforeTimeout = withTimeoutOrNull(500L) {
+                        val releasedBeforeTimeout = withTimeoutOrNull(LONG_PRESS_TIMEOUT_MS) {
                             while (true) {
                                 val nextEvent = awaitPointerEvent()
                                 nextEvent.changes.forEach { it.consume() }
@@ -125,7 +131,7 @@ fun Modifier.onResetInstantPress(
                 if (event.type == PointerEventType.Press || event.changes.any { it.pressed }) {
                     event.changes.forEach { it.consume() }
                     var isReleased = false
-                    val releasedBeforeTimeout = withTimeoutOrNull(500L) {
+                    val releasedBeforeTimeout = withTimeoutOrNull(LONG_PRESS_TIMEOUT_MS) {
                         while (true) {
                             val nextEvent = awaitPointerEvent()
                             nextEvent.changes.forEach { it.consume() }

@@ -164,7 +164,7 @@
 
     <!-- Multi-Run Strings -->
     <string name="label_run">Lauf %1$d</string>
-    <string name="hint_hold_to_reset_all">0,5s gedrückt halten zum Zurücksetzen aller Läufe</string>
+    <string name="hint_hold_to_reset_all">0,3s gedrückt halten zum Zurücksetzen aller Läufe</string>
     <string name="label_hold_to_reset_all">Zum vollständigen Zurücksetzen gedrückt halten</string>
     <string name="label_total_all_runs">Gesamt</string>
     <string name="label_run_duration">Laufdauer</string>
@@ -177,9 +177,9 @@
     <string name="help_hardware_keys_title">Hardware-Lautstärketasten</string>
     <string name="help_hardware_keys_desc">Lauter = Alle starten / Rundenzeit für fokussierte Stoppuhr\nLeiser = Fokussierte Stoppuhr stoppen / Alle zurücksetzen, wenn gestoppt</string>
     <string name="help_reset_title">Zurücksetzen-Steuerung</string>
-    <string name="help_reset_desc">Kurz drücken (&lt;0,5s): Setzt die Anzeigezeit auf 0 zurück und bereitet einen neuen Lauf vor (Lauf 1, Lauf 2, …).\nLange drücken (&gt;0,5s): Löscht alle Läufe und den Rundenverlauf vollständig.</string>
+    <string name="help_reset_desc">Kurz drücken (&lt;0,3s): Setzt die Anzeigezeit auf 0 zurück und bereitet einen neuen Lauf vor (Lauf 1, Lauf 2, …).\nLange drücken (&gt;0,3s): Löscht alle Läufe und den Rundenverlauf vollständig.</string>
     <string name="help_reset_button_title">Zurücksetzen-Steuerung</string>
-    <string name="help_reset_button_desc">Kurz drücken (&lt;0,5s): Setzt die Anzeigezeit auf 0 zurück und bereitet einen neuen Lauf vor (Lauf 1, Lauf 2, …).\nLange drücken (&gt;0,5s): Löscht alle Läufe und den Rundenverlauf vollständig.</string>
+    <string name="help_reset_button_desc">Kurz drücken (&lt;0,3s): Setzt die Anzeigezeit auf 0 zurück und bereitet einen neuen Lauf vor (Lauf 1, Lauf 2, …).\nLange drücken (&gt;0,3s): Löscht alle Läufe und den Rundenverlauf vollständig.</string>
     <string name="help_pace_trend_title">Rundentrend-Anzeige</string>
     <string name="help_pace_trend_desc">Grün ▼ zeigt eine schnellere Runde als die vorherige an, Rot ▲ eine langsamere Runde.</string>
     <string name="help_roster_title">Gespeicherte Athleten-Liste</string>
@@ -193,7 +193,7 @@
     <string name="help_settings_title">Präzisions- &amp; Anzeige-Einstellungen</string>
     <string name="help_settings_desc">Konfigurieren Sie getrennte Genauigkeit für laufende Zeit und Ergebnisse/Runden, Themes, Textskalierung, automatische Sortierung, Bildschirm anlassen und Spracheinstellungen.</string>
     <string name="help_session_naming_title">Sessionen benennen</string>
-    <string name="help_session_naming_desc">Drücken Sie lange auf Start oder Starten (&gt;0,5s), um eine Session mit Schnellauswahl-Chips zu benennen. Sie können Sessionen auch nachträglich in den Details umbenennen.</string>
+    <string name="help_session_naming_desc">Drücken Sie lange auf Start oder Starten (&gt;0,3s), um eine Session mit Schnellauswahl-Chips zu benennen. Sie können Sessionen auch nachträglich in den Details umbenennen.</string>
     <string name="help_precision_sort_title">Präzisions- &amp; Anzeige-Einstellungen</string>
     <string name="help_precision_sort_desc">Konfigurieren Sie getrennte Genauigkeit für laufende Zeit und Ergebnisse/Runden, Themes, Textskalierung, automatische Sortierung, Bildschirm anlassen und Spracheinstellungen.</string>
 

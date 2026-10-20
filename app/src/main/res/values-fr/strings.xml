@@ -164,7 +164,7 @@
 
     <!-- Multi-Run Strings -->
     <string name="label_run">Course %1$d</string>
-    <string name="hint_hold_to_reset_all">Maintenir 0,5s pour réinitialiser toutes les courses pour tous les chronos</string>
+    <string name="hint_hold_to_reset_all">Maintenir 0,3s pour réinitialiser toutes les courses pour tous les chronos</string>
     <string name="label_hold_to_reset_all">Maintenir pour tout réinitialiser</string>
     <string name="label_total_all_runs">Total</string>
     <string name="label_run_duration">Durée de la course</string>
@@ -177,9 +177,9 @@
     <string name="help_hardware_keys_title">Boutons de volume physiques</string>
     <string name="help_hardware_keys_desc">Volume+ = Tout démarrer / Temps au tour pour le chrono ciblé\nVolume- = Arrêter le chrono ciblé / Tout réinitialiser une fois arrêté</string>
     <string name="help_reset_title">Contrôles du bouton Réinitialiser</string>
-    <string name="help_reset_desc">Appui court (&lt;0,5s) : Réinitialise le temps affiché à 0 et prépare une nouvelle session de course (Course 1, Course 2, …).\nAppui long (&gt;0,5s) : Effectue une suppression complète de toutes les sessions de course et de l\'historique des tours.</string>
+    <string name="help_reset_desc">Appui court (&lt;0,3s) : Réinitialise le temps affiché à 0 et prépare une nouvelle session de course (Course 1, Course 2, …).\nAppui long (&gt;0,3s) : Effectue une suppression complète de toutes les sessions de course et de l\'historique des tours.</string>
     <string name="help_reset_button_title">Contrôles du bouton Réinitialiser</string>
-    <string name="help_reset_button_desc">Appui court (&lt;0,5s) : Réinitialise le temps affiché à 0 et prépare une nouvelle session de course (Course 1, Course 2, …).\nAppui long (&gt;0,5s) : Effectue une suppression complète de toutes les sessions de course et de l\'historique des tours.</string>
+    <string name="help_reset_button_desc">Appui court (&lt;0,3s) : Réinitialise le temps affiché à 0 et prépare une nouvelle session de course (Course 1, Course 2, …).\nAppui long (&gt;0,3s) : Effectue une suppression complète de toutes les sessions de course et de l\'historique des tours.</string>
     <string name="help_pace_trend_title">Indicateur de tendance d\'allure</string>
     <string name="help_pace_trend_desc">Vert ▼ indique un tour plus rapide que le précédent, Rouge ▲ indique un tour plus lent.</string>
     <string name="help_roster_title">Liste d\'athlètes enregistrés</string>
@@ -193,7 +193,7 @@
     <string name="help_settings_title">Paramètres de précision &amp; d\'affichage</string>
     <string name="help_settings_desc">Configurez séparément la précision du temps en cours et des résultats/tours, les thèmes, la taille du texte, le tri automatique, le maintien de l\'écran allumé et la langue.</string>
     <string name="help_session_naming_title">Nommer les sessions</string>
-    <string name="help_session_naming_desc">Appuyez longuement sur Démarrer (&gt;0,5s) pour nommer une session avec des puces rapides. Vous pouvez aussi renommer les sessions dans les détails.</string>
+    <string name="help_session_naming_desc">Appuyez longuement sur Démarrer (&gt;0,3s) pour nommer une session avec des puces rapides. Vous pouvez aussi renommer les sessions dans les détails.</string>
     <string name="help_precision_sort_title">Paramètres de précision &amp; d\'affichage</string>
     <string name="help_precision_sort_desc">Configurez séparément la précision du temps en cours et des résultats/tours, les thèmes, la taille du texte, le tri automatique, le maintien de l\'écran allumé et la langue.</string>
 

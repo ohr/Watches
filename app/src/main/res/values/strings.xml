@@ -164,7 +164,7 @@
 
     <!-- Multi-Run Strings -->
     <string name="label_run">Run %1$d</string>
-    <string name="hint_hold_to_reset_all">Hold 0.5s to reset all runs for all watches</string>
+    <string name="hint_hold_to_reset_all">Hold 0.3s to reset all runs for all watches</string>
     <string name="label_hold_to_reset_all">Hold to Reset All</string>
     <string name="label_total_all_runs">Total</string>
     <string name="label_run_duration">Run Duration</string>
@@ -177,9 +177,9 @@
     <string name="help_hardware_keys_title">Hardware Volume Buttons</string>
     <string name="help_hardware_keys_desc">Volume+ = Start All / Lap split for focused watch\nVolume- = Stop focused watch / Reset all when stopped</string>
     <string name="help_reset_title">Reset Button Controls</string>
-    <string name="help_reset_desc">Short tap (&lt;0.5s): Resets display time to 0 and prepares a new run session (Run 1, Run 2, …).\nLong press (&gt;0.5s): Performs a complete wipe of all run sessions and lap history.</string>
+    <string name="help_reset_desc">Short tap (&lt;0.3s): Resets display time to 0 and prepares a new run session (Run 1, Run 2, …).\nLong press (&gt;0.3s): Performs a complete wipe of all run sessions and lap history.</string>
     <string name="help_reset_button_title">Reset Button Controls</string>
-    <string name="help_reset_button_desc">Short tap (&lt;0.5s): Resets display time to 0 and prepares a new run session (Run 1, Run 2, …).\nLong press (&gt;0.5s): Performs a complete wipe of all run sessions and lap history.</string>
+    <string name="help_reset_button_desc">Short tap (&lt;0.3s): Resets display time to 0 and prepares a new run session (Run 1, Run 2, …).\nLong press (&gt;0.3s): Performs a complete wipe of all run sessions and lap history.</string>
     <string name="help_pace_trend_title">Pace Trend Indicators</string>
     <string name="help_pace_trend_desc">Green ▼ indicates a lap faster than the previous split, while Red ▲ indicates a slower lap.</string>
     <string name="help_roster_title">Saved Athlete Roster</string>
@@ -193,7 +193,7 @@
     <string name="help_settings_title">Precision &amp; Display Settings</string>
     <string name="help_settings_desc">Configure separate running time vs result/lap precision, themes, text scaling, auto-sorting, Keep Screen Awake, and language settings.</string>
     <string name="help_session_naming_title">Custom Session Naming</string>
-    <string name="help_session_naming_desc">Long-press Start or Start All (&gt;0.5s) to name a session using quick preset chips while timing. You can also rename any session retroactively in the Detail View.</string>
+    <string name="help_session_naming_desc">Long-press Start or Start All (&gt;0.3s) to name a session using quick preset chips while timing. You can also rename any session retroactively in the Detail View.</string>
     <string name="help_precision_sort_title">Precision &amp; Display Settings</string>
     <string name="help_precision_sort_desc">Configure separate running time vs result/lap precision, themes, text scaling, auto-sorting, Keep Screen Awake, and language settings.</string>
 
