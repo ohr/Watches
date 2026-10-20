@@ -127,145 +127,28 @@ fun BatchAddDialog(
                     }
                 }
 
+                // Middle Section (Roster vs Numbered)
                 if (mode == BatchAddMode.ROSTER && proposedAthleteNames.isNotEmpty()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 4.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        TextButton(
-                            onClick = { selectedNames = proposedAthleteNames.toSet() }
-                        ) {
-                            Text(stringResource(R.string.btn_select_all))
-                        }
-                        TextButton(
-                            onClick = { selectedNames = emptySet() }
-                        ) {
-                            Text(stringResource(R.string.btn_deselect_all))
-                        }
-                    }
-
-                    // Scrollable Middle Section
-                    LazyColumn(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(2.dp)
-                    ) {
-                        items(
-                            items = proposedAthleteNames,
-                            key = { it }
-                        ) { name ->
-                            val isChecked = name in selectedNames
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        selectedNames = if (isChecked) {
-                                            selectedNames - name
-                                        } else {
-                                            selectedNames + name
-                                        }
-                                    }
-                                    .padding(vertical = 2.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Checkbox(
-                                    checked = isChecked,
-                                    onCheckedChange = { checked ->
-                                        selectedNames = if (checked) {
-                                            selectedNames + name
-                                        } else {
-                                            selectedNames - name
-                                        }
-                                    }
-                                )
-                                Text(
-                                    text = name,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .padding(start = 8.dp)
-                                )
-                                IconButton(
-                                    onClick = { onRemoveProposedName(name) }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Delete,
-                                        contentDescription = stringResource(R.string.cd_remove_proposed_name),
-                                        tint = MaterialTheme.colorScheme.error
-                                    )
-                                }
-                            }
-                        }
-                    }
+                    BatchRosterSection(
+                        proposedAthleteNames = proposedAthleteNames,
+                        selectedNames = selectedNames,
+                        onSelectAll = { selectedNames = proposedAthleteNames.toSet() },
+                        onDeselectAll = { selectedNames = emptySet() },
+                        onToggleName = { name ->
+                            selectedNames = if (name in selectedNames) selectedNames - name else selectedNames + name
+                        },
+                        onRemoveProposedName = onRemoveProposedName,
+                        modifier = Modifier.weight(1f)
+                    )
                 } else {
-                    // Scrollable Middle Section for Numbered Mode
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        OutlinedTextField(
-                            value = prefix,
-                            onValueChange = { prefix = it },
-                            label = { Text(stringResource(R.string.dialog_batch_add_prefix_label)) },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-
-                        Text(
-                            text = stringResource(R.string.dialog_batch_add_number_athletes),
-                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
-                        )
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            IconButton(
-                                onClick = { if (count > 1) count-- },
-                                enabled = count > 1
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Remove,
-                                    contentDescription = stringResource(R.string.cd_decrease_count),
-                                    modifier = Modifier.size(28.dp)
-                                )
-                            }
-
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                modifier = Modifier.padding(horizontal = 16.dp)
-                            ) {
-                                Text(
-                                    text = "$count",
-                                    style = MaterialTheme.typography.headlineMedium.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                                    ),
-                                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
-                                )
-                            }
-
-                            IconButton(
-                                onClick = { if (count < 12) count++ },
-                                enabled = count < 12
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Add,
-                                    contentDescription = stringResource(R.string.cd_increase_count),
-                                    modifier = Modifier.size(28.dp)
-                                )
-                            }
-                        }
-                    }
+                    BatchNumberedSection(
+                        prefix = prefix,
+                        onPrefixChange = { prefix = it },
+                        count = count,
+                        onDecreaseCount = { if (count > 1) count-- },
+                        onIncreaseCount = { if (count < 12) count++ },
+                        modifier = Modifier.weight(1f)
+                    )
                 }
 
                 // Fixed Bottom Footer
@@ -310,6 +193,146 @@ fun BatchAddDialog(
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BatchRosterSection(
+    proposedAthleteNames: List<String>,
+    selectedNames: Set<String>,
+    onSelectAll: () -> Unit,
+    onDeselectAll: () -> Unit,
+    onToggleName: (String) -> Unit,
+    onRemoveProposedName: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TextButton(onClick = onSelectAll) {
+                Text(stringResource(R.string.btn_select_all))
+            }
+            TextButton(onClick = onDeselectAll) {
+                Text(stringResource(R.string.btn_deselect_all))
+            }
+        }
+
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            items(
+                items = proposedAthleteNames,
+                key = { it }
+            ) { name ->
+                val isChecked = name in selectedNames
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onToggleName(name) }
+                        .padding(vertical = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = isChecked,
+                        onCheckedChange = { onToggleName(name) }
+                    )
+                    Text(
+                        text = name,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 8.dp)
+                    )
+                    IconButton(
+                        onClick = { onRemoveProposedName(name) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = stringResource(R.string.cd_remove_proposed_name),
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BatchNumberedSection(
+    prefix: String,
+    onPrefixChange: (String) -> Unit,
+    count: Int,
+    onDecreaseCount: () -> Unit,
+    onIncreaseCount: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        OutlinedTextField(
+            value = prefix,
+            onValueChange = onPrefixChange,
+            label = { Text(stringResource(R.string.dialog_batch_add_prefix_label)) },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp)
+        )
+
+        Text(
+            text = stringResource(R.string.dialog_batch_add_number_athletes),
+            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(
+                onClick = onDecreaseCount,
+                enabled = count > 1
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Remove,
+                    contentDescription = stringResource(R.string.cd_decrease_count),
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.primaryContainer,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            ) {
+                Text(
+                    text = "$count",
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    ),
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+                )
+            }
+
+            IconButton(
+                onClick = onIncreaseCount,
+                enabled = count < 12
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = stringResource(R.string.cd_increase_count),
+                    modifier = Modifier.size(28.dp)
+                )
             }
         }
     }

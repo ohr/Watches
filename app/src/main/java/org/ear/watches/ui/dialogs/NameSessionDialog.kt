@@ -67,48 +67,12 @@ fun NameSessionDialog(
                 )
 
                 if (proposedSessionNames.isNotEmpty()) {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.dialog_name_session_proposed),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-
-                        // Dynamic proposed session chips row
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .horizontalScroll(rememberScrollState()),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            proposedSessionNames.forEach { proposal ->
-                                FilterChip(
-                                    selected = (sessionNameText == proposal),
-                                    onClick = { sessionNameText = proposal },
-                                    label = { Text(proposal) },
-                                    trailingIcon = if (onRemoveProposedSessionName != null) {
-                                        {
-                                            IconButton(
-                                                onClick = { onRemoveProposedSessionName(proposal) },
-                                                modifier = Modifier.size(18.dp)
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Default.Close,
-                                                    contentDescription = stringResource(R.string.cd_remove_proposed_session),
-                                                    modifier = Modifier.size(14.dp),
-                                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
-                                            }
-                                        }
-                                    } else null,
-                                    shape = RoundedCornerShape(8.dp)
-                                )
-                            }
-                        }
-                    }
+                    ProposedSessionChipsSection(
+                        proposedSessionNames = proposedSessionNames,
+                        selectedName = sessionNameText,
+                        onSelectProposal = { sessionNameText = it },
+                        onRemoveProposal = onRemoveProposedSessionName
+                    )
                 }
 
                 // Custom input field
@@ -142,6 +106,58 @@ fun NameSessionDialog(
             }
         }
     )
+}
+
+@Composable
+private fun ProposedSessionChipsSection(
+    proposedSessionNames: List<String>,
+    selectedName: String,
+    onSelectProposal: (String) -> Unit,
+    onRemoveProposal: ((String) -> Unit)?,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.dialog_name_session_proposed),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            proposedSessionNames.forEach { proposal ->
+                FilterChip(
+                    selected = (selectedName == proposal),
+                    onClick = { onSelectProposal(proposal) },
+                    label = { Text(proposal) },
+                    trailingIcon = if (onRemoveProposal != null) {
+                        {
+                            IconButton(
+                                onClick = { onRemoveProposal(proposal) },
+                                modifier = Modifier.size(18.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = stringResource(R.string.cd_remove_proposed_session),
+                                    modifier = Modifier.size(14.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    } else null,
+                    shape = RoundedCornerShape(8.dp)
+                )
+            }
+        }
+    }
 }
 
 @Preview

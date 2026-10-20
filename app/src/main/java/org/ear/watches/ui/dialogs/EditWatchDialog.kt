@@ -79,39 +79,11 @@ fun EditWatchDialog(
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
                 )
 
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    StopwatchItem.DEFAULT_PASTEL_COLORS.forEach { colorHex ->
-                        val color = Color(colorHex)
-                        val isSelected = (colorHex == selectedColorHex)
-
-                        Box(
-                            modifier = Modifier
-                                .size(42.dp)
-                                .clip(CircleShape)
-                                .background(color)
-                                .border(
-                                    width = if (isSelected) 3.dp else 1.dp,
-                                    color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Black.copy(alpha = 0.2f),
-                                    shape = CircleShape
-                                )
-                                .clickable { selectedColorHex = colorHex },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (isSelected) {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = stringResource(R.string.cd_selected),
-                                    tint = Color.Black.copy(alpha = 0.7f),
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
-                        }
-                    }
-                }
+                ColorPickerGrid(
+                    colors = StopwatchItem.DEFAULT_PASTEL_COLORS,
+                    selectedColorHex = selectedColorHex,
+                    onSelectColor = { selectedColorHex = it }
+                )
             }
         },
         confirmButton = {
@@ -135,6 +107,59 @@ fun EditWatchDialog(
             }
         }
     )
+}
+
+@Composable
+private fun ColorPickerGrid(
+    colors: List<Long>,
+    selectedColorHex: Long,
+    onSelectColor: (Long) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    FlowRow(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        colors.forEach { colorHex ->
+            ColorOptionSwatch(
+                colorHex = colorHex,
+                isSelected = (colorHex == selectedColorHex),
+                onClick = { onSelectColor(colorHex) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ColorOptionSwatch(
+    colorHex: Long,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    val color = Color(colorHex)
+    Box(
+        modifier = Modifier
+            .size(42.dp)
+            .clip(CircleShape)
+            .background(color)
+            .border(
+                width = if (isSelected) 3.dp else 1.dp,
+                color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Black.copy(alpha = 0.2f),
+                shape = CircleShape
+            )
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        if (isSelected) {
+            Icon(
+                imageVector = Icons.Default.Check,
+                contentDescription = stringResource(R.string.cd_selected),
+                tint = Color.Black.copy(alpha = 0.7f),
+                modifier = Modifier.size(22.dp)
+            )
+        }
+    }
 }
 
 @Preview

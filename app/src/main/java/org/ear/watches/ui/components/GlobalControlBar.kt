@@ -79,7 +79,6 @@ private object GlobalControlBarDefaults {
  * that affect all stopwatches simultaneously (e.g., Global Start, Stop, Reset). Also houses
  * the actions for adding new watches, sharing results, and accessing settings.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GlobalControlBar(
     uiState: StopwatchUiState,
@@ -106,50 +105,12 @@ fun GlobalControlBar(
         shadowElevation = 4.dp
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            TopAppBar(
-                title = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Timer,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(GlobalControlBarDefaults.HeaderIconSize)
-                        )
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text(
-                            text = stringResource(R.string.app_name),
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.Bold
-                            )
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = onOpenAbout) {
-                        Icon(
-                            imageVector = Icons.Outlined.Info,
-                            contentDescription = stringResource(R.string.action_about)
-                        )
-                    }
-                    IconButton(onClick = onOpenHelp) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Default.HelpOutline,
-                            contentDescription = stringResource(R.string.cd_help)
-                        )
-                    }
-                    IconButton(onClick = onOpenSettings) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = stringResource(R.string.action_settings)
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
+            GlobalControlBarHeader(
+                onOpenAbout = onOpenAbout,
+                onOpenHelp = onOpenHelp,
+                onOpenSettings = onOpenSettings
             )
 
-            // Global Control Buttons in a single scrollable row
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -158,172 +119,264 @@ fun GlobalControlBar(
                 horizontalArrangement = Arrangement.spacedBy(GlobalControlBarDefaults.RowSpacing),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Add Watch
-                Button(
-                    onClick = onAddWatch,
-                    shape = GlobalControlBarDefaults.ButtonShape,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    ),
-                    contentPadding = GlobalControlBarDefaults.ButtonContentPadding
+                AddWatchButton(onClick = onAddWatch)
+
+                BatchAddButton(onClick = onBatchAdd)
+
+                GlobalStartStopButton(
+                    hasWatches = hasWatches,
+                    anyRunning = anyRunning,
+                    onStartAll = onStartAll,
+                    onStopAll = onStopAll,
+                    onNameAllSessions = onNameAllSessions
+                )
+
+                GlobalResetButton(
+                    enabled = hasWatches && allStopped,
+                    onResetAll = onResetAll,
+                    onFullResetAll = onFullResetAll
+                )
+
+                ShareResultsButton(onClick = onShareResults)
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun GlobalControlBarHeader(
+    onOpenAbout: () -> Unit,
+    onOpenHelp: () -> Unit,
+    onOpenSettings: () -> Unit
+) {
+    TopAppBar(
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.Timer,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(GlobalControlBarDefaults.HeaderIconSize)
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(
+                    text = stringResource(R.string.app_name),
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+            }
+        },
+        actions = {
+            IconButton(onClick = onOpenAbout) {
+                Icon(
+                    imageVector = Icons.Outlined.Info,
+                    contentDescription = stringResource(R.string.action_about)
+                )
+            }
+            IconButton(onClick = onOpenHelp) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Default.HelpOutline,
+                    contentDescription = stringResource(R.string.cd_help)
+                )
+            }
+            IconButton(onClick = onOpenSettings) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = stringResource(R.string.action_settings)
+                )
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    )
+}
+
+@Composable
+private fun AddWatchButton(onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
+        shape = GlobalControlBarDefaults.ButtonShape,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary
+        ),
+        contentPadding = GlobalControlBarDefaults.ButtonContentPadding
+    ) {
+        Icon(
+            imageVector = Icons.Default.Add,
+            contentDescription = null,
+            modifier = Modifier.size(GlobalControlBarDefaults.ButtonIconSize)
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+            text = stringResource(R.string.action_add_watch),
+            style = GlobalControlBarDefaults.ButtonTextStyle
+        )
+    }
+}
+
+@Composable
+private fun BatchAddButton(onClick: () -> Unit) {
+    FilledTonalButton(
+        onClick = onClick,
+        shape = GlobalControlBarDefaults.ButtonShape,
+        contentPadding = GlobalControlBarDefaults.ButtonContentPadding
+    ) {
+        Icon(
+            imageVector = Icons.Default.GroupAdd,
+            contentDescription = null,
+            modifier = Modifier.size(GlobalControlBarDefaults.ButtonIconSize)
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+            text = stringResource(R.string.action_batch_add),
+            style = GlobalControlBarDefaults.ButtonTextStyle
+        )
+    }
+}
+
+@Composable
+private fun GlobalStartStopButton(
+    hasWatches: Boolean,
+    anyRunning: Boolean,
+    onStartAll: () -> Unit,
+    onStopAll: () -> Unit,
+    onNameAllSessions: () -> Unit
+) {
+    val haptic = LocalHapticFeedback.current
+    Box(
+        modifier = Modifier.onStartInstantPressWithLongPressNaming(
+            enabled = hasWatches,
+            isRunning = anyRunning,
+            onStart = onStartAll,
+            onPause = onStopAll,
+            onLongPressNameSession = onNameAllSessions,
+            onLongPressHaptic = {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            }
+        )
+    ) {
+        if (anyRunning) {
+            Surface(
+                shape = GlobalControlBarDefaults.ButtonShape,
+                color = GlobalControlBarDefaults.StopButtonColor,
+                contentColor = Color.White
+            ) {
+                Row(
+                    modifier = Modifier.padding(GlobalControlBarDefaults.ButtonContentPadding),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Add,
+                        imageVector = Icons.Default.Stop,
                         contentDescription = null,
                         modifier = Modifier.size(GlobalControlBarDefaults.ButtonIconSize)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = stringResource(R.string.action_add_watch),
+                        text = stringResource(R.string.action_stop_all),
                         style = GlobalControlBarDefaults.ButtonTextStyle
                     )
                 }
-
-                // Batch Add
-                FilledTonalButton(
-                    onClick = onBatchAdd,
-                    shape = GlobalControlBarDefaults.ButtonShape,
-                    contentPadding = GlobalControlBarDefaults.ButtonContentPadding
+            }
+        } else {
+            Surface(
+                shape = GlobalControlBarDefaults.ButtonShape,
+                color = if (hasWatches) GlobalControlBarDefaults.StartButtonColor else GlobalControlBarDefaults.DisabledButtonContainerColor,
+                contentColor = if (hasWatches) Color.White else GlobalControlBarDefaults.DisabledButtonContentColor
+            ) {
+                Row(
+                    modifier = Modifier.padding(GlobalControlBarDefaults.ButtonContentPadding),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        imageVector = Icons.Default.GroupAdd,
+                        imageVector = Icons.Default.PlayArrow,
                         contentDescription = null,
                         modifier = Modifier.size(GlobalControlBarDefaults.ButtonIconSize)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = stringResource(R.string.action_batch_add),
-                        style = GlobalControlBarDefaults.ButtonTextStyle
-                    )
-                }
-
-                // Start All / Stop All
-                val haptic = LocalHapticFeedback.current
-                Box(
-                    modifier = Modifier.onStartInstantPressWithLongPressNaming(
-                        enabled = hasWatches,
-                        isRunning = anyRunning,
-                        onStart = onStartAll,
-                        onPause = onStopAll,
-                        onLongPressNameSession = onNameAllSessions,
-                        onLongPressHaptic = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        }
-                    )
-                ) {
-                    if (anyRunning) {
-                        Surface(
-                            shape = GlobalControlBarDefaults.ButtonShape,
-                            color = GlobalControlBarDefaults.StopButtonColor,
-                            contentColor = Color.White
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(GlobalControlBarDefaults.ButtonContentPadding),
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Stop,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(GlobalControlBarDefaults.ButtonIconSize)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = stringResource(R.string.action_stop_all),
-                                    style = GlobalControlBarDefaults.ButtonTextStyle
-                                )
-                            }
-                        }
-                    } else {
-                        Surface(
-                            shape = GlobalControlBarDefaults.ButtonShape,
-                            color = if (hasWatches) GlobalControlBarDefaults.StartButtonColor else GlobalControlBarDefaults.DisabledButtonContainerColor,
-                            contentColor = if (hasWatches) Color.White else GlobalControlBarDefaults.DisabledButtonContentColor
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(GlobalControlBarDefaults.ButtonContentPadding),
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.PlayArrow,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(GlobalControlBarDefaults.ButtonIconSize)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = stringResource(R.string.action_start_all),
-                                    style = GlobalControlBarDefaults.ButtonTextStyle
-                                )
-                            }
-                        }
-                    }
-                }
-
-                // Reset All Button
-                val resetEnabled = hasWatches && allStopped
-                TooltipBox(
-                    positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-                    tooltip = {
-                        PlainTooltip {
-                            Text(stringResource(R.string.hint_hold_to_reset_all))
-                        }
-                    },
-                    state = rememberTooltipState()
-                ) {
-                    Surface(
-                        modifier = Modifier
-                            .clip(GlobalControlBarDefaults.ButtonShape)
-                            .onResetInstantPress(
-                                enabled = resetEnabled,
-                                onReset = onResetAll,
-                                onFullReset = onFullResetAll,
-                                onLongPressHaptic = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                }
-                            ),
-                        color = if (resetEnabled) GlobalControlBarDefaults.ResetButtonColor else GlobalControlBarDefaults.DisabledButtonContainerColor,
-                        contentColor = if (resetEnabled) Color.White else GlobalControlBarDefaults.DisabledButtonContentColor,
-                        shape = GlobalControlBarDefaults.ButtonShape
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(GlobalControlBarDefaults.ButtonContentPadding),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Refresh,
-                                contentDescription = null,
-                                modifier = Modifier.size(GlobalControlBarDefaults.ButtonIconSize)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = stringResource(R.string.action_reset_all),
-                                style = GlobalControlBarDefaults.ButtonTextStyle
-                            )
-                        }
-                    }
-                }
-
-                // Share Results
-                FilledTonalButton(
-                    onClick = onShareResults,
-                    shape = GlobalControlBarDefaults.ButtonShape,
-                    contentPadding = GlobalControlBarDefaults.ButtonContentPadding
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Share,
-                        contentDescription = null,
-                        modifier = Modifier.size(GlobalControlBarDefaults.ButtonIconSize)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = stringResource(R.string.action_share),
+                        text = stringResource(R.string.action_start_all),
                         style = GlobalControlBarDefaults.ButtonTextStyle
                     )
                 }
             }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun GlobalResetButton(
+    enabled: Boolean,
+    onResetAll: () -> Unit,
+    onFullResetAll: () -> Unit
+) {
+    val haptic = LocalHapticFeedback.current
+    TooltipBox(
+        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+        tooltip = {
+            PlainTooltip {
+                Text(stringResource(R.string.hint_hold_to_reset_all))
+            }
+        },
+        state = rememberTooltipState()
+    ) {
+        Surface(
+            modifier = Modifier
+                .clip(GlobalControlBarDefaults.ButtonShape)
+                .onResetInstantPress(
+                    enabled = enabled,
+                    onReset = onResetAll,
+                    onFullReset = onFullResetAll,
+                    onLongPressHaptic = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    }
+                ),
+            color = if (enabled) GlobalControlBarDefaults.ResetButtonColor else GlobalControlBarDefaults.DisabledButtonContainerColor,
+            contentColor = if (enabled) Color.White else GlobalControlBarDefaults.DisabledButtonContentColor,
+            shape = GlobalControlBarDefaults.ButtonShape
+        ) {
+            Row(
+                modifier = Modifier.padding(GlobalControlBarDefaults.ButtonContentPadding),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = null,
+                    modifier = Modifier.size(GlobalControlBarDefaults.ButtonIconSize)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = stringResource(R.string.action_reset_all),
+                    style = GlobalControlBarDefaults.ButtonTextStyle
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ShareResultsButton(onClick: () -> Unit) {
+    FilledTonalButton(
+        onClick = onClick,
+        shape = GlobalControlBarDefaults.ButtonShape,
+        contentPadding = GlobalControlBarDefaults.ButtonContentPadding
+    ) {
+        Icon(
+            imageVector = Icons.Default.Share,
+            contentDescription = null,
+            modifier = Modifier.size(GlobalControlBarDefaults.ButtonIconSize)
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+            text = stringResource(R.string.action_share),
+            style = GlobalControlBarDefaults.ButtonTextStyle
+        )
     }
 }
 

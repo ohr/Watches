@@ -62,7 +62,7 @@
     <string name="auto_sort_by_name">By Stopwatch Name (A-Z)</string>
     <string name="setting_keep_screen_on">Keep Screen Awake</string>
     <string name="setting_keep_screen_on_desc">Keep display active while any stopwatch is running</string>
-    <string name="setting_running_display_precision">Running Time Precision</string>
+    <string name="setting_running_display_precision">Running Time Display</string>
     <string name="setting_time_precision">Result &amp; Lap Precision</string>
 
     <!-- Precision Options -->

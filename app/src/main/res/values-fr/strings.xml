@@ -62,7 +62,7 @@
     <string name="auto_sort_by_name">Par nom de chronomètre (A-Z)</string>
     <string name="setting_keep_screen_on">Garder l\'écran allumé</string>
     <string name="setting_keep_screen_on_desc">Empêcher la mise en veille pendant le chrono</string>
-    <string name="setting_running_display_precision">Précision du temps en cours</string>
+    <string name="setting_running_display_precision">Affichage du temps en cours</string>
     <string name="setting_time_precision">Précision résultat &amp; tour</string>
 
     <!-- Precision Options -->

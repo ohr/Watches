@@ -35,7 +35,11 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,16 +54,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import org.ear.watches.R
 import org.ear.watches.data.model.AppPrecision
 import org.ear.watches.data.model.AppSettings
 import org.ear.watches.data.model.LapRecord
-import androidx.compose.runtime.produceState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import org.ear.watches.data.model.RunSession
 import org.ear.watches.data.model.StopwatchItem
 import org.ear.watches.data.util.TimeFormatter
@@ -116,46 +116,13 @@ fun StopwatchDetailModal(
                     .padding(16.dp)
             ) {
                 // Fixed Header (Top): Watch Name, Pastel color badge, Close (X) icon button
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 12.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(20.dp)
-                                .clip(CircleShape)
-                                .background(Color(watch.pastelColorHex))
-                        )
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text(
-                            text = watch.name,
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.Bold
-                            ),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
+                StopwatchDetailHeader(
+                    name = watch.name,
+                    pastelColorHex = watch.pastelColorHex,
+                    onDismiss = onDismiss
+                )
 
-                    IconButton(
-                        onClick = onDismiss,
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = stringResource(R.string.cd_close_details)
-                        )
-                    }
-                }
-
-                // Scrollable Middle Panel: LazyColumn with Modifier.weight(1f).fillMaxWidth()
+                // Scrollable Middle Panel
                 LazyColumn(
                     modifier = Modifier
                         .weight(1f)
@@ -167,40 +134,10 @@ fun StopwatchDetailModal(
                         val totalCumulativeMillis = watch.getTotalCumulativeMillis(nowNanos)
                         val totalPrecision = if (watch.isRunning) settings.runningDisplayPrecision else settings.timePrecision
                         val formattedTotalCumulative = TimeFormatter.formatTime(totalCumulativeMillis, totalPrecision, subsecondSeparator)
-                        Card(
-                            shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
-                            ),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(12.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.label_total_all_runs),
-                                    style = MaterialTheme.typography.titleMedium.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                                    )
-                                )
-                                Text(
-                                    text = formattedTotalCumulative,
-                                    style = MaterialTheme.typography.titleLarge.copy(
-                                        fontFamily = FontFamily.Monospace,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                )
-                            }
-                        }
+                        TotalCumulativeCard(formattedTotal = formattedTotalCumulative)
                     }
 
-                    // Run Sessions Section (LazyColumn items)
+                    // Run Sessions Section
                     if (effectiveRuns.isEmpty()) {
                         item {
                             Text(
@@ -214,316 +151,28 @@ fun StopwatchDetailModal(
                         }
                     } else {
                         items(effectiveRuns) { run ->
-                            val runStartString = if (run.startTimeMillis > 0L) {
-                                timeFormatter.format(Date(run.startTimeMillis))
-                            } else {
-                                "-"
-                            }
-                            val runEndString = if (run.isFinished) {
-                                if (run.startTimeMillis > 0L) {
-                                    timeFormatter.format(Date(run.startTimeMillis + run.accumulatedMillis))
-                                } else {
-                                    "-"
-                                }
-                            } else if (watch.isRunning && run.runIndex == effectiveRuns.size) {
-                                stringResource(R.string.status_running)
-                            } else {
-                                "-"
-                            }
-                            val runDurationMillis = if (run.isRunning && watch.isRunning && run.runIndex == effectiveRuns.size) {
-                                watch.getElapsedMillis(nowNanos)
-                            } else {
-                                run.accumulatedMillis
-                            }
-                            
-                            val isRunActive = watch.isRunning && run.isRunning
-                            val runPrecision = if (isRunActive) settings.runningDisplayPrecision else settings.timePrecision
-                            val formattedRunDuration = TimeFormatter.formatTime(runDurationMillis, runPrecision, subsecondSeparator)
-
-                            Card(
-                                shape = RoundedCornerShape(12.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-                                ),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(12.dp),
-                                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                                ) {
-                                    // Card or section header: "Run X" with Run Duration and Start/End timestamp
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            modifier = Modifier.weight(1f)
-                                        ) {
-                                            val fallbackRunName = stringResource(R.string.label_run, run.runIndex)
-                                            Text(
-                                                text = run.getDisplayName(fallbackRunName),
-                                                style = MaterialTheme.typography.titleMedium.copy(
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = MaterialTheme.colorScheme.primary
-                                                ),
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
-                                            IconButton(
-                                                onClick = { renamingRunSession = run },
-                                                modifier = Modifier.size(28.dp)
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Default.Edit,
-                                                    contentDescription = stringResource(R.string.cd_edit_session_name),
-                                                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-                                                    modifier = Modifier.size(16.dp)
-                                                )
-                                            }
-                                        }
-                                        Text(
-                                            text = formattedRunDuration,
-                                            style = MaterialTheme.typography.titleMedium.copy(
-                                                fontFamily = FontFamily.Monospace,
-                                                fontWeight = FontWeight.Bold
-                                            ),
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                    }
-
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            text = "${stringResource(R.string.label_start_time)}: $runStartString",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                        Text(
-                                            text = "${stringResource(R.string.label_end_time)}: $runEndString",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                    }
-
-                                    HorizontalDivider(
-                                        modifier = Modifier.padding(vertical = 4.dp),
-                                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                                    )
-
-                                    // Vertical list of Laps for this run: Lap number, Lap split duration, and total duration
-                                    if (run.laps.isEmpty()) {
-                                        Text(
-                                            text = stringResource(R.string.report_laps_none),
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                    } else {
-                                        Column(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            verticalArrangement = Arrangement.spacedBy(4.dp)
-                                        ) {
-                                            // Lap table header row: [Lap #]   [Lap Time]   [Total Time]   [Delta]
-                                            Row(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                Text(
-                                                    text = stringResource(R.string.header_lap_num),
-                                                    style = MaterialTheme.typography.labelSmall.copy(
-                                                        fontWeight = FontWeight.Bold,
-                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                    ),
-                                                    modifier = Modifier.weight(0.15f),
-                                                    maxLines = 1,
-                                                    overflow = TextOverflow.Ellipsis
-                                                )
-                                                Text(
-                                                    text = stringResource(R.string.header_lap_time),
-                                                    style = MaterialTheme.typography.labelSmall.copy(
-                                                        fontWeight = FontWeight.Bold,
-                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                    ),
-                                                    modifier = Modifier.weight(0.30f),
-                                                    textAlign = TextAlign.End,
-                                                    maxLines = 1,
-                                                    overflow = TextOverflow.Ellipsis
-                                                )
-                                                Text(
-                                                    text = stringResource(R.string.header_total_time),
-                                                    style = MaterialTheme.typography.labelSmall.copy(
-                                                        fontWeight = FontWeight.Bold,
-                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                    ),
-                                                    modifier = Modifier.weight(0.30f),
-                                                    textAlign = TextAlign.End,
-                                                    maxLines = 1,
-                                                    overflow = TextOverflow.Ellipsis
-                                                )
-                                                Text(
-                                                    text = stringResource(R.string.header_pace_delta),
-                                                    style = MaterialTheme.typography.labelSmall.copy(
-                                                        fontWeight = FontWeight.Bold,
-                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                    ),
-                                                    modifier = Modifier.weight(0.25f),
-                                                    textAlign = TextAlign.End,
-                                                    maxLines = 1,
-                                                    overflow = TextOverflow.Ellipsis
-                                                )
-                                            }
-
-                                            run.laps.forEachIndexed { index, lap ->
-                                                val deltaMillis = lap.lapDeltaMillis ?: if (index > 0) lap.lapTimeMillis - run.laps[index - 1].lapTimeMillis else null
-                                                val deltaText = if (deltaMillis != null) {
-                                                    TimeFormatter.formatDeltaTime(deltaMillis, settings.timePrecision, subsecondSeparator)
-                                                } else {
-                                                    "-"
-                                                }
-                                                val deltaColor = when {
-                                                    deltaMillis != null && deltaMillis < 0 -> Color(0xFF2E7D32)
-                                                    deltaMillis != null && deltaMillis > 0 -> Color(0xFFD32F2F)
-                                                    else -> MaterialTheme.colorScheme.onSurfaceVariant
-                                                }
-
-                                                Row(
-                                                    modifier = Modifier.fillMaxWidth(),
-                                                    verticalAlignment = Alignment.CenterVertically
-                                                ) {
-                                                    Text(
-                                                        text = lap.lapNumber.toString(),
-                                                        style = MaterialTheme.typography.bodySmall.copy(
-                                                            fontWeight = FontWeight.Medium,
-                                                            fontFamily = FontFamily.Monospace
-                                                        ),
-                                                        modifier = Modifier.weight(0.15f),
-                                                        maxLines = 1,
-                                                        overflow = TextOverflow.Ellipsis
-                                                    )
-                                                    Text(
-                                                        text = TimeFormatter.formatTime(lap.lapTimeMillis, settings.timePrecision, subsecondSeparator),
-                                                        style = MaterialTheme.typography.bodySmall.copy(
-                                                            fontFamily = FontFamily.Monospace
-                                                        ),
-                                                        modifier = Modifier.weight(0.30f),
-                                                        textAlign = TextAlign.End,
-                                                        maxLines = 1,
-                                                        overflow = TextOverflow.Ellipsis
-                                                    )
-                                                    Text(
-                                                        text = TimeFormatter.formatTime(lap.totalTimeMillis, settings.timePrecision, subsecondSeparator),
-                                                        style = MaterialTheme.typography.bodySmall.copy(
-                                                            fontFamily = FontFamily.Monospace
-                                                        ),
-                                                        modifier = Modifier.weight(0.30f),
-                                                        textAlign = TextAlign.End,
-                                                        maxLines = 1,
-                                                        overflow = TextOverflow.Ellipsis
-                                                    )
-                                                    Text(
-                                                        text = deltaText,
-                                                        style = MaterialTheme.typography.bodySmall.copy(
-                                                            fontFamily = FontFamily.Monospace,
-                                                            fontWeight = if (deltaMillis != null && deltaMillis != 0L) FontWeight.Bold else FontWeight.Normal,
-                                                            color = deltaColor
-                                                        ),
-                                                        modifier = Modifier.weight(0.25f),
-                                                        textAlign = TextAlign.End,
-                                                        maxLines = 1,
-                                                        overflow = TextOverflow.Ellipsis
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                            RunSessionCard(
+                                run = run,
+                                watch = watch,
+                                settings = settings,
+                                nowNanos = nowNanos,
+                                effectiveRunsCount = effectiveRuns.size,
+                                timeFormatter = timeFormatter,
+                                subsecondSeparator = subsecondSeparator,
+                                onRenameRunSession = { renamingRunSession = run }
+                            )
                         }
                     }
                 }
 
                 // Fixed Footer (Bottom): "Close", "Delete Runs", and "Share" buttons
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    val hasMultipleButtons = hasRunData || canDeleteRuns
-
-                    OutlinedButton(
-                        onClick = onDismiss,
-                        modifier = if (hasMultipleButtons) Modifier.weight(1f) else Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(10.dp),
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.btn_close),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-
-                    if (canDeleteRuns) {
-                        FilledTonalButton(
-                            onClick = { onDeleteRuns(watch.id) },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(10.dp),
-                            colors = ButtonDefaults.filledTonalButtonColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer,
-                                contentColor = MaterialTheme.colorScheme.onErrorContainer
-                            ),
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = stringResource(R.string.cd_delete_runs),
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = stringResource(R.string.btn_delete_runs),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    }
-
-                    if (hasRunData) {
-                        Button(
-                            onClick = { showShareFormatDialog = true },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(10.dp),
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Share,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = stringResource(R.string.btn_share),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    }
-                }
+                StopwatchDetailFooter(
+                    hasRunData = hasRunData,
+                    canDeleteRuns = canDeleteRuns,
+                    onDismiss = onDismiss,
+                    onDeleteRuns = { onDeleteRuns(watch.id) },
+                    onShare = { showShareFormatDialog = true }
+                )
             }
         }
     }
@@ -553,6 +202,441 @@ fun StopwatchDetailModal(
             onDismiss = { renamingRunSession = null },
             onRemoveProposedSessionName = onRemoveProposedSessionName
         )
+    }
+}
+
+@Composable
+private fun StopwatchDetailHeader(
+    name: String,
+    pastelColorHex: Long,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(bottom = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.weight(1f)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(20.dp)
+                    .clip(CircleShape)
+                    .background(Color(pastelColorHex))
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                text = name,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        IconButton(
+            onClick = onDismiss,
+            modifier = Modifier.size(32.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = stringResource(R.string.cd_close_details)
+            )
+        }
+    }
+}
+
+@Composable
+private fun TotalCumulativeCard(
+    formattedTotal: String,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+        ),
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(R.string.label_total_all_runs),
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            )
+            Text(
+                text = formattedTotal,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            )
+        }
+    }
+}
+
+@Composable
+private fun RunSessionCard(
+    run: RunSession,
+    watch: StopwatchItem,
+    settings: AppSettings,
+    nowNanos: Long,
+    effectiveRunsCount: Int,
+    timeFormatter: SimpleDateFormat,
+    subsecondSeparator: String,
+    onRenameRunSession: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val runStartString = if (run.startTimeMillis > 0L) {
+        timeFormatter.format(Date(run.startTimeMillis))
+    } else {
+        "-"
+    }
+    val runEndString = if (run.isFinished) {
+        if (run.startTimeMillis > 0L) {
+            timeFormatter.format(Date(run.startTimeMillis + run.accumulatedMillis))
+        } else {
+            "-"
+        }
+    } else if (watch.isRunning && run.runIndex == effectiveRunsCount) {
+        stringResource(R.string.status_running)
+    } else {
+        "-"
+    }
+    val runDurationMillis = if (run.isRunning && watch.isRunning && run.runIndex == effectiveRunsCount) {
+        watch.getElapsedMillis(nowNanos)
+    } else {
+        run.accumulatedMillis
+    }
+
+    val isRunActive = watch.isRunning && run.isRunning
+    val runPrecision = if (isRunActive) settings.runningDisplayPrecision else settings.timePrecision
+    val formattedRunDuration = TimeFormatter.formatTime(runDurationMillis, runPrecision, subsecondSeparator)
+
+    Card(
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            // Header: Session name, duration & edit button
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    val fallbackRunName = stringResource(R.string.label_run, run.runIndex)
+                    Text(
+                        text = run.getDisplayName(fallbackRunName),
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    IconButton(
+                        onClick = onRenameRunSession,
+                        modifier = Modifier.size(28.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = stringResource(R.string.cd_edit_session_name),
+                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+                Text(
+                    text = formattedRunDuration,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "${stringResource(R.string.label_start_time)}: $runStartString",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = "${stringResource(R.string.label_end_time)}: $runEndString",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 4.dp),
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+            )
+
+            // Laps table
+            if (run.laps.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.report_laps_none),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            } else {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    LapTableHeaderRow()
+
+                    run.laps.forEachIndexed { index, lap ->
+                        val deltaMillis = lap.lapDeltaMillis ?: if (index > 0) lap.lapTimeMillis - run.laps[index - 1].lapTimeMillis else null
+                        LapRowItem(
+                            lap = lap,
+                            deltaMillis = deltaMillis,
+                            precision = settings.timePrecision,
+                            subsecondSeparator = subsecondSeparator
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LapTableHeaderRow(modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = stringResource(R.string.header_lap_num),
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            ),
+            modifier = Modifier.weight(0.15f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Text(
+            text = stringResource(R.string.header_lap_time),
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            ),
+            modifier = Modifier.weight(0.30f),
+            textAlign = TextAlign.End,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Text(
+            text = stringResource(R.string.header_total_time),
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            ),
+            modifier = Modifier.weight(0.30f),
+            textAlign = TextAlign.End,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Text(
+            text = stringResource(R.string.header_pace_delta),
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            ),
+            modifier = Modifier.weight(0.25f),
+            textAlign = TextAlign.End,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Composable
+private fun LapRowItem(
+    lap: LapRecord,
+    deltaMillis: Long?,
+    precision: AppPrecision,
+    subsecondSeparator: String,
+    modifier: Modifier = Modifier
+) {
+    val deltaText = if (deltaMillis != null) {
+        TimeFormatter.formatDeltaTime(deltaMillis, precision, subsecondSeparator)
+    } else {
+        "-"
+    }
+    val deltaColor = when {
+        deltaMillis != null && deltaMillis < 0 -> Color(0xFF2E7D32)
+        deltaMillis != null && deltaMillis > 0 -> Color(0xFFD32F2F)
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = lap.lapNumber.toString(),
+            style = MaterialTheme.typography.bodySmall.copy(
+                fontWeight = FontWeight.Medium,
+                fontFamily = FontFamily.Monospace
+            ),
+            modifier = Modifier.weight(0.15f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Text(
+            text = TimeFormatter.formatTime(lap.lapTimeMillis, precision, subsecondSeparator),
+            style = MaterialTheme.typography.bodySmall.copy(
+                fontFamily = FontFamily.Monospace
+            ),
+            modifier = Modifier.weight(0.30f),
+            textAlign = TextAlign.End,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Text(
+            text = TimeFormatter.formatTime(lap.totalTimeMillis, precision, subsecondSeparator),
+            style = MaterialTheme.typography.bodySmall.copy(
+                fontFamily = FontFamily.Monospace
+            ),
+            modifier = Modifier.weight(0.30f),
+            textAlign = TextAlign.End,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Text(
+            text = deltaText,
+            style = MaterialTheme.typography.bodySmall.copy(
+                fontFamily = FontFamily.Monospace,
+                fontWeight = if (deltaMillis != null && deltaMillis != 0L) FontWeight.Bold else FontWeight.Normal,
+                color = deltaColor
+            ),
+            modifier = Modifier.weight(0.25f),
+            textAlign = TextAlign.End,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Composable
+private fun StopwatchDetailFooter(
+    hasRunData: Boolean,
+    canDeleteRuns: Boolean,
+    onDismiss: () -> Unit,
+    onDeleteRuns: () -> Unit,
+    onShare: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        val hasMultipleButtons = hasRunData || canDeleteRuns
+
+        OutlinedButton(
+            onClick = onDismiss,
+            modifier = if (hasMultipleButtons) Modifier.weight(1f) else Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(10.dp),
+            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.btn_close),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        if (canDeleteRuns) {
+            FilledTonalButton(
+                onClick = onDeleteRuns,
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.filledTonalButtonColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                ),
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = stringResource(R.string.cd_delete_runs),
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = stringResource(R.string.btn_delete_runs),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+
+        if (hasRunData) {
+            Button(
+                onClick = onShare,
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(10.dp),
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Share,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = stringResource(R.string.btn_share),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
     }
 }
 

@@ -54,7 +54,6 @@ import org.ear.watches.ui.theme.WatchesTheme
  * A modal dialog presenting application-wide configuration options.
  * Allows users to toggle haptics, volume keys, display precision, auto-sort, and language.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsDialog(
     settings: AppSettings,
@@ -90,411 +89,115 @@ fun SettingsDialog(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 // 1. Running Display Precision Dropdown
-                var runningPrecisionExpanded by remember { mutableStateOf(false) }
-                ExposedDropdownMenuBox(
-                    expanded = runningPrecisionExpanded,
-                    onExpandedChange = { runningPrecisionExpanded = !runningPrecisionExpanded },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                            .fillMaxWidth(),
-                        readOnly = true,
-                        value = when (settings.runningDisplayPrecision) {
-                            AppPrecision.TENTHS -> stringResource(R.string.precision_tenths)
-                            AppPrecision.HUNDREDTHS -> stringResource(R.string.precision_hundredths)
-                            AppPrecision.SECONDS -> stringResource(R.string.precision_seconds)
-                        },
-                        onValueChange = {},
-                        label = { Text(text = stringResource(R.string.setting_running_display_precision)) },
-                        trailingIcon = {
-                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = runningPrecisionExpanded)
-                        },
-                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
-                    )
-                    ExposedDropdownMenu(
-                        expanded = runningPrecisionExpanded,
-                        onDismissRequest = { runningPrecisionExpanded = false }
-                    ) {
-                        AppPrecision.entries.forEach { precision ->
-                            val label = when (precision) {
-                                AppPrecision.TENTHS -> stringResource(R.string.precision_tenths)
-                                AppPrecision.HUNDREDTHS -> stringResource(R.string.precision_hundredths)
-                                AppPrecision.SECONDS -> stringResource(R.string.precision_seconds)
-                            }
-                            DropdownMenuItem(
-                                text = { Text(text = label) },
-                                onClick = {
-                                    onSetRunningDisplayPrecision(precision)
-                                    runningPrecisionExpanded = false
-                                },
-                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                            )
-                        }
-                    }
-                }
+                SettingDropdown(
+                    label = stringResource(R.string.setting_running_display_precision),
+                    selectedLabel = precisionLabel(settings.runningDisplayPrecision),
+                    options = AppPrecision.entries,
+                    optionLabel = { precisionLabel(it) },
+                    onOptionSelected = onSetRunningDisplayPrecision
+                )
 
                 // 2. Result & Lap Precision Dropdown
-                var timePrecisionExpanded by remember { mutableStateOf(false) }
-                ExposedDropdownMenuBox(
-                    expanded = timePrecisionExpanded,
-                    onExpandedChange = { timePrecisionExpanded = !timePrecisionExpanded },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                            .fillMaxWidth(),
-                        readOnly = true,
-                        value = when (settings.timePrecision) {
-                            AppPrecision.TENTHS -> stringResource(R.string.precision_tenths)
-                            AppPrecision.HUNDREDTHS -> stringResource(R.string.precision_hundredths)
-                            AppPrecision.SECONDS -> stringResource(R.string.precision_seconds)
-                        },
-                        onValueChange = {},
-                        label = { Text(text = stringResource(R.string.setting_time_precision)) },
-                        trailingIcon = {
-                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = timePrecisionExpanded)
-                        },
-                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
-                    )
-                    ExposedDropdownMenu(
-                        expanded = timePrecisionExpanded,
-                        onDismissRequest = { timePrecisionExpanded = false }
-                    ) {
-                        AppPrecision.entries.forEach { precision ->
-                            val label = when (precision) {
-                                AppPrecision.TENTHS -> stringResource(R.string.precision_tenths)
-                                AppPrecision.HUNDREDTHS -> stringResource(R.string.precision_hundredths)
-                                AppPrecision.SECONDS -> stringResource(R.string.precision_seconds)
-                            }
-                            DropdownMenuItem(
-                                text = { Text(text = label) },
-                                onClick = {
-                                    onSetPrecision(precision)
-                                    timePrecisionExpanded = false
-                                },
-                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                            )
-                        }
-                    }
-                }
+                SettingDropdown(
+                    label = stringResource(R.string.setting_time_precision),
+                    selectedLabel = precisionLabel(settings.timePrecision),
+                    options = AppPrecision.entries,
+                    optionLabel = { precisionLabel(it) },
+                    onOptionSelected = onSetPrecision
+                )
 
                 // 3. Theme Mode Dropdown
-                var themeModeExpanded by remember { mutableStateOf(false) }
-                ExposedDropdownMenuBox(
-                    expanded = themeModeExpanded,
-                    onExpandedChange = { themeModeExpanded = !themeModeExpanded },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                            .fillMaxWidth(),
-                        readOnly = true,
-                        value = when (settings.themeMode) {
-                            AppThemeMode.SYSTEM_DEFAULT -> stringResource(R.string.theme_system_default)
-                            AppThemeMode.LIGHT -> stringResource(R.string.theme_light)
-                            AppThemeMode.DARK -> stringResource(R.string.theme_dark)
-                        },
-                        onValueChange = {},
-                        label = { Text(text = stringResource(R.string.setting_theme_mode)) },
-                        trailingIcon = {
-                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = themeModeExpanded)
-                        },
-                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
-                    )
-                    ExposedDropdownMenu(
-                        expanded = themeModeExpanded,
-                        onDismissRequest = { themeModeExpanded = false }
-                    ) {
-                        AppThemeMode.entries.forEach { themeMode ->
-                            val label = when (themeMode) {
-                                AppThemeMode.SYSTEM_DEFAULT -> stringResource(R.string.theme_system_default)
-                                AppThemeMode.LIGHT -> stringResource(R.string.theme_light)
-                                AppThemeMode.DARK -> stringResource(R.string.theme_dark)
-                            }
-                            DropdownMenuItem(
-                                text = { Text(text = label) },
-                                onClick = {
-                                    onSetThemeMode(themeMode)
-                                    themeModeExpanded = false
-                                },
-                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                            )
-                        }
-                    }
-                }
+                SettingDropdown(
+                    label = stringResource(R.string.setting_theme_mode),
+                    selectedLabel = themeModeLabel(settings.themeMode),
+                    options = AppThemeMode.entries,
+                    optionLabel = { themeModeLabel(it) },
+                    onOptionSelected = onSetThemeMode
+                )
 
                 // 4. Font Size Scale Dropdown
-                var fontSizeExpanded by remember { mutableStateOf(false) }
-                ExposedDropdownMenuBox(
-                    expanded = fontSizeExpanded,
-                    onExpandedChange = { fontSizeExpanded = !fontSizeExpanded },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                            .fillMaxWidth(),
-                        readOnly = true,
-                        value = when (settings.fontSizeScale) {
-                            AppFontSize.SMALL -> stringResource(R.string.font_size_small)
-                            AppFontSize.NORMAL -> stringResource(R.string.font_size_normal)
-                            AppFontSize.LARGE -> stringResource(R.string.font_size_large)
-                        },
-                        onValueChange = {},
-                        label = { Text(text = stringResource(R.string.setting_font_size)) },
-                        trailingIcon = {
-                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = fontSizeExpanded)
-                        },
-                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
-                    )
-                    ExposedDropdownMenu(
-                        expanded = fontSizeExpanded,
-                        onDismissRequest = { fontSizeExpanded = false }
-                    ) {
-                        AppFontSize.entries.forEach { fontSize ->
-                            val label = when (fontSize) {
-                                AppFontSize.SMALL -> stringResource(R.string.font_size_small)
-                                AppFontSize.NORMAL -> stringResource(R.string.font_size_normal)
-                                AppFontSize.LARGE -> stringResource(R.string.font_size_large)
-                            }
-                            DropdownMenuItem(
-                                text = { Text(text = label) },
-                                onClick = {
-                                    onSetFontSizeScale(fontSize)
-                                    fontSizeExpanded = false
-                                },
-                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                            )
-                        }
-                    }
-                }
+                SettingDropdown(
+                    label = stringResource(R.string.setting_font_size),
+                    selectedLabel = fontSizeLabel(settings.fontSizeScale),
+                    options = AppFontSize.entries,
+                    optionLabel = { fontSizeLabel(it) },
+                    onOptionSelected = onSetFontSizeScale
+                )
 
                 // 5. Language Dropdown
-                var languageMenuExpanded by remember { mutableStateOf(false) }
-                ExposedDropdownMenuBox(
-                    expanded = languageMenuExpanded,
-                    onExpandedChange = { languageMenuExpanded = !languageMenuExpanded },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                            .fillMaxWidth(),
-                        readOnly = true,
-                        value = stringResource(settings.language.labelResId),
-                        onValueChange = {},
-                        label = { Text(text = stringResource(R.string.setting_language)) },
-                        trailingIcon = {
-                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = languageMenuExpanded)
-                        },
-                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
-                    )
-                    ExposedDropdownMenu(
-                        expanded = languageMenuExpanded,
-                        onDismissRequest = { languageMenuExpanded = false }
-                    ) {
-                        AppLanguage.entries.forEach { language ->
-                            DropdownMenuItem(
-                                text = { Text(text = stringResource(language.labelResId)) },
-                                onClick = {
-                                    onLanguageSelected(language)
-                                    onSetLanguage(language)
-                                    languageMenuExpanded = false
-                                },
-                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                            )
-                        }
+                SettingDropdown(
+                    label = stringResource(R.string.setting_language),
+                    selectedLabel = stringResource(settings.language.labelResId),
+                    options = AppLanguage.entries,
+                    optionLabel = { stringResource(it.labelResId) },
+                    onOptionSelected = { language ->
+                        onLanguageSelected(language)
+                        onSetLanguage(language)
                     }
-                }
+                )
 
                 HorizontalDivider()
 
                 // Dynamic Colors Switch (Android 12+)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onToggleDynamicColor() },
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = stringResource(R.string.setting_dynamic_color),
-                                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
-                            )
-                            Text(
-                                text = stringResource(R.string.setting_dynamic_color_desc),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        Switch(
-                            checked = settings.useDynamicColor,
-                            onCheckedChange = { onToggleDynamicColor() }
-                        )
-                    }
+                    SettingSwitchRow(
+                        title = stringResource(R.string.setting_dynamic_color),
+                        description = stringResource(R.string.setting_dynamic_color_desc),
+                        checked = settings.useDynamicColor,
+                        onToggle = onToggleDynamicColor
+                    )
 
                     HorizontalDivider()
                 }
 
                 // Sound Cues Switch
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onToggleSound() },
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(R.string.setting_sound),
-                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
-                        )
-                        Text(
-                            text = stringResource(R.string.setting_sound_desc),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Switch(
-                        checked = settings.soundEnabled,
-                        onCheckedChange = { onToggleSound() }
-                    )
-                }
+                SettingSwitchRow(
+                    title = stringResource(R.string.setting_sound),
+                    description = stringResource(R.string.setting_sound_desc),
+                    checked = settings.soundEnabled,
+                    onToggle = onToggleSound
+                )
 
                 HorizontalDivider()
 
                 // Haptic Vibration Switch
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onToggleHaptics() },
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(R.string.setting_haptics),
-                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
-                        )
-                        Text(
-                            text = stringResource(R.string.setting_haptics_desc),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Switch(
-                        checked = settings.hapticsEnabled,
-                        onCheckedChange = { onToggleHaptics() }
-                    )
-                }
+                SettingSwitchRow(
+                    title = stringResource(R.string.setting_haptics),
+                    description = stringResource(R.string.setting_haptics_desc),
+                    checked = settings.hapticsEnabled,
+                    onToggle = onToggleHaptics
+                )
 
                 HorizontalDivider()
 
                 // Hardware Volume Keys Control Switch
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onToggleHardwareKeys() },
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(R.string.setting_hardware_keys),
-                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
-                        )
-                        Text(
-                            text = stringResource(R.string.setting_hardware_keys_desc),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Switch(
-                        checked = settings.hardwareVolumeKeysEnabled,
-                        onCheckedChange = { onToggleHardwareKeys() }
-                    )
-                }
+                SettingSwitchRow(
+                    title = stringResource(R.string.setting_hardware_keys),
+                    description = stringResource(R.string.setting_hardware_keys_desc),
+                    checked = settings.hardwareVolumeKeysEnabled,
+                    onToggle = onToggleHardwareKeys
+                )
 
                 HorizontalDivider()
 
                 // Auto-Sort Dropdown
-                var autoSortExpanded by remember { mutableStateOf(false) }
-                ExposedDropdownMenuBox(
-                    expanded = autoSortExpanded,
-                    onExpandedChange = { autoSortExpanded = !autoSortExpanded },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                            .fillMaxWidth(),
-                        readOnly = true,
-                        value = when (settings.autoSortOption) {
-                            AppAutoSortOption.NONE -> stringResource(R.string.auto_sort_none)
-                            AppAutoSortOption.BY_FASTEST_LAP -> stringResource(R.string.auto_sort_fastest_lap)
-                            AppAutoSortOption.BY_NAME -> stringResource(R.string.auto_sort_by_name)
-                        },
-                        onValueChange = {},
-                        label = { Text(text = stringResource(R.string.setting_auto_sort)) },
-                        trailingIcon = {
-                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = autoSortExpanded)
-                        },
-                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
-                    )
-                    ExposedDropdownMenu(
-                        expanded = autoSortExpanded,
-                        onDismissRequest = { autoSortExpanded = false }
-                    ) {
-                        AppAutoSortOption.entries.forEach { option ->
-                            val label = when (option) {
-                                AppAutoSortOption.NONE -> stringResource(R.string.auto_sort_none)
-                                AppAutoSortOption.BY_FASTEST_LAP -> stringResource(R.string.auto_sort_fastest_lap)
-                                AppAutoSortOption.BY_NAME -> stringResource(R.string.auto_sort_by_name)
-                            }
-                            DropdownMenuItem(
-                                text = { Text(text = label) },
-                                onClick = {
-                                    onSetAutoSortOption(option)
-                                    autoSortExpanded = false
-                                },
-                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                            )
-                        }
-                    }
-                }
+                SettingDropdown(
+                    label = stringResource(R.string.setting_auto_sort),
+                    selectedLabel = autoSortLabel(settings.autoSortOption),
+                    options = AppAutoSortOption.entries,
+                    optionLabel = { autoSortLabel(it) },
+                    onOptionSelected = onSetAutoSortOption
+                )
 
                 HorizontalDivider()
 
                 // Keep Screen Awake Switch
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onToggleKeepScreenOn() },
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(R.string.setting_keep_screen_on),
-                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
-                        )
-                        Text(
-                            text = stringResource(R.string.setting_keep_screen_on_desc),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Switch(
-                        checked = settings.keepScreenOnWhileRunning,
-                        onCheckedChange = { onToggleKeepScreenOn() }
-                    )
-                }
+                SettingSwitchRow(
+                    title = stringResource(R.string.setting_keep_screen_on),
+                    description = stringResource(R.string.setting_keep_screen_on_desc),
+                    checked = settings.keepScreenOnWhileRunning,
+                    onToggle = onToggleKeepScreenOn
+                )
 
                 HorizontalDivider()
 
@@ -531,6 +234,114 @@ fun SettingsDialog(
             }
         }
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun <T> SettingDropdown(
+    label: String,
+    selectedLabel: String,
+    options: List<T>,
+    optionLabel: @Composable (T) -> String,
+    onOptionSelected: (T) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = modifier.fillMaxWidth()
+    ) {
+        OutlinedTextField(
+            modifier = Modifier
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                .fillMaxWidth(),
+            readOnly = true,
+            value = selectedLabel,
+            onValueChange = {},
+            label = { Text(text = label) },
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            },
+            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(text = optionLabel(option)) },
+                    onClick = {
+                        onOptionSelected(option)
+                        expanded = false
+                    },
+                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SettingSwitchRow(
+    title: String,
+    description: String,
+    checked: Boolean,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onToggle() },
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
+            )
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Switch(
+            checked = checked,
+            onCheckedChange = { onToggle() }
+        )
+    }
+}
+
+@Composable
+private fun precisionLabel(precision: AppPrecision): String = when (precision) {
+    AppPrecision.TENTHS -> stringResource(R.string.precision_tenths)
+    AppPrecision.HUNDREDTHS -> stringResource(R.string.precision_hundredths)
+    AppPrecision.SECONDS -> stringResource(R.string.precision_seconds)
+}
+
+@Composable
+private fun themeModeLabel(themeMode: AppThemeMode): String = when (themeMode) {
+    AppThemeMode.SYSTEM_DEFAULT -> stringResource(R.string.theme_system_default)
+    AppThemeMode.LIGHT -> stringResource(R.string.theme_light)
+    AppThemeMode.DARK -> stringResource(R.string.theme_dark)
+}
+
+@Composable
+private fun fontSizeLabel(fontSize: AppFontSize): String = when (fontSize) {
+    AppFontSize.SMALL -> stringResource(R.string.font_size_small)
+    AppFontSize.NORMAL -> stringResource(R.string.font_size_normal)
+    AppFontSize.LARGE -> stringResource(R.string.font_size_large)
+}
+
+@Composable
+private fun autoSortLabel(option: AppAutoSortOption): String = when (option) {
+    AppAutoSortOption.NONE -> stringResource(R.string.auto_sort_none)
+    AppAutoSortOption.BY_FASTEST_LAP -> stringResource(R.string.auto_sort_fastest_lap)
+    AppAutoSortOption.BY_NAME -> stringResource(R.string.auto_sort_by_name)
 }
 
 @Preview
