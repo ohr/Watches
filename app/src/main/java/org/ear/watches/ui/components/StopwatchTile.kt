@@ -1,8 +1,8 @@
 package org.ear.watches.ui.components
 
 import android.os.SystemClock
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,11 +16,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -62,13 +67,17 @@ fun StopwatchTile(
     var showCurrentLapTime by rememberSaveable { mutableStateOf(false) }
 
     val isFocused = watch.isFocused
-    val borderThickness by animateDpAsState(
+    val animatedBorderWidth by animateDpAsState(
         targetValue = if (isFocused) StopwatchTileDefaults.FocusBorderWidth else 1.dp,
-        label = "borderThickness"
+        label = "animatedBorderWidth"
+    )
+    val animatedBorderColor by animateColorAsState(
+        targetValue = if (isFocused) StopwatchTileDefaults.FocusBorderColor else Color(0x1F000000),
+        label = "animatedBorderColor"
     )
 
-    val cardBackgroundColor = Color(watch.pastelColorHex)
-    val darkContentColor = Color(0xFF1F1F1F)
+    val cardBackgroundColor = remember(watch.pastelColorHex) { Color(watch.pastelColorHex) }
+    val darkContentColor = remember { Color(0xFF1F1F1F) }
 
     val currentTick by produceState(initialValue = SystemClock.elapsedRealtimeNanos(), watch.isRunning, tickerFlow) {
         if (watch.isRunning) {
@@ -95,10 +104,22 @@ fun StopwatchTile(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .shadow(
-                elevation = if (isFocused) 8.dp else StopwatchTileDefaults.CardElevation,
-                shape = StopwatchTileDefaults.CardShape
-            )
+            .drawWithCache {
+                val strokePx = animatedBorderWidth.toPx()
+                val color = animatedBorderColor
+                val cornerRadiusPx = 20.dp.toPx()
+                val halfStroke = strokePx / 2f
+                onDrawWithContent {
+                    drawContent()
+                    drawRoundRect(
+                        color = color,
+                        topLeft = Offset(halfStroke, halfStroke),
+                        size = Size(size.width - strokePx, size.height - strokePx),
+                        cornerRadius = CornerRadius(cornerRadiusPx, cornerRadiusPx),
+                        style = Stroke(width = strokePx)
+                    )
+                }
+            }
             .pointerInput(watch.id) {
                 detectTapGestures(
                     onTap = { onSelectFocus(watch.id) }
@@ -108,9 +129,8 @@ fun StopwatchTile(
         colors = CardDefaults.cardColors(
             containerColor = cardBackgroundColor
         ),
-        border = BorderStroke(
-            width = borderThickness,
-            color = if (isFocused) StopwatchTileDefaults.FocusBorderColor else Color.Black.copy(alpha = 0.12f)
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = if (isFocused) 6.dp else StopwatchTileDefaults.CardElevation
         )
     ) {
         Column(
@@ -118,7 +138,6 @@ fun StopwatchTile(
                 .fillMaxWidth()
                 .padding(StopwatchTileDefaults.TilePaddingValues)
         ) {
-            // Header Row: Name, Focus Tag, Details & Delete buttons
             StopwatchTileHeader(
                 watch = watch,
                 darkContentColor = darkContentColor,
@@ -130,7 +149,6 @@ fun StopwatchTile(
 
             Spacer(modifier = Modifier.height(StopwatchTileDefaults.SectionSpacing))
 
-            // Running Time Display
             StopwatchTimeDisplay(
                 formattedTime = formattedTime,
                 darkContentColor = darkContentColor,
@@ -140,7 +158,6 @@ fun StopwatchTile(
 
             Spacer(modifier = Modifier.height(StopwatchTileDefaults.SectionSpacing))
 
-            // Status and Last Lap Info Row
             StopwatchStatusAndPaceRow(
                 watch = watch,
                 lastLapTime = lastLapTime,
@@ -151,7 +168,6 @@ fun StopwatchTile(
 
             Spacer(modifier = Modifier.height(StopwatchTileDefaults.SectionSpacing))
 
-            // Action Controls Row
             StopwatchActionControls(
                 watch = watch,
                 onStart = onStart,

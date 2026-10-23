@@ -1,13 +1,14 @@
 package org.ear.watches.data.util
 
 import org.ear.watches.data.model.AppPrecision
-import java.util.Locale
 import kotlin.math.abs
 
 /**
  * Utility object responsible for formatting millisecond durations into human-readable strings.
  * Handles formatting logic for different precisions (e.g., tenths, hundredths, seconds),
  * and supports both absolute time formatting and delta time formatting.
+ *
+ * Optimized for high-frequency execution (60+ FPS) without String.format overhead to minimize GC pressure.
  */
 object TimeFormatter {
 
@@ -54,36 +55,71 @@ object TimeFormatter {
         val seconds = (safeMillis % 60_000) / 1_000
         val remainderMillis = safeMillis % 1_000
 
-        val mainPart = if (isDelta) {
+        val sb = StringBuilder(16)
+        if (prefix.isNotEmpty()) {
+            sb.append(prefix)
+        }
+
+        if (isDelta) {
             if (hours > 0) {
-                String.format(Locale.US, "%d:%02d:%02d", hours, minutes, seconds)
+                appendDigits(sb, hours)
+                sb.append(':')
+                appendTwoDigits(sb, minutes)
+                sb.append(':')
+                appendTwoDigits(sb, seconds)
             } else if (minutes > 0) {
-                String.format(Locale.US, "%d:%02d", minutes, seconds)
+                appendDigits(sb, minutes)
+                sb.append(':')
+                appendTwoDigits(sb, seconds)
             } else {
-                seconds.toString()
+                appendDigits(sb, seconds)
             }
         } else {
             if (hours > 0) {
-                String.format(Locale.US, "%02d:%02d:%02d", hours, minutes, seconds)
+                appendTwoDigits(sb, hours)
+                sb.append(':')
+                appendTwoDigits(sb, minutes)
+                sb.append(':')
+                appendTwoDigits(sb, seconds)
             } else {
-                String.format(Locale.US, "%02d:%02d", minutes, seconds)
+                appendTwoDigits(sb, minutes)
+                sb.append(':')
+                appendTwoDigits(sb, seconds)
             }
         }
 
-        val subsecondPart = when (precision) {
+        when (precision) {
             AppPrecision.TENTHS -> {
                 val tenths = remainderMillis / 100
-                "$subsecondSeparator$tenths"
+                sb.append(subsecondSeparator)
+                sb.append(tenths)
             }
             AppPrecision.HUNDREDTHS -> {
                 val hundredths = remainderMillis / 10
-                String.format(Locale.US, "%s%02d", subsecondSeparator, hundredths)
+                sb.append(subsecondSeparator)
+                appendTwoDigits(sb, hundredths)
             }
-            AppPrecision.SECONDS -> ""
+            AppPrecision.SECONDS -> {}
         }
 
-        val suffix = if (isDelta) "s" else ""
+        if (isDelta) {
+            sb.append('s')
+        }
 
-        return "$prefix$mainPart$subsecondPart$suffix"
+        return sb.toString()
+    }
+
+    private fun appendTwoDigits(sb: StringBuilder, number: Long) {
+        val n = (number % 100).toInt()
+        sb.append((n / 10 + '0'.code).toChar())
+        sb.append((n % 10 + '0'.code).toChar())
+    }
+
+    private fun appendDigits(sb: StringBuilder, number: Long) {
+        if (number < 10) {
+            sb.append((number.toInt() + '0'.code).toChar())
+        } else {
+            sb.append(number.toString())
+        }
     }
 }
