@@ -66,7 +66,6 @@ import org.ear.watches.ui.viewmodel.StopwatchViewModel
 import org.ear.watches.util.FeedbackManager
 import org.ear.watches.util.RaceResultsFormatter
 import org.ear.watches.util.ShareHelper
-import org.ear.watches.util.shareRaceResults
 
 /**
  * The root Jetpack Compose screen that orchestrates the layout of the application.
@@ -487,7 +486,7 @@ fun MainStopwatchScreen(
                     stopwatches = uiState.stopwatches,
                     precision = uiState.settings.timePrecision
                 )
-                shareRaceResults(context, reportText)
+                ShareHelper.shareRaceResults(context, reportText)
             },
             onSelectCsv = {
                 showShareFormatDialog = false

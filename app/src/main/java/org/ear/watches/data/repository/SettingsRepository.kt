@@ -268,10 +268,6 @@ class SettingsRepository(
         updateSettings { it.copy(autoSortOption = option) }
     }
 
-    suspend fun setAutoSortEnabled(enabled: Boolean) {
-        setAutoSortOption(if (enabled) AppAutoSortOption.BY_FASTEST_LAP else AppAutoSortOption.NONE)
-    }
-
     suspend fun setKeepScreenOnWhileRunning(enabled: Boolean) {
         updateSettings { it.copy(keepScreenOnWhileRunning = enabled) }
     }

@@ -2,4 +2,11 @@
 <resources>
 
     <style name="Theme.Watches" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <!-- Splash Screen Theme using androidx.core:core-splashscreen -->
+    <style name="Theme.Watches.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#F8F9FA</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo</item>
+        <item name="postSplashScreenTheme">@style/Theme.Watches</item>
+    </style>
 </resources>

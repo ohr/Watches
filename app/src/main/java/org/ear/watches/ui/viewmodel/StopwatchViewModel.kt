@@ -61,7 +61,7 @@ class StopwatchViewModel(
     }
 
     private fun checkTicker() {
-        val anyRunning = _uiState.value.stopwatches.any { it.isRunning }
+        val anyRunning = _uiState.value.stopwatches.any { watch -> watch.isRunning }
         if (anyRunning) {
             if (tickerJob?.isActive != true) {
                 tickerJob = viewModelScope.launch(Dispatchers.Default) {
@@ -292,11 +292,11 @@ class StopwatchViewModel(
             return
         }
 
-        val focusedRunningWatch = stopwatches.find { it.id == state.activeFocusedWatchId && it.isRunning }
+        val focusedRunningWatch = stopwatches.find { (it.id == state.activeFocusedWatchId) && it.isRunning }
         val watchToStop = focusedRunningWatch ?: stopwatches.firstOrNull { it.isRunning }
 
-        if (watchToStop != null) {
-            pauseStopwatch(watchToStop.id)
+        watchToStop?.let {
+            pauseStopwatch(it.id)
         }
     }
 

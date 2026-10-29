@@ -54,9 +54,9 @@ data class StopwatchItem(
      * @return Total duration in nanoseconds across all run sessions.
      */
     fun getTotalCumulativeNanos(nowNanos: Long = 0L): Long {
-        val completedSum = runs.filter { it.isFinished }.sumOf { it.accumulatedNanos }
+        val completedSum = runs.asSequence().filter { it.isFinished }.sumOf { it.accumulatedNanos }
         val active = activeRun
-        val activeElapsed = if (isRunning && active != null && active.isRunning) {
+        val activeElapsed = if (isRunning && (active != null) && active.isRunning) {
             (nowNanos - active.startTimeNanos).coerceAtLeast(0L)
         } else {
             0L
@@ -358,7 +358,7 @@ data class StopwatchItem(
 
             val zeroLapCandidates = candidates.filter { it.currentRunLaps.isEmpty() }
             if (zeroLapCandidates.isNotEmpty()) {
-                return if (currentFocusedId != null && zeroLapCandidates.any { it.id == currentFocusedId }) {
+                return if ((currentFocusedId != null) && zeroLapCandidates.any { it.id == currentFocusedId }) {
                     currentFocusedId
                 } else {
                     zeroLapCandidates.first().id

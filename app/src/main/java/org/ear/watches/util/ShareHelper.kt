@@ -113,12 +113,3 @@ object ShareHelper {
         )
     }
 }
-
-fun shareRaceResults(
-    context: Context,
-    resultsText: String,
-    subject: String? = null,
-    chooserTitle: String? = null
-) {
-    ShareHelper.shareRaceResults(context, resultsText, subject, chooserTitle)
-}
