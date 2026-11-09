@@ -1,5 +1,7 @@
 package org.ear.watches.ui.viewmodel
 
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineDispatcher
@@ -11,17 +13,22 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.ear.watches.R
 import org.ear.watches.data.model.AppAutoSortOption
 import org.ear.watches.data.model.AppFontSize
 import org.ear.watches.data.model.AppLanguage
 import org.ear.watches.data.model.AppPrecision
 import org.ear.watches.data.model.AppSettings
 import org.ear.watches.data.model.AppThemeMode
+import org.ear.watches.data.model.StopwatchBackupPayload
 import org.ear.watches.data.model.StopwatchItem
 import org.ear.watches.data.model.StopwatchUiState
 import org.ear.watches.data.repository.SettingsRepository
 import org.ear.watches.data.util.SystemTimeProvider
 import org.ear.watches.data.util.TimeProvider
+import org.ear.watches.util.StopwatchBackupHelper
+import java.util.UUID
 
 /**
  * Primary ViewModel for the application, responsible for maintaining the state of all stopwatches,
@@ -525,6 +532,85 @@ class StopwatchViewModel(
 
     private fun syncFocusState() {
         _uiState.update { it.applyFocusAndSort() }
+    }
+
+    fun setPendingImport(payload: StopwatchBackupPayload) {
+        _uiState.update { it.copy(pendingImportPayload = payload) }
+    }
+
+    fun dismissPendingImport() {
+        _uiState.update { it.copy(pendingImportPayload = null) }
+    }
+
+    fun confirmImportReplace() {
+        val payload = _uiState.value.pendingImportPayload ?: return
+        val importedWatches = payload.stopwatches.map { watch ->
+            watch.copy(
+                id = UUID.randomUUID().toString(),
+                isRunning = false
+            )
+        }
+        val newFocusedId = StopwatchItem.calculateNextFocusedWatchId(importedWatches)
+        _uiState.update { state ->
+            state.copy(
+                stopwatches = importedWatches,
+                activeFocusedWatchId = newFocusedId,
+                pendingImportPayload = null
+            ).applyFocusAndSort(newFocusedId = newFocusedId)
+        }
+        checkTicker()
+    }
+
+    fun confirmImportAppend() {
+        val payload = _uiState.value.pendingImportPayload ?: return
+        if (payload.stopwatches.isEmpty()) {
+            dismissPendingImport()
+            return
+        }
+        val remapped = payload.stopwatches.map { watch ->
+            watch.copy(
+                id = UUID.randomUUID().toString(),
+                isRunning = false
+            )
+        }
+        _uiState.update { state ->
+            val combined = state.stopwatches + remapped
+            val newFocusedId = state.activeFocusedWatchId ?: StopwatchItem.calculateNextFocusedWatchId(combined)
+            state.copy(
+                stopwatches = combined,
+                activeFocusedWatchId = newFocusedId,
+                pendingImportPayload = null
+            ).applyFocusAndSort(newFocusedId = newFocusedId)
+        }
+        checkTicker()
+    }
+
+    fun loadBackupFromUri(
+        context: Context,
+        uri: Uri,
+        onSuccess: (count: Int) -> Unit = {},
+        onError: (String) -> Unit = {}
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val result = StopwatchBackupHelper.parseBackupFromUri(context, uri)
+            result.onSuccess { payload ->
+                withContext(dispatcher) {
+                    if (payload.stopwatches.isEmpty()) {
+                        onError(context.getString(R.string.import_empty_toast))
+                    } else if (_uiState.value.stopwatches.isEmpty()) {
+                        setPendingImport(payload)
+                        confirmImportReplace()
+                        onSuccess(payload.stopwatches.size)
+                    } else {
+                        setPendingImport(payload)
+                    }
+                }
+            }.onFailure { error ->
+                withContext(dispatcher) {
+                    onError(error.localizedMessage ?: context.getString(R.string.import_error_invalid_file))
+                }
+            }
+        }
     }
 
     private inline fun updateWatch(

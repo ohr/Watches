@@ -13,5 +13,6 @@ data class StopwatchUiState(
     val settings: AppSettings = AppSettings(),
     val activeFocusedWatchId: String? = null,
     val showHelpDialog: Boolean = false,
-    val showAboutDialog: Boolean = false
+    val showAboutDialog: Boolean = false,
+    val pendingImportPayload: StopwatchBackupPayload? = null
 )

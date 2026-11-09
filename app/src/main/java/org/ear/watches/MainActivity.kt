@@ -1,11 +1,14 @@
 package org.ear.watches
 
 import android.app.LocaleManager
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.LocaleList
 import android.view.KeyEvent
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -51,6 +54,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         feedbackManager = FeedbackManager(this)
 
+        if (savedInstanceState == null) {
+            handleIncomingFileIntent(intent)
+        }
+
         setContent {
             val uiState by viewModel.uiState.collectAsState()
 
@@ -79,6 +86,33 @@ class MainActivity : ComponentActivity() {
                     )
                 }
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleIncomingFileIntent(intent)
+    }
+
+    private fun handleIncomingFileIntent(intent: Intent?) {
+        if (intent?.action == Intent.ACTION_VIEW) {
+            val uri = intent.data ?: return
+            intent.data = null
+            viewModel.loadBackupFromUri(
+                context = applicationContext,
+                uri = uri,
+                onSuccess = { count ->
+                    Toast.makeText(
+                        this,
+                        getString(R.string.import_success_toast, count),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                },
+                onError = { message ->
+                    Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+                }
+            )
         }
     }
 

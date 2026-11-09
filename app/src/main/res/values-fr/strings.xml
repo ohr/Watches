@@ -134,6 +134,18 @@
     <string name="share_as_text_desc">Format pour SMS et e-mails</string>
     <string name="share_as_csv">Feuille de calcul CSV</string>
     <string name="share_as_csv_desc">Format pour Excel et Google Sheets</string>
+    <string name="share_as_backup">Sauvegarde d\'état (.watches.json)</string>
+    <string name="share_as_backup_desc">Exporter l\'état des chronomètres vers un fichier pour partager ou recharger</string>
+    <string name="share_backup_subject">Sauvegarde d\'état Chronomètres</string>
+    <string name="share_backup_chooser_title">Exporter l\'état des chronomètres via</string>
+    <string name="action_import">Importer</string>
+    <string name="import_dialog_title">Importer des chronomètres</string>
+    <string name="import_dialog_message">%1$d chronomètre(s) trouvé(s) dans le fichier. Choisissez comment les importer :</string>
+    <string name="btn_replace_all">Tout remplacer</string>
+    <string name="btn_append">Ajouter</string>
+    <string name="import_success_toast">%1$d chronomètre(s) importé(s)</string>
+    <string name="import_empty_toast">Le fichier de sauvegarde ne contient aucun chronomètre</string>
+    <string name="import_error_invalid_file">Fichier .watches.json invalide ou corrompu</string>
 
     <!-- Stopwatch Detail Modal -->
     <string name="title_stopwatch_details">Détails du chronomètre</string>

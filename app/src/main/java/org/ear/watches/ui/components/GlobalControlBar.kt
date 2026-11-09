@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
@@ -93,7 +94,8 @@ fun GlobalControlBar(
     onOpenHelp: () -> Unit,
     onOpenAbout: () -> Unit,
     modifier: Modifier = Modifier,
-    onNameAllSessions: () -> Unit = {}
+    onNameAllSessions: () -> Unit = {},
+    onImportWatches: () -> Unit = {}
 ) {
     val hasWatches = uiState.stopwatches.isNotEmpty()
     val anyRunning = uiState.stopwatches.any { it.isRunning }
@@ -138,6 +140,11 @@ fun GlobalControlBar(
                 )
 
                 ShareResultsButton(onClick = onShareResults)
+
+                ImportWatchesButton(
+                    enabled = allStopped,
+                    onClick = onImportWatches
+                )
             }
         }
     }
@@ -380,6 +387,30 @@ private fun ShareResultsButton(onClick: () -> Unit) {
     }
 }
 
+@Composable
+private fun ImportWatchesButton(
+    enabled: Boolean = true,
+    onClick: () -> Unit
+) {
+    FilledTonalButton(
+        onClick = onClick,
+        enabled = enabled,
+        shape = GlobalControlBarDefaults.ButtonShape,
+        contentPadding = GlobalControlBarDefaults.ButtonContentPadding
+    ) {
+        Icon(
+            imageVector = Icons.Default.FileUpload,
+            contentDescription = null,
+            modifier = Modifier.size(GlobalControlBarDefaults.ButtonIconSize)
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+            text = stringResource(R.string.action_import),
+            style = GlobalControlBarDefaults.ButtonTextStyle
+        )
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun GlobalControlBarPreview() {
@@ -395,7 +426,8 @@ fun GlobalControlBarPreview() {
             onShareResults = {},
             onOpenSettings = {},
             onOpenHelp = {},
-            onOpenAbout = {}
+            onOpenAbout = {},
+            onImportWatches = {}
         )
     }
 }

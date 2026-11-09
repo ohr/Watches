@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.TableChart
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -33,13 +34,14 @@ import org.ear.watches.R
 import org.ear.watches.ui.theme.WatchesTheme
 
 /**
- * A dialog allowing the user to select the desired export format (Plain Text vs CSV Spreadsheet)
- * when sharing race results.
+ * A dialog allowing the user to select the desired export format (Plain Text, CSV Spreadsheet,
+ * or full state backup as .watches.json) when sharing race results or exporting state.
  */
 @Composable
 fun ShareFormatDialog(
     onSelectText: () -> Unit,
     onSelectCsv: () -> Unit,
+    onSelectBackup: (() -> Unit)? = null,
     onDismiss: () -> Unit
 ) {
     AlertDialog(
@@ -70,6 +72,16 @@ fun ShareFormatDialog(
                     description = stringResource(R.string.share_as_csv_desc),
                     onClick = onSelectCsv
                 )
+
+                // State Backup (.watches.json) Option
+                if (onSelectBackup != null) {
+                    ShareOptionCard(
+                        icon = Icons.Default.Save,
+                        title = stringResource(R.string.share_as_backup),
+                        description = stringResource(R.string.share_as_backup_desc),
+                        onClick = onSelectBackup
+                    )
+                }
             }
         },
         confirmButton = {},
@@ -136,6 +148,7 @@ fun ShareFormatDialogPreview() {
         ShareFormatDialog(
             onSelectText = {},
             onSelectCsv = {},
+            onSelectBackup = {},
             onDismiss = {}
         )
     }

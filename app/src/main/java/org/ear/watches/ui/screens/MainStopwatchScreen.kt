@@ -47,6 +47,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.ear.watches.R
@@ -58,6 +61,7 @@ import org.ear.watches.ui.dialogs.AboutDialog
 import org.ear.watches.ui.dialogs.BatchAddDialog
 import org.ear.watches.ui.dialogs.EditWatchDialog
 import org.ear.watches.ui.dialogs.HelpDialog
+import org.ear.watches.ui.dialogs.ImportConfirmDialog
 import org.ear.watches.ui.dialogs.NameSessionDialog
 import org.ear.watches.ui.dialogs.SettingsDialog
 import org.ear.watches.ui.dialogs.ShareFormatDialog
@@ -99,6 +103,27 @@ fun MainStopwatchScreen(
     var dragOffset by remember { mutableStateOf(Offset.Zero) }
 
     val lazyGridState = rememberLazyGridState()
+
+    val importLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            viewModel.loadBackupFromUri(
+                context = context,
+                uri = uri,
+                onSuccess = { count ->
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.import_success_toast, count),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                },
+                onError = { message ->
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                }
+            )
+        }
+    }
 
     LaunchedEffect(uiState.settings.autoSortOption) {
         if (uiState.settings.autoSortOption != AppAutoSortOption.NONE) {
@@ -151,6 +176,9 @@ fun MainStopwatchScreen(
                 onAddWatch = { viewModel.addStopwatch(defaultNamePrefix = defaultPrefix) },
                 onBatchAdd = { showBatchAddDialog = true },
                 onShareResults = { showShareFormatDialog = true },
+                onImportWatches = {
+                    importLauncher.launch(arrayOf("application/json", "*/*"))
+                },
                 onOpenSettings = { showSettingsDialog = true },
                 onOpenHelp = { showHelpDialog = true },
                 onOpenAbout = { showAboutDialog = true }
@@ -496,7 +524,40 @@ fun MainStopwatchScreen(
                     precision = uiState.settings.timePrecision
                 )
             },
+            onSelectBackup = {
+                showShareFormatDialog = false
+                ShareHelper.shareStopwatchesBackup(
+                    context = context,
+                    stopwatches = uiState.stopwatches
+                )
+            },
             onDismiss = { showShareFormatDialog = false }
+        )
+    }
+
+    uiState.pendingImportPayload?.let { payload ->
+        ImportConfirmDialog(
+            stopwatchCount = payload.stopwatches.size,
+            hasExistingWatches = uiState.stopwatches.isNotEmpty(),
+            onReplaceAll = {
+                val count = payload.stopwatches.size
+                viewModel.confirmImportReplace()
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.import_success_toast, count),
+                    Toast.LENGTH_SHORT
+                ).show()
+            },
+            onAppend = {
+                val count = payload.stopwatches.size
+                viewModel.confirmImportAppend()
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.import_success_toast, count),
+                    Toast.LENGTH_SHORT
+                ).show()
+            },
+            onDismiss = { viewModel.dismissPendingImport() }
         )
     }
 

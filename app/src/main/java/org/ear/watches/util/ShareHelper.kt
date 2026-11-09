@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.core.content.FileProvider
 import org.ear.watches.R
 import org.ear.watches.data.model.AppPrecision
+import org.ear.watches.data.model.StopwatchBackupPayload
 import org.ear.watches.data.model.StopwatchItem
 import java.io.File
 
@@ -111,5 +112,54 @@ object ShareHelper {
             precision = precision,
             nowNanos = nowNanos
         )
+    }
+
+    fun shareStopwatchesBackup(
+        context: Context,
+        stopwatches: List<StopwatchItem>,
+        subject: String? = null,
+        chooserTitle: String? = null
+    ) {
+        val shareSubject = subject ?: context.getString(R.string.share_backup_subject)
+        val title = chooserTitle ?: context.getString(R.string.share_backup_chooser_title)
+        val errorToastText = context.getString(R.string.share_error_toast)
+
+        try {
+            val appVersion = runCatching {
+                context.packageManager.getPackageInfo(context.packageName, 0).versionName
+            }.getOrNull()
+
+            val jsonText = StopwatchBackupHelper.createBackupJson(
+                stopwatches = stopwatches,
+                appVersion = appVersion
+            )
+
+            // Purge previously generated backup cache files
+            context.cacheDir.listFiles { file ->
+                file.name.startsWith("watches_") && file.name.endsWith(StopwatchBackupPayload.FILE_SUFFIX)
+            }?.forEach { it.delete() }
+
+            val timestamp = System.currentTimeMillis()
+            val cacheFile = File(context.cacheDir, "watches_$timestamp${StopwatchBackupPayload.FILE_SUFFIX}")
+            cacheFile.writeText(jsonText)
+
+            val contentUri = FileProvider.getUriForFile(
+                context,
+                "org.ear.watches.fileprovider",
+                cacheFile
+            )
+
+            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                type = "application/json"
+                putExtra(Intent.EXTRA_SUBJECT, shareSubject)
+                putExtra(Intent.EXTRA_STREAM, contentUri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+
+            val chooser = Intent.createChooser(shareIntent, title)
+            context.startActivity(chooser)
+        } catch (_: Exception) {
+            Toast.makeText(context, errorToastText, Toast.LENGTH_SHORT).show()
+        }
     }
 }

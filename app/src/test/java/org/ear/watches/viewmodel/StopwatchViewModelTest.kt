@@ -7,6 +7,7 @@ import org.ear.watches.data.model.AppLanguage
 import org.ear.watches.data.model.AppPrecision
 import org.ear.watches.data.model.AppSettings
 import org.ear.watches.data.model.AppThemeMode
+import org.ear.watches.data.model.StopwatchBackupPayload
 import org.ear.watches.data.model.StopwatchItem
 import org.ear.watches.data.repository.SettingsRepository
 import org.ear.watches.data.util.TimeProvider
@@ -1019,5 +1020,90 @@ class StopwatchViewModelTest {
         assertEquals(id0, updatedList[0].id)
         assertEquals(id1, updatedList[1].id)
         assertEquals(id2, updatedList[2].id)
+    }
+
+    @Test
+    fun pendingImport_setAndDismiss() {
+        val payload = StopwatchBackupPayload(
+            stopwatches = listOf(
+                StopwatchItem(name = "Imported 1", pastelColorHex = 0xFFEF9A9AL)
+            )
+        )
+
+        viewModel.setPendingImport(payload)
+        assertEquals(payload, viewModel.uiState.value.pendingImportPayload)
+
+        viewModel.dismissPendingImport()
+        org.junit.jupiter.api.Assertions.assertNull(viewModel.uiState.value.pendingImportPayload)
+    }
+
+    @Test
+    fun confirmImportReplace_clearsExistingAndAppliesImported() {
+        viewModel.batchAddStopwatches(3, "Existing")
+        assertEquals(3, viewModel.uiState.value.stopwatches.size)
+
+        val payload = StopwatchBackupPayload(
+            stopwatches = listOf(
+                StopwatchItem(name = "Replacement 1", pastelColorHex = 0xFFEF9A9AL),
+                StopwatchItem(name = "Replacement 2", pastelColorHex = 0xFF90CAF9L)
+            )
+        )
+
+        viewModel.setPendingImport(payload)
+        viewModel.confirmImportReplace()
+
+        org.junit.jupiter.api.Assertions.assertNull(viewModel.uiState.value.pendingImportPayload)
+        val stopwatches = viewModel.uiState.value.stopwatches
+        assertEquals(2, stopwatches.size)
+        assertEquals("Replacement 1", stopwatches[0].name)
+        assertEquals("Replacement 2", stopwatches[1].name)
+        assertFalse(stopwatches.any { it.isRunning })
+    }
+
+    @Test
+    fun confirmImportAppend_preservesExistingAndAssignsNewUniqueIds() {
+        viewModel.batchAddStopwatches(2, "Existing")
+        val existingIds = viewModel.uiState.value.stopwatches.map { it.id }.toSet()
+        assertEquals(2, existingIds.size)
+
+        val importedId = "fixed-original-id"
+        val payload = StopwatchBackupPayload(
+            stopwatches = listOf(
+                StopwatchItem(id = importedId, name = "Appended 1", pastelColorHex = 0xFFA5D6A7L)
+            )
+        )
+
+        viewModel.setPendingImport(payload)
+        viewModel.confirmImportAppend()
+
+        org.junit.jupiter.api.Assertions.assertNull(viewModel.uiState.value.pendingImportPayload)
+        val stopwatches = viewModel.uiState.value.stopwatches
+        assertEquals(3, stopwatches.size)
+        assertEquals("Existing 1", stopwatches[0].name)
+        assertEquals("Existing 2", stopwatches[1].name)
+        assertEquals("Appended 1", stopwatches[2].name)
+
+        // Verifies new unique UUID was assigned instead of colliding with importedId or existing
+        val allIds = stopwatches.map { it.id }.toSet()
+        assertEquals(3, allIds.size)
+        org.junit.jupiter.api.Assertions.assertNotEquals(importedId, stopwatches[2].id)
+    }
+
+    @Test
+    fun confirmImportReplace_whenPayloadHasDuplicateIds_ensuresDistinctIds() {
+        val sameId = "duplicate-id-123"
+        val payload = StopwatchBackupPayload(
+            stopwatches = listOf(
+                StopwatchItem(id = sameId, name = "Watch A", pastelColorHex = 0xFFEF9A9AL),
+                StopwatchItem(id = sameId, name = "Watch B", pastelColorHex = 0xFF90CAF9L)
+            )
+        )
+
+        viewModel.setPendingImport(payload)
+        viewModel.confirmImportReplace()
+
+        val stopwatches = viewModel.uiState.value.stopwatches
+        assertEquals(2, stopwatches.size)
+        org.junit.jupiter.api.Assertions.assertNotEquals(stopwatches[0].id, stopwatches[1].id)
     }
 }

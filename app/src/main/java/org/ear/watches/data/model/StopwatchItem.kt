@@ -1,6 +1,7 @@
 package org.ear.watches.data.model
 
 import androidx.compose.runtime.Stable
+import kotlinx.serialization.Serializable
 import java.util.UUID
 
 /**
@@ -9,6 +10,7 @@ import java.util.UUID
  * elapsed time and laps across runs.
  */
 @Stable
+@Serializable
 data class StopwatchItem(
     val id: String = UUID.randomUUID().toString(),
     val name: String,

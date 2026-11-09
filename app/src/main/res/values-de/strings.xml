@@ -134,6 +134,18 @@
     <string name="share_as_text_desc">Geeignet für Messenger und E-Mail</string>
     <string name="share_as_csv">CSV-Tabelle</string>
     <string name="share_as_csv_desc">Geeignet für Excel und Google Sheets</string>
+    <string name="share_as_backup">Status-Sicherung (.watches.json)</string>
+    <string name="share_as_backup_desc">Stoppuhren-Status als Datei zum Teilen oder Wiederherstellen exportieren</string>
+    <string name="share_backup_subject">Stoppuhren Status-Sicherung</string>
+    <string name="share_backup_chooser_title">Stoppuhren-Status exportieren über</string>
+    <string name="action_import">Importieren</string>
+    <string name="import_dialog_title">Stoppuhren importieren</string>
+    <string name="import_dialog_message">%1$d Stoppuhr(en) in Sicherungsdatei gefunden. Wählen Sie die Import-Methode:</string>
+    <string name="btn_replace_all">Alle ersetzen</string>
+    <string name="btn_append">Anhängen</string>
+    <string name="import_success_toast">%1$d Stoppuhr(en) importiert</string>
+    <string name="import_empty_toast">Sicherungsdatei enthält keine Stoppuhren</string>
+    <string name="import_error_invalid_file">Ungültige oder beschädigte .watches.json Datei</string>
 
     <!-- Stopwatch Detail Modal -->
     <string name="title_stopwatch_details">Stoppuhr Details</string>

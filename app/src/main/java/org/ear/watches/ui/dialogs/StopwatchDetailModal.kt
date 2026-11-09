@@ -187,6 +187,10 @@ fun StopwatchDetailModal(
                 showShareFormatDialog = false
                 ShareHelper.shareSingleStopwatchResultsCsv(context, watch, settings.timePrecision, nowNanos)
             },
+            onSelectBackup = {
+                showShareFormatDialog = false
+                ShareHelper.shareStopwatchesBackup(context, listOf(watch))
+            },
             onDismiss = { showShareFormatDialog = false }
         )
     }

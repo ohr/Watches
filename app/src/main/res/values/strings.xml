@@ -134,6 +134,18 @@
     <string name="share_as_text_desc">Format for messaging apps and emails</string>
     <string name="share_as_csv">CSV Spreadsheet</string>
     <string name="share_as_csv_desc">Format for Excel and Google Sheets</string>
+    <string name="share_as_backup">State Backup (.watches.json)</string>
+    <string name="share_as_backup_desc">Export stopwatch state to file for sharing or reloading</string>
+    <string name="share_backup_subject">Watches State Backup</string>
+    <string name="share_backup_chooser_title">Export Stopwatch State via</string>
+    <string name="action_import">Import</string>
+    <string name="import_dialog_title">Import Stopwatches</string>
+    <string name="import_dialog_message">Found %1$d stopwatch(es) in backup file. Choose how to import them:</string>
+    <string name="btn_replace_all">Replace All</string>
+    <string name="btn_append">Append</string>
+    <string name="import_success_toast">Imported %1$d stopwatch(es)</string>
+    <string name="import_empty_toast">Backup file contains no stopwatches</string>
+    <string name="import_error_invalid_file">Invalid or corrupted .watches.json file</string>
 
     <!-- Stopwatch Detail Modal -->
     <string name="title_stopwatch_details">Stopwatch Details</string>
