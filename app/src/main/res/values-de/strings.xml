@@ -235,4 +235,6 @@
     <string name="notification_action_stop_all">Alle stoppen</string>
     <string name="setting_running_notification">Benachrichtigung bei laufender Zeit</string>
     <string name="setting_running_notification_desc">Laufende Stoppuhren mit Runden-/Stopp-Steuerung in einer Benachrichtigung anzeigen und die Zeitmessung im Hintergrund aktiv halten</string>
+    <string name="a11y_action_full_reset">Vollständig zurücksetzen (Verlauf löschen)</string>
+    <string name="a11y_action_start_and_name_session">Starten und Session benennen</string>
 </resources>

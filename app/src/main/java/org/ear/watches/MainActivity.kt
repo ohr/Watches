@@ -124,12 +124,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        viewModel.setUiVisible(true)
+        viewModel.onUiStarted()
     }
 
     override fun onStop() {
         super.onStop()
-        viewModel.setUiVisible(false)
+        viewModel.onUiStopped()
         // The process may be killed at any time once in the background: flush pending changes.
         viewModel.persistNow()
     }

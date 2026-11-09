@@ -235,4 +235,6 @@
     <string name="notification_action_stop_all">Tout arrêter</string>
     <string name="setting_running_notification">Notification en cours</string>
     <string name="setting_running_notification_desc">Afficher les chronos en cours avec les commandes Tour/Arrêt dans une notification et maintenir le chronométrage en arrière-plan</string>
+    <string name="a11y_action_full_reset">Réinitialisation complète (effacer l\'historique)</string>
+    <string name="a11y_action_start_and_name_session">Démarrer et nommer la session</string>
 </resources>

@@ -235,4 +235,6 @@
     <string name="notification_action_stop_all">Stop all</string>
     <string name="setting_running_notification">Running Notification</string>
     <string name="setting_running_notification_desc">Show running stopwatches with Lap/Stop controls in a notification and keep timing alive in the background</string>
+    <string name="a11y_action_full_reset">Full reset (clear history)</string>
+    <string name="a11y_action_start_and_name_session">Start and name session</string>
 </resources>

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -77,25 +78,32 @@ fun StopwatchTile(
     )
 
     val cardBackgroundColor = remember(watch.pastelColorHex) { Color(watch.pastelColorHex) }
-    val darkContentColor = remember { Color(0xFF1F1F1F) }
+    val darkContentColor = StopwatchTileDefaults.TileContentColor
 
-    val currentTick by produceState(initialValue = SystemClock.elapsedRealtimeNanos(), watch.isRunning, tickerFlow) {
+    // Performance: the ticker fires up to 60x/s. It is deliberately NOT read in this function's
+    // body (that would re-run the whole tile on every tick). Only the derived time string reads
+    // it, and derivedStateOf notifies its single reader (the time Text) only when the displayed
+    // string actually changes. Stopped watches do not collect the ticker at all.
+    val tick = produceState(initialValue = SystemClock.elapsedRealtimeNanos(), watch.isRunning, tickerFlow) {
         if (watch.isRunning) {
             tickerFlow.collect { value = it }
         }
     }
-    val nowNanos = if (watch.isRunning) currentTick else SystemClock.elapsedRealtimeNanos()
-
-    val currentTotalTime = watch.getElapsedMillis(nowNanos)
-    val lastLapRecordedTotalTime = watch.currentRunLaps.lastOrNull()?.totalTimeMillis ?: 0L
-    val displayedTimeMillis = if (showCurrentLapTime) {
-        (currentTotalTime - lastLapRecordedTotalTime).coerceAtLeast(0L)
-    } else {
-        currentTotalTime
-    }
     val subsecondSeparator = stringResource(R.string.subsecond_separator)
     val activeDisplayPrecision = if (watch.isRunning) runningDisplayPrecision else timePrecision
-    val formattedTime = TimeFormatter.formatTime(displayedTimeMillis, activeDisplayPrecision, subsecondSeparator)
+    val formattedTime = remember(watch, showCurrentLapTime, activeDisplayPrecision, subsecondSeparator) {
+        derivedStateOf {
+            val nowNanos = if (watch.isRunning) tick.value else 0L
+            val currentTotalTime = watch.getElapsedMillis(nowNanos)
+            val lastLapRecordedTotalTime = watch.currentRunLaps.lastOrNull()?.totalTimeMillis ?: 0L
+            val displayedTimeMillis = if (showCurrentLapTime) {
+                (currentTotalTime - lastLapRecordedTotalTime).coerceAtLeast(0L)
+            } else {
+                currentTotalTime
+            }
+            TimeFormatter.formatTime(displayedTimeMillis, activeDisplayPrecision, subsecondSeparator)
+        }
+    }
 
     val lastLapTime = watch.currentRunLaps.lastOrNull()?.let {
         TimeFormatter.formatTime(it.lapTimeMillis, timePrecision, subsecondSeparator)
@@ -151,7 +159,7 @@ fun StopwatchTile(
             Spacer(modifier = Modifier.height(StopwatchTileDefaults.SectionSpacing))
 
             StopwatchTimeDisplay(
-                formattedTime = formattedTime,
+                formattedTime = { formattedTime.value },
                 darkContentColor = darkContentColor,
                 showCurrentLapTime = showCurrentLapTime,
                 onToggleLapDisplay = { showCurrentLapTime = !showCurrentLapTime }

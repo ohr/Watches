@@ -42,6 +42,9 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -68,11 +71,17 @@ internal object StopwatchTileDefaults {
     val StartButtonColor = Color(0xFF2E7D32)
     val StopButtonColor = Color(0xFFD32F2F)
     val LapButtonColor = Color(0xFF00796B)
-    val ResetButtonColor = Color(0xFFE65100)
+    // Colors drawn on the pastel tile background are dark enough for WCAG AA (>= 4.5:1) on every
+    // palette color; button colors keep >= 4.5:1 against their white labels (see TileContrastTest).
+    val ResetButtonColor = Color(0xFFBF360C)
     val DisabledButtonContainerColor = Color(0xFFB0BEC5)
     val DisabledButtonContentColor = Color(0xFF546E7A)
-    val PaceFasterColor = Color(0xFF2E7D32)
-    val PaceSlowerColor = Color(0xFFD32F2F)
+    val TileContentColor = Color(0xFF1F1F1F)
+    val PaceFasterColor = Color(0xFF0B3D0E)
+    val PaceSlowerColor = Color(0xFF7A0A0A)
+    val StatusRunningColor = PaceFasterColor
+    val StatusStoppedColor = Color(0xFF3A3A3A)
+    val DeleteIconColor = PaceSlowerColor
     val SmallIconSize = 16.dp
     val TilePaddingValues = PaddingValues(start = 14.dp, top = 10.dp, end = 14.dp, bottom = 12.dp)
     val SectionSpacing = 8.dp
@@ -188,7 +197,7 @@ private fun TileHeaderActionGroup(
         IconButton(
             onClick = { onDelete(watch.id) },
             colors = IconButtonDefaults.iconButtonColors(
-                contentColor = Color(0xFFB71C1C)
+                contentColor = StopwatchTileDefaults.DeleteIconColor
             ),
             modifier = Modifier.size(32.dp)
         ) {
@@ -229,9 +238,29 @@ private fun FocusBadge() {
     }
 }
 
+private val TimeTextStyle = TextStyle(
+    fontFamily = FontFamily.Monospace,
+    fontWeight = FontWeight.Bold,
+    fontSize = StopwatchTileDefaults.TimeTextFontSize
+)
+
+/**
+ * The running time. Kept as its own composable so that reading [formattedTime] (which changes
+ * up to 100x/s) only recomposes this Text, not the surrounding time display or tile.
+ */
+@Composable
+private fun TimeText(formattedTime: () -> String, color: Color) {
+    Text(
+        text = formattedTime(),
+        style = TimeTextStyle,
+        color = color,
+        maxLines = 1
+    )
+}
+
 @Composable
 internal fun StopwatchTimeDisplay(
-    formattedTime: String,
+    formattedTime: () -> String,
     darkContentColor: Color,
     showCurrentLapTime: Boolean,
     onToggleLapDisplay: () -> Unit,
@@ -253,16 +282,7 @@ internal fun StopwatchTimeDisplay(
                 LapTagBadge()
             }
 
-            Text(
-                text = formattedTime,
-                style = TextStyle(
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = StopwatchTileDefaults.TimeTextFontSize,
-                    color = darkContentColor
-                ),
-                maxLines = 1
-            )
+            TimeText(formattedTime = formattedTime, color = darkContentColor)
         }
 
         IconButton(
@@ -353,7 +373,7 @@ private fun StopwatchStatusBadge(isRunning: Boolean) {
             text = if (isRunning) stringResource(R.string.status_running) else stringResource(R.string.status_stopped),
             style = MaterialTheme.typography.labelMedium.copy(
                 fontWeight = FontWeight.Bold,
-                color = if (isRunning) Color(0xFF1B5E20) else Color.DarkGray
+                color = if (isRunning) StopwatchTileDefaults.StatusRunningColor else StopwatchTileDefaults.StatusStoppedColor
             )
         )
     }
@@ -469,7 +489,11 @@ private fun TileActionButton(
     Surface(
         modifier = modifier
             .clip(StopwatchTileDefaults.ActionButtonShape)
-            .then(if (enabled) onClickModifier else Modifier),
+            // Disabled buttons still announce themselves ("Lap, button, disabled").
+            .then(
+                if (enabled) onClickModifier
+                else Modifier.semantics(mergeDescendants = true) { role = Role.Button; disabled() }
+            ),
         color = effectiveContainerColor,
         contentColor = effectiveContentColor,
         shape = StopwatchTileDefaults.ActionButtonShape
@@ -484,7 +508,8 @@ private fun TileActionButton(
         ) {
             Icon(
                 imageVector = icon,
-                contentDescription = contentDescription,
+                // The visible text already labels the button; only describe the icon if there is none.
+                contentDescription = contentDescription.takeIf { text.isBlank() },
                 modifier = Modifier.size(StopwatchTileDefaults.ActionButtonIconSize)
             )
             Spacer(modifier = Modifier.width(4.dp))

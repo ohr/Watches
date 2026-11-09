@@ -273,14 +273,33 @@ class StopwatchPersistenceTest {
         viewModel.addStopwatch("Athlete")
         viewModel.startAll()
 
-        viewModel.setUiVisible(false)
+        viewModel.onUiStarted()
+        viewModel.onUiStopped()
         val hiddenTick = viewModel.tickerFlow.value
         timeProvider.advanceTimeBy(3_000_000_000L)
         Thread.sleep(150) // Real-time ticker on Dispatchers.Default would have ticked by now.
         assertEquals(hiddenTick, viewModel.tickerFlow.value)
 
-        viewModel.setUiVisible(true)
+        viewModel.onUiStarted()
         assertEquals(timeProvider.currentTimeNanos(), viewModel.tickerFlow.value)
+    }
+
+    @Test
+    fun ticker_keepsRunning_whenNewScreenStartsBeforeOldOneStops() {
+        // Activity replacement order: new onStart, then old onStop (seen after an app update).
+        val viewModel = createViewModel(FakeStateStore())
+        viewModel.onUiStarted() // old screen
+        viewModel.addStopwatch("Athlete")
+        viewModel.startAll()
+
+        viewModel.onUiStarted() // new screen
+        viewModel.onUiStopped() // old screen goes away
+
+        val before = viewModel.tickerFlow.value
+        timeProvider.advanceTimeBy(1_000_000_000L)
+        val deadline = System.currentTimeMillis() + 2_000
+        while (viewModel.tickerFlow.value == before && System.currentTimeMillis() < deadline) Thread.sleep(20)
+        assertTrue(viewModel.tickerFlow.value > before, "Display ticker stopped although a screen is visible")
     }
 
     @Test

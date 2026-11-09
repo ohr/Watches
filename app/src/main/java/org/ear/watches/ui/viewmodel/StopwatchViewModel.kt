@@ -11,6 +11,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,6 +37,7 @@ import org.ear.watches.data.util.TimeProvider
 import org.ear.watches.util.LocaleController
 import org.ear.watches.util.StopwatchBackupHelper
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Primary ViewModel for the application, responsible for maintaining the state of all stopwatches,
@@ -60,16 +62,34 @@ class StopwatchViewModel(
     private var tickerJob: Job? = null
 
     /**
-     * Whether any UI is visible. The high-frequency ticker only runs while visible, so a
-     * background session (kept alive by the foreground service) does not burn CPU for redraws.
+     * Number of started (visible) screens. The high-frequency ticker only runs while at least one
+     * is visible, so a background session (kept alive by the foreground service) does not burn CPU
+     * for redraws.
+     *
+     * A counter rather than a flag: when one activity instance replaces another, the new one is
+     * started *before* the old one is stopped (e.g. the system relaunching the app after an update).
+     * A boolean would end up `false` while the new screen is showing and freeze the display.
      */
-    @Volatile
-    private var isUiVisible = true
+    private val startedUiCount = AtomicInteger(0)
 
-    fun setUiVisible(visible: Boolean) {
-        if (isUiVisible == visible) return
-        isUiVisible = visible
-        if (visible) _tickerFlow.value = timeProvider.currentTimeNanos()
+    /** Until the UI reports its lifecycle (e.g. in tests), assume it is visible. */
+    @Volatile
+    private var uiLifecycleTracked = false
+
+    private val isUiVisible: Boolean
+        get() = !uiLifecycleTracked || startedUiCount.get() > 0
+
+    /** Call from each screen's `onStart`. */
+    fun onUiStarted() {
+        uiLifecycleTracked = true
+        startedUiCount.incrementAndGet()
+        _tickerFlow.value = timeProvider.currentTimeNanos()
+        checkTicker()
+    }
+
+    /** Call from each screen's `onStop`. */
+    fun onUiStopped() {
+        startedUiCount.updateAndGet { (it - 1).coerceAtLeast(0) }
         checkTicker()
     }
 
@@ -78,17 +98,15 @@ class StopwatchViewModel(
     /** `true` once persisted stopwatches have been restored (immediately if persistence is disabled). */
     val isRestored: StateFlow<Boolean> = _isRestored.asStateFlow()
 
-    private val restoreJob: Job?
-
     init {
         syncFocusState()
         observeSettings()
-        restoreJob = stateStore?.let { store ->
+        stateStore?.let { store ->
             viewModelScope.launch(dispatcher) {
                 restorePersistedState(store)
                 _isRestored.value = true
                 checkTicker()
-                observeAndPersist(store)
+                observeAndPersist(store) // Never completes: keeps saving changes.
             }
         }
     }
@@ -703,7 +721,8 @@ class StopwatchViewModel(
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             // Decide between "replace silently" and "ask" only after persisted watches are back.
-            restoreJob?.join()
+            // (Not the restore coroutine itself: it keeps running to persist later changes.)
+            _isRestored.first { it }
             val result = StopwatchBackupHelper.parseBackupFromUri(context, uri)
             result.onSuccess { payload ->
                 withContext(dispatcher) {

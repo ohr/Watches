@@ -71,7 +71,7 @@ private object GlobalControlBarDefaults {
 
     val StartButtonColor = Color(0xFF2E7D32)
     val StopButtonColor = Color(0xFFD32F2F)
-    val ResetButtonColor = Color(0xFFE65100)
+    val ResetButtonColor = Color(0xFFBF360C) // >= 4.5:1 against the white label
     val DisabledButtonContainerColor = Color(0xFFB0BEC5)
     val DisabledButtonContentColor = Color(0xFF546E7A)
 

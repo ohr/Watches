@@ -35,6 +35,8 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -47,6 +49,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -87,12 +90,20 @@ fun StopwatchDetailModal(
     val timeFormatter = remember(locale) { SimpleDateFormat("HH:mm:ss", locale) }
     val subsecondSeparator = stringResource(R.string.subsecond_separator)
 
-    val currentTick by produceState(initialValue = SystemClock.elapsedRealtimeNanos(), watch.isRunning, tickerFlow) {
+    // Performance: the ticker is only read inside derivedStateOf blocks below, so a tick only
+    // recomposes the live time texts (when their string changes), not the dialog or run cards.
+    val tick = produceState(initialValue = SystemClock.elapsedRealtimeNanos(), watch.isRunning, tickerFlow) {
         if (watch.isRunning) {
             tickerFlow.collect { value = it }
         }
     }
-    val nowNanos = if (watch.isRunning) currentTick else SystemClock.elapsedRealtimeNanos()
+    val totalPrecision = if (watch.isRunning) settings.runningDisplayPrecision else settings.timePrecision
+    val formattedTotal = remember(watch, totalPrecision, subsecondSeparator) {
+        derivedStateOf {
+            val nowNanos = if (watch.isRunning) tick.value else 0L
+            TimeFormatter.formatTime(watch.getTotalCumulativeMillis(nowNanos), totalPrecision, subsecondSeparator)
+        }
+    }
 
     var showShareFormatDialog by remember { mutableStateOf(false) }
     var renamingRunSession by remember { mutableStateOf<RunSession?>(null) }
@@ -131,10 +142,7 @@ fun StopwatchDetailModal(
                 ) {
                     // Total Cumulative Time across all runs
                     item {
-                        val totalCumulativeMillis = watch.getTotalCumulativeMillis(nowNanos)
-                        val totalPrecision = if (watch.isRunning) settings.runningDisplayPrecision else settings.timePrecision
-                        val formattedTotalCumulative = TimeFormatter.formatTime(totalCumulativeMillis, totalPrecision, subsecondSeparator)
-                        TotalCumulativeCard(formattedTotal = formattedTotalCumulative)
+                        TotalCumulativeCard(formattedTotal = { formattedTotal.value })
                     }
 
                     // Run Sessions Section
@@ -155,7 +163,7 @@ fun StopwatchDetailModal(
                                 run = run,
                                 watch = watch,
                                 settings = settings,
-                                nowNanos = nowNanos,
+                                tick = tick,
                                 effectiveRunsCount = effectiveRuns.size,
                                 timeFormatter = timeFormatter,
                                 subsecondSeparator = subsecondSeparator,
@@ -181,11 +189,11 @@ fun StopwatchDetailModal(
         ShareFormatDialog(
             onSelectText = {
                 showShareFormatDialog = false
-                ShareHelper.shareSingleStopwatchResults(context, watch, settings.timePrecision, nowNanos)
+                ShareHelper.shareSingleStopwatchResults(context, watch, settings.timePrecision, SystemClock.elapsedRealtimeNanos())
             },
             onSelectCsv = {
                 showShareFormatDialog = false
-                ShareHelper.shareSingleStopwatchResultsCsv(context, watch, settings.timePrecision, nowNanos)
+                ShareHelper.shareSingleStopwatchResultsCsv(context, watch, settings.timePrecision, SystemClock.elapsedRealtimeNanos())
             },
             onSelectBackup = {
                 showShareFormatDialog = false
@@ -258,7 +266,7 @@ private fun StopwatchDetailHeader(
 
 @Composable
 private fun TotalCumulativeCard(
-    formattedTotal: String,
+    formattedTotal: () -> String,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -282,7 +290,7 @@ private fun TotalCumulativeCard(
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             )
-            Text(
+            LiveText(
                 text = formattedTotal,
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontFamily = FontFamily.Monospace,
@@ -299,7 +307,7 @@ private fun RunSessionCard(
     run: RunSession,
     watch: StopwatchItem,
     settings: AppSettings,
-    nowNanos: Long,
+    tick: State<Long>,
     effectiveRunsCount: Int,
     timeFormatter: SimpleDateFormat,
     subsecondSeparator: String,
@@ -322,15 +330,16 @@ private fun RunSessionCard(
     } else {
         "-"
     }
-    val runDurationMillis = if (run.isRunning && watch.isRunning && run.runIndex == effectiveRunsCount) {
-        watch.getElapsedMillis(nowNanos)
-    } else {
-        run.accumulatedMillis
-    }
-
+    val isLiveRun = run.isRunning && watch.isRunning && run.runIndex == effectiveRunsCount
     val isRunActive = watch.isRunning && run.isRunning
     val runPrecision = if (isRunActive) settings.runningDisplayPrecision else settings.timePrecision
-    val formattedRunDuration = TimeFormatter.formatTime(runDurationMillis, runPrecision, subsecondSeparator)
+    val formattedRunDuration = remember(run, watch, isLiveRun, runPrecision, subsecondSeparator) {
+        derivedStateOf {
+            // Only the live run reads the ticker; finished runs never update.
+            val runDurationMillis = if (isLiveRun) watch.getElapsedMillis(tick.value) else run.accumulatedMillis
+            TimeFormatter.formatTime(runDurationMillis, runPrecision, subsecondSeparator)
+        }
+    }
 
     Card(
         shape = RoundedCornerShape(12.dp),
@@ -378,8 +387,8 @@ private fun RunSessionCard(
                         )
                     }
                 }
-                Text(
-                    text = formattedRunDuration,
+                LiveText(
+                    text = { formattedRunDuration.value },
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontFamily = FontFamily.Monospace,
                         fontWeight = FontWeight.Bold
@@ -679,4 +688,18 @@ fun StopwatchDetailModalPreview() {
             onDismiss = {}
         )
     }
+}
+
+/**
+ * Text whose content changes frequently (running times). Reading [text] here keeps the
+ * recomposition to this single Text instead of the enclosing card or dialog.
+ */
+@Composable
+private fun LiveText(
+    text: () -> String,
+    style: TextStyle,
+    maxLines: Int = 1,
+    overflow: TextOverflow = TextOverflow.Clip
+) {
+    Text(text = text(), style = style, maxLines = maxLines, overflow = overflow)
 }

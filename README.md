@@ -10,26 +10,29 @@ In fast-paced race environments, coaches need to measure precise timing for mult
 
 ## Core Features
 
-- **Multi-Stopwatch Grid**: Run and display multiple stopwatches concurrently on a single screen with clear layout, dynamic sizing, and individual label management for athletes.
-- **Instant Touch-Down Control**: Timers trigger on `PointerEventType.Press` (touch-down) rather than touch-up/release to eliminate human response lag and ensure real-time reaction accuracy.
-- **Hardware Volume Key Shortcuts with Smart Focus Prediction**: Use physical Volume Up and Volume Down buttons as tactile start/stop triggers. The app intelligently predicts and auto-focuses the active or next relevant timer for rapid operation.
-- **Multi-Session Run Tracking**: Group timing events into distinct training sessions, runs, or races to organize history, splits, and athlete records cleanly.
-- **Long-Press Reset**: Accidental resets are prevented using long-press confirmation gestures on clear/reset controls.
-- **Detail View with Individual Export**: Drill down into individual stopwatch logs, review full split time breakdowns, and export session data as formatted text or CSV.
-- **English & German i18n**: Full internationalization support with localized strings for English (`en`) and German (`de`).
-- **Theme & Text Scaling**: Dynamic Material 3 styling with light/dark theme toggle and adjustable text scaling for clear visibility on field devices under various outdoor conditions.
-- **DataStore JSON Persistence**: Reliable local storage powered by Jetpack DataStore, serializing application state and timing history into structured JSON so data is preserved across app restarts or backgrounding.
+- **Multi-Stopwatch Grid**: Run and display multiple stopwatches concurrently on a single screen with clear layout, dynamic sizing, and individual names and colors per athlete.
+- **Instant Touch-Down Control**: Start, Stop and Lap trigger on touch-down (`PointerEventType.Press`) rather than on release, eliminating release lag.
+- **Hardware Volume Keys with Smart Focus**: Volume Up starts all watches, then records a lap for the highlighted watch. Volume Down stops it; when nothing is running, *holding* Volume Down resets all watches (a short press only shows a hint). Focus automatically moves to the watch expected to finish its next lap soonest, also across staggered starts.
+- **Running Notification**: While a watch runs, a foreground service keeps timing alive in the background and shows an ongoing notification with a live timer and Lap / Stop / Stop all actions. Can be switched off in the settings.
+- **Persistent Timing State**: Stopwatches, laps and run history survive app restarts and process death. After a device reboot, running watches are stopped with their duration estimated from wall-clock time.
+- **Multi-Session Run Tracking**: Group timing into named runs/sessions to organize history and splits.
+- **Long-Press Reset**: A short press on Reset clears the current time; a long press clears the full history.
+- **Detail View, Sharing & CSV Export**: Per-stopwatch lap breakdown; share results as text or CSV spreadsheet.
+- **Backup Export & Import**: Export all stopwatches as a `*.watches.json` file and import it again via the in-app import or by opening the file from another app.
+- **Localization**: English, German and French; integrates with the Android 13+ per-app language setting.
+- **Theme & Text Scaling**: Material 3 with light/dark/system theme, optional dynamic colors and adjustable text size.
+- **Accessibility**: All controls are labelled and operable with TalkBack and Switch Access (including the long-press actions); tile colors meet WCAG AA contrast.
 
 ---
 
 ## Tech Stack
 
-- **Language**: [Kotlin](https://kotlinlang.org/)
-- **UI Framework**: [Jetpack Compose](https://developer.android.com/jetpack/compose) with [Material 3 Design](https://m3.material.io/)
-- **Architecture**: MVVM with `ViewModel` and `StateFlow`
-- **Persistence**: [Jetpack DataStore](https://developer.android.com/topic/libraries/architecture/datastore) with JSON serialization
-- **Testing**: JUnit 5 (JUnit Jupiter) for unit testing application logic
-- **CI/CD**: GitHub Actions CI workflow for automated builds and testing
+- **Language**: [Kotlin](https://kotlinlang.org/) with Coroutines and Flow
+- **UI Framework**: [Jetpack Compose](https://developer.android.com/jetpack/compose) with [Material 3](https://m3.material.io/)
+- **Architecture**: MVVM; a single process-wide `StopwatchViewModel` (owned by `WatchesApplication`) shared by the UI and the foreground service
+- **Persistence**: [Jetpack DataStore](https://developer.android.com/topic/libraries/architecture/datastore) with kotlinx.serialization JSON (separate stores for settings and timing state)
+- **Testing**: JUnit 5 unit tests (JVM); JUnit 4 + Compose UI instrumented tests (device/emulator)
+- **CI/CD**: GitHub Actions workflow building the debug APK and running the unit tests
 
 ---
 
@@ -37,9 +40,9 @@ In fast-paced race environments, coaches need to measure precise timing for mult
 
 ### Prerequisites
 
-- **JDK**: JDK 17
-- **Android Studio**: Android Studio Ladybug or newer
-- **Android SDK**: SDK 35 (Android 15)
+- **JDK**: 17 or newer
+- **Android Studio**: a version supporting Android Gradle Plugin 9.x
+- **Android SDK**: compile SDK 37, target SDK 36 (Android 16), minimum SDK 30 (Android 11)
 
 ### Commands
 
@@ -53,13 +56,26 @@ Execute the following commands from the project root directory:
 
 - **Run Unit Tests**:
   ```bash
-  ./gradlew test
+  ./gradlew testDebugUnitTest
+  ```
+
+- **Run Instrumented Tests** (requires a connected device or emulator; note that this installs and afterwards *uninstalls* the app, deleting its data on that device):
+  ```bash
+  ./gradlew connectedDebugAndroidTest
   ```
 
 - **Install Debug APK to Connected Device/Emulator**:
   ```bash
   ./gradlew installDebug
   ```
+
+### Versioning
+
+`versionCode` is derived from the number of commits (`git rev-list --count HEAD`), so builds from later commits always install over earlier ones. `versionName` is set manually in `app/build.gradle.kts`. CI checks out the full history for this reason.
+
+### Release Notes for Google Play
+
+The foreground service uses the `specialUse` type (there is no dedicated stopwatch type), which requires a short justification in the Play Console. Language splits are disabled in the app bundle so that the in-app language picker works for all bundled languages.
 
 ---
 
