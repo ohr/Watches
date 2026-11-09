@@ -35,7 +35,7 @@ import org.ear.watches.ui.theme.WatchesTheme
 
 /**
  * A dialog allowing the user to select the desired export format (Plain Text, CSV Spreadsheet,
- * or full state backup as .watches.json) when sharing race results or exporting state.
+ * or full state backup as .watches.json for sharing or saving).
  */
 @Composable
 fun ShareFormatDialog(
@@ -73,7 +73,7 @@ fun ShareFormatDialog(
                     onClick = onSelectCsv
                 )
 
-                // State Backup (.watches.json) Option
+                // State Backup (.watches.json) Option via Share Sheet (Share or Save locally)
                 if (onSelectBackup != null) {
                     ShareOptionCard(
                         icon = Icons.Default.Save,

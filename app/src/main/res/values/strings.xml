@@ -135,9 +135,10 @@
     <string name="share_as_csv">CSV Spreadsheet</string>
     <string name="share_as_csv_desc">Format for Excel and Google Sheets</string>
     <string name="share_as_backup">State Backup (.watches.json)</string>
-    <string name="share_as_backup_desc">Export stopwatch state to file for sharing or reloading</string>
+    <string name="share_as_backup_desc">Export stopwatch state to file for sharing, saving, or reloading</string>
     <string name="share_backup_subject">Watches State Backup</string>
     <string name="share_backup_chooser_title">Export Stopwatch State via</string>
+    <string name="action_share_results">Share Results</string>
     <string name="action_import">Import</string>
     <string name="import_dialog_title">Import Stopwatches</string>
     <string name="import_dialog_message">Found %1$d stopwatch(es) in backup file. Choose how to import them:</string>
@@ -146,6 +147,8 @@
     <string name="import_success_toast">Imported %1$d stopwatch(es)</string>
     <string name="import_empty_toast">Backup file contains no stopwatches</string>
     <string name="import_error_invalid_file">Invalid or corrupted .watches.json file</string>
+    <string name="export_success_toast">Saved stopwatch state</string>
+    <string name="export_error_toast">Failed to save stopwatch state</string>
 
     <!-- Stopwatch Detail Modal -->
     <string name="title_stopwatch_details">Stopwatch Details</string>
@@ -176,7 +179,7 @@
 
     <!-- Multi-Run Strings -->
     <string name="label_run">Run %1$d</string>
-    <string name="hint_hold_to_reset_all">Hold 0.3s to reset all runs for all watches</string>
+    <string name="hint_hold_to_reset_all">Short tap to reset all runs for all watches</string>
     <string name="label_hold_to_reset_all">Hold to Reset All</string>
     <string name="label_total_all_runs">Total</string>
     <string name="label_run_duration">Run Duration</string>
@@ -189,9 +192,9 @@
     <string name="help_hardware_keys_title">Hardware Volume Buttons</string>
     <string name="help_hardware_keys_desc">Volume+ = Start All / Lap split for focused watch\nVolume- = Stop focused watch / Reset all when stopped</string>
     <string name="help_reset_title">Reset Button Controls</string>
-    <string name="help_reset_desc">Short tap (&lt;0.3s): Resets display time to 0 and prepares a new run session (Run 1, Run 2, …).\nLong press (&gt;0.3s): Performs a complete wipe of all run sessions and lap history.</string>
+    <string name="help_reset_desc">Short tap: Resets display time to 0 and prepares a new run session (Run 1, Run 2, …).\nLong press: Performs a complete wipe of all run sessions and lap history.</string>
     <string name="help_reset_button_title">Reset Button Controls</string>
-    <string name="help_reset_button_desc">Short tap (&lt;0.3s): Resets display time to 0 and prepares a new run session (Run 1, Run 2, …).\nLong press (&gt;0.3s): Performs a complete wipe of all run sessions and lap history.</string>
+    <string name="help_reset_button_desc">Short tap: Resets display time to 0 and prepares a new run session (Run 1, Run 2, …).\nLong press: Performs a complete wipe of all run sessions and lap history.</string>
     <string name="help_pace_trend_title">Pace Trend Indicators</string>
     <string name="help_pace_trend_desc">Green ▼ indicates a lap faster than the previous split, while Red ▲ indicates a slower lap.</string>
     <string name="help_roster_title">Saved Athlete Roster</string>
@@ -205,7 +208,7 @@
     <string name="help_settings_title">Precision &amp; Display Settings</string>
     <string name="help_settings_desc">Configure separate running time vs result/lap precision, themes, text scaling, auto-sorting, Keep Screen Awake, and language settings.</string>
     <string name="help_session_naming_title">Custom Session Naming</string>
-    <string name="help_session_naming_desc">Long-press Start or Start All (&gt;0.3s) to name a session using quick preset chips while timing. You can also rename any session retroactively in the Detail View.</string>
+    <string name="help_session_naming_desc">Long-press Start or Start All to name a session using quick preset chips while timing. You can also rename any session retroactively in the Detail View.</string>
     <string name="help_precision_sort_title">Precision &amp; Display Settings</string>
     <string name="help_precision_sort_desc">Configure separate running time vs result/lap precision, themes, text scaling, auto-sorting, Keep Screen Awake, and language settings.</string>
 

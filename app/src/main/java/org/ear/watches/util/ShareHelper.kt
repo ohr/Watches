@@ -162,4 +162,28 @@ object ShareHelper {
             Toast.makeText(context, errorToastText, Toast.LENGTH_SHORT).show()
         }
     }
+
+    fun saveStopwatchesBackupToUri(
+        context: Context,
+        uri: android.net.Uri,
+        stopwatches: List<StopwatchItem>
+    ): Boolean {
+        return try {
+            val appVersion = runCatching {
+                context.packageManager.getPackageInfo(context.packageName, 0).versionName
+            }.getOrNull()
+
+            val jsonText = StopwatchBackupHelper.createBackupJson(
+                stopwatches = stopwatches,
+                appVersion = appVersion
+            )
+
+            context.contentResolver.openOutputStream(uri)?.use { stream ->
+                stream.write(jsonText.toByteArray(Charsets.UTF_8))
+            } ?: return false
+            true
+        } catch (_: Exception) {
+            false
+        }
+    }
 }
