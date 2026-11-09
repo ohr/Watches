@@ -479,8 +479,8 @@ private fun TileActionButton(
     containerColor: Color,
     contentColor: Color,
     enabled: Boolean,
-    onClickModifier: Modifier,
     modifier: Modifier = Modifier,
+    gestureModifier: Modifier = Modifier,
     contentDescription: String? = null
 ) {
     val effectiveContainerColor = if (enabled) containerColor else StopwatchTileDefaults.DisabledButtonContainerColor
@@ -491,7 +491,7 @@ private fun TileActionButton(
             .clip(StopwatchTileDefaults.ActionButtonShape)
             // Disabled buttons still announce themselves ("Lap, button, disabled").
             .then(
-                if (enabled) onClickModifier
+                if (enabled) gestureModifier
                 else Modifier.semantics(mergeDescendants = true) { role = Role.Button; disabled() }
             ),
         color = effectiveContainerColor,
@@ -550,7 +550,7 @@ private fun TileStartStopButton(
             containerColor = StopwatchTileDefaults.StopButtonColor,
             contentColor = Color.White,
             enabled = true,
-            onClickModifier = gestureModifier,
+            gestureModifier = gestureModifier,
             contentDescription = stringResource(R.string.btn_stop),
             modifier = modifier
         )
@@ -561,7 +561,7 @@ private fun TileStartStopButton(
             containerColor = StopwatchTileDefaults.StartButtonColor,
             contentColor = Color.White,
             enabled = true,
-            onClickModifier = gestureModifier,
+            gestureModifier = gestureModifier,
             contentDescription = stringResource(R.string.btn_start),
             modifier = modifier
         )
@@ -584,7 +584,7 @@ private fun TileLapButton(
         containerColor = StopwatchTileDefaults.LapButtonColor,
         contentColor = Color.White,
         enabled = watch.isRunning,
-        onClickModifier = gestureModifier,
+        gestureModifier = gestureModifier,
         contentDescription = stringResource(R.string.btn_lap),
         modifier = modifier
     )
@@ -613,7 +613,7 @@ private fun TileResetButton(
         containerColor = StopwatchTileDefaults.ResetButtonColor,
         contentColor = Color.White,
         enabled = !watch.isRunning,
-        onClickModifier = gestureModifier,
+        gestureModifier = gestureModifier,
         contentDescription = stringResource(R.string.btn_reset),
         modifier = modifier
     )

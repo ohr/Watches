@@ -189,8 +189,9 @@ class StopwatchViewModelTest {
         assertEquals(800L, laps[2].lapDeltaMillis)
         assertEquals(0L, laps[3].lapDeltaMillis)
 
-        // Start Run 2 (New Session)
+        // Start Run 2 (New Session): Stop, short Reset, Start
         viewModel.pauseStopwatch(watchId)
+        viewModel.resetStopwatch(watchId)
         viewModel.startStopwatch(watchId)
 
         // Lap 1 of Run 2: 10_000_000_000ns -> 1st lap in active run session -> lapDeltaNanos = null
@@ -509,7 +510,26 @@ class StopwatchViewModelTest {
     }
 
     @Test
-    fun multiRunCreation_startsNewRunSessionAfterStop() {
+    fun stopAllThenStartAll_continuesFromStoppedTime() {
+        viewModel.addStopwatch("A")
+        viewModel.addStopwatch("B")
+
+        viewModel.startAll()
+        timeProvider.advanceTimeBy(5_000_000_000L)
+        viewModel.pauseAll()
+        timeProvider.advanceTimeBy(10_000_000_000L) // paused time must not count
+        viewModel.startAll()
+        timeProvider.advanceTimeBy(1_000_000_000L)
+
+        viewModel.uiState.value.stopwatches.forEach { watch ->
+            assertTrue(watch.isRunning)
+            assertEquals(1, watch.runs.size)
+            assertEquals(6000L, watch.getElapsedMillis(timeProvider.currentTimeNanos()))
+        }
+    }
+
+    @Test
+    fun multiRunCreation_startsNewRunSessionAfterReset() {
         viewModel.addStopwatch("Athlete", "Multi-Run Runner")
         val watchId = viewModel.uiState.value.stopwatches.first().id
 
@@ -527,6 +547,7 @@ class StopwatchViewModelTest {
         assertEquals(1, watch.runs[0].laps.size)
 
         // Run 2
+        viewModel.resetStopwatch(watchId)
         timeProvider.advanceTimeBy(2_000_000_000L)
         viewModel.startStopwatch(watchId)
         timeProvider.advanceTimeBy(3_000_000_000L)
@@ -555,6 +576,7 @@ class StopwatchViewModelTest {
         viewModel.startStopwatch(watchId)
         timeProvider.advanceTimeBy(4_000_000_000L)
         viewModel.pauseStopwatch(watchId)
+        viewModel.resetStopwatch(watchId)
 
         // Run 2
         viewModel.startStopwatch(watchId)
@@ -626,6 +648,7 @@ class StopwatchViewModelTest {
         timeProvider.advanceTimeBy(4_000_000_000L)
         viewModel.lapStopwatch(watchId)
         viewModel.pauseStopwatch(watchId)
+        viewModel.resetStopwatch(watchId)
 
         // Run 2
         viewModel.startStopwatch(watchId)
@@ -892,6 +915,7 @@ class StopwatchViewModelTest {
         viewModel.startStopwatch(id, "Run 1 Name")
         timeProvider.advanceTimeBy(5_000_000_000L)
         viewModel.pauseStopwatch(id)
+        viewModel.resetStopwatch(id)
 
         // Run 2
         viewModel.startStopwatch(id, "Run 2 Name")

@@ -8,7 +8,7 @@ import kotlin.math.abs
  * Handles formatting logic for different precisions (e.g., tenths, hundredths, seconds),
  * and supports both absolute time formatting and delta time formatting.
  *
- * Optimized for high-frequency execution (60+ FPS) without String.format overhead to minimize GC pressure.
+ * Optimized for high-frequency execution (60+ FPS) without "String.format" overhead to minimize GC pressure.
  */
 object TimeFormatter {
 

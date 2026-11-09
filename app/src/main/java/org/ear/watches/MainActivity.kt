@@ -3,7 +3,6 @@ package org.ear.watches
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
@@ -14,14 +13,14 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.core.content.ContextCompat
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import org.ear.watches.ui.screens.MainStopwatchScreen
 import org.ear.watches.ui.theme.WatchesTheme
 import org.ear.watches.ui.viewmodel.StopwatchViewModel
@@ -40,7 +39,9 @@ class MainActivity : AppCompatActivity() {
     private val notificationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { /* Optional; timing works either way. */ }
     private var notificationPermissionRequested = false
-    private lateinit var feedbackManager: FeedbackManager
+    /** App-wide, so recreated activities don't each allocate (and leak) low-latency audio tracks. */
+    private val feedbackManager: FeedbackManager
+        get() = (application as WatchesApplication).feedbackManager
 
     /** Volume-Down was pressed while nothing was running; a long press resets all watches. */
     private var volumeDownResetArmed = false
@@ -51,7 +52,6 @@ class MainActivity : AppCompatActivity() {
         // Avoid flashing an empty list while persisted stopwatches are being restored.
         splashScreen.setKeepOnScreenCondition { !viewModel.isRestored.value }
         enableEdgeToEdge()
-        feedbackManager = FeedbackManager(this)
 
         if (savedInstanceState == null) {
             handleIncomingFileIntent(intent)
@@ -111,7 +111,7 @@ class MainActivity : AppCompatActivity() {
                 onSuccess = { count ->
                     Toast.makeText(
                         this,
-                        getString(R.string.import_success_toast, count),
+                        resources.getQuantityString(R.plurals.import_success_toast, count, count),
                         Toast.LENGTH_SHORT
                     ).show()
                 },
@@ -147,13 +147,6 @@ class MainActivity : AppCompatActivity() {
         if (granted) return
         notificationPermissionRequested = true
         notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        if (::feedbackManager.isInitialized) {
-            feedbackManager.release()
-        }
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {

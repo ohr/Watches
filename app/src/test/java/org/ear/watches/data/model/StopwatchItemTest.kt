@@ -40,19 +40,44 @@ class StopwatchItemTest {
     }
 
     @Test
-    fun start_pausedWatch_createsNewRunSession() {
+    fun start_stoppedWatch_resumesSameRunWithoutCountingThePause() {
         val started = initialWatch.start(nowNanos = 1_000_000_000L, nowMillis = 1_000L)
+            .lap(nowNanos = 3_000_000_000L)
         val paused = started.pause(nowNanos = 5_000_000_000L)
 
-        val restarted = paused.start(nowNanos = 7_000_000_000L, nowMillis = 7_000L)
+        // Paused for 2 s, then resumed.
+        val resumed = paused.start(nowNanos = 7_000_000_000L, nowMillis = 7_000L)
 
-        assertTrue(restarted.isRunning)
-        assertEquals(2, restarted.runs.size)
+        assertTrue(resumed.isRunning)
+        assertEquals(1, resumed.runs.size)
+        val run = resumed.runs[0]
+        assertTrue(run.isRunning)
+        assertEquals(1_000L, run.startTimeMillis) // wall-clock start of the run is kept
+        assertEquals(1, run.laps.size)
+        // Continues at 4 s, not at 0 and not at 6 s (pause excluded).
+        assertEquals(4_000L, resumed.getElapsedMillis(nowNanos = 7_000_000_000L))
+        assertEquals(5_000L, resumed.getElapsedMillis(nowNanos = 8_000_000_000L))
+        assertEquals(5_000L, resumed.getTotalCumulativeMillis(nowNanos = 8_000_000_000L))
 
-        val run2 = restarted.runs[1]
-        assertEquals(2, run2.runIndex)
-        assertEquals(7_000_000_000L, run2.startTimeNanos)
-        assertEquals(7_000L, run2.startTimeMillis)
+        // The next lap is measured from the previous one on the paused-adjusted clock: 2 s + 1 s.
+        val lapped = resumed.lap(nowNanos = 8_000_000_000L)
+        val lap2 = lapped.runs[0].laps[1]
+        assertEquals(3_000_000_000L, lap2.lapTimeNanos)
+        assertEquals(5_000_000_000L, lap2.totalTimeNanos)
+
+        // Stopping again accumulates the whole run time.
+        val pausedAgain = lapped.pause(nowNanos = 9_000_000_000L)
+        assertEquals(6_000_000_000L, pausedAgain.runs[0].accumulatedNanos)
+        assertEquals(6_000L, pausedAgain.getElapsedMillis())
+    }
+
+    @Test
+    fun start_stoppedWatch_keepsRunNameUnlessANewOneIsGiven() {
+        val paused = initialWatch.start(nowNanos = 1_000_000_000L, nowMillis = 1_000L, sessionName = "Heat 1")
+            .pause(nowNanos = 2_000_000_000L)
+
+        assertEquals("Heat 1", paused.start(3_000_000_000L, 3_000L).runs[0].name)
+        assertEquals("Final", paused.start(3_000_000_000L, 3_000L, sessionName = "Final").runs[0].name)
     }
 
     @Test
@@ -191,7 +216,7 @@ class StopwatchItemTest {
     @Test
     fun updateRunSessionName_updatesSpecificSessionByIndex() {
         val started1 = initialWatch.start(nowNanos = 1_000_000_000L, nowMillis = 1_000L, sessionName = "Run 1 Name")
-        val paused1 = started1.pause(nowNanos = 5_000_000_000L)
+        val paused1 = started1.pause(nowNanos = 5_000_000_000L).reset(nowNanos = 5_000_000_000L)
         val started2 = paused1.start(nowNanos = 6_000_000_000L, nowMillis = 6_000L, sessionName = "Run 2 Name")
 
         val updated = started2.updateRunSessionName(runIndex = 1, newName = "Warm-up Final")

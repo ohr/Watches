@@ -27,9 +27,9 @@ class StopwatchDetailModalDisplayTest {
     @Test
     fun runningWatch_totalAndLiveRunFollowTicker_finishedRunStaysFixed() {
         val t0 = 1_000_000_000L
-        // Run 1: 2 s, finished. Run 2: running since t0 + 10 s.
+        // Run 1: 2 s, finished (Stop + short Reset). Run 2: running since t0 + 10 s.
         val watch = StopwatchItem(name = "A", pastelColorHex = 0xFF90CAF9)
-            .start(t0, 1L).pause(t0 + 2_000_000_000L)
+            .start(t0, 1L).pause(t0 + 2_000_000_000L).reset(t0 + 2_000_000_000L)
             .start(t0 + 10_000_000_000L, 2L)
         val ticker = MutableStateFlow(t0 + 10_000_000_000L)
 

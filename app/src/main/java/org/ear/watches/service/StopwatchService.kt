@@ -157,7 +157,9 @@ class StopwatchService : Service() {
     private fun buildNotification(model: RunningNotificationModel): Notification {
         val precision = viewModel.uiState.value.settings.timePrecision
         val separator = getString(R.string.subsecond_separator)
-        val running = getString(R.string.notification_running_count, model.runningCount, model.totalCount)
+        val running = resources.getQuantityString(
+            R.plurals.notification_running_count, model.runningCount, model.runningCount, model.totalCount
+        )
         val text = if (model.lastLapNumber != null && model.lastLapMillis != null) {
             val lap = getString(
                 R.string.notification_last_lap,

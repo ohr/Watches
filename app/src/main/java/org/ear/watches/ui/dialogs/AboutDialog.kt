@@ -45,7 +45,6 @@ import org.ear.watches.ui.theme.WatchesTheme
 import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import com.mikepenz.aboutlibraries.util.withContext
-import kotlinx.collections.immutable.toImmutableList
 
 /**
  * A dialog displaying application details, version information, GitHub repository link,
@@ -58,23 +57,10 @@ fun AboutDialog(
     val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
 
+    // License definitions are generated at build time by the AboutLibraries Gradle plugin
+    // (res/raw/aboutlibraries.json); the fallback UI below handles a missing/broken file.
     val libs = remember(context) {
-        try {
-            val loaded = Libs.Builder().withContext(context).build()
-            if (loaded.libraries.isNotEmpty()) {
-                loaded
-            } else {
-                val json = context.assets.open("aboutlibraries.json").bufferedReader().use { it.readText() }
-                Libs.Builder().withJson(json).build()
-            }
-        } catch (_: Exception) {
-            try {
-                val json = context.assets.open("aboutlibraries.json").bufferedReader().use { it.readText() }
-                Libs.Builder().withJson(json).build()
-            } catch (_: Exception) {
-                null
-            }
-        }
+        runCatching { Libs.Builder().withContext(context).build() }.getOrNull()
     }
 
     val productionLibs = remember(libs) {
@@ -85,7 +71,7 @@ fun AboutDialog(
                 id.contains("junit") || id.contains("test") || id.contains("mock") ||
                 name.contains("junit") || name.contains("test")
             }
-            rawLibs.copy(libraries = nonTestLibraries.toImmutableList())
+            rawLibs.copy(libraries = nonTestLibraries)
         }
     }
 

@@ -72,8 +72,7 @@ object ShareHelper {
 
         val csvText = RaceResultsFormatter.formatAsCsv(
             stopwatches = stopwatches,
-            precision = precision,
-            nowNanos = nowNanos
+            precision = precision
         )
 
         try {

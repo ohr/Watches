@@ -14,10 +14,9 @@ class AboutLibrariesTest {
 
     @Test
     fun testAboutLibrariesJsonGeneratedAndValid() {
-        val jsonFile = File("build/generated/aboutLibraries/aboutlibraries.json").let {
-            if (it.exists()) it else File("app/build/generated/aboutLibraries/aboutlibraries.json")
-        }
-        assertTrue(jsonFile.exists(), "aboutlibraries.json should be generated at build/generated/aboutLibraries/aboutlibraries.json")
+        val path = "build/generated/aboutLibraries/debug/res/raw/aboutlibraries.json"
+        val jsonFile = File(path).let { if (it.exists()) it else File("app/$path") }
+        assertTrue(jsonFile.exists(), "aboutlibraries.json should be generated at $path")
 
         val jsonString = jsonFile.readText()
         assertTrue(jsonString.isNotBlank(), "aboutlibraries.json should not be empty")

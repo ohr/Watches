@@ -3,6 +3,7 @@ package org.ear.watches.util
 import android.content.Context
 import android.media.AudioAttributes
 import android.media.AudioFormat
+import android.media.AudioManager
 import android.media.AudioTrack
 import android.os.Build
 import android.os.VibrationEffect
@@ -22,7 +23,9 @@ import kotlin.math.sin
  * | Stop   | falling two notes (1320→880 Hz)| two pulses         |
  * | Reset  | one long low tone (330 Hz)     | one long pulse     |
  *
- * Sounds are synthesized once and preloaded into static [AudioTrack]s for minimal latency.
+ * Sounds are synthesized once and preloaded into static [AudioTrack]s for minimal latency. They use
+ * the device's native output sample rate: with any other rate Android denies the low-latency ("fast")
+ * audio path and mixes the track normally, which delays the sound by ~100 ms behind the vibration.
  * (`ToneGenerator`'s predefined tones were indistinguishable: they are fixed-length beeps that
  * the requested duration only cuts off or pads with silence.)
  */
@@ -56,8 +59,11 @@ class FeedbackManager(context: Context) {
         }
     }
 
+    /** Native output rate (usually 48 kHz); required for the low-latency audio path. */
+    private val sampleRate: Int = nativeOutputSampleRate(appContext)
+
     private val tracks: Map<Cue, AudioTrack> = Cue.entries.mapNotNull { cue ->
-        createTrack(synthesize(cue.tones))?.let { cue to it }
+        createTrack(synthesize(cue.tones, sampleRate))?.let { cue to it }
     }.toMap()
 
     fun playStart(soundEnabled: Boolean = true, hapticsEnabled: Boolean = true) =
@@ -76,8 +82,9 @@ class FeedbackManager(context: Context) {
     fun isSoundReady(cue: Cue): Boolean = tracks[cue]?.state == AudioTrack.STATE_INITIALIZED
 
     private fun play(cue: Cue, soundEnabled: Boolean, hapticsEnabled: Boolean) {
-        if (hapticsEnabled) vibrate(cue.vibrationTimings)
+        // Sound first: its output path has more latency than the vibrator.
         if (soundEnabled) playSound(cue)
+        if (hapticsEnabled) vibrate(cue.vibrationTimings)
     }
 
     private fun playSound(cue: Cue) {
@@ -113,7 +120,7 @@ class FeedbackManager(context: Context) {
             .setAudioFormat(
                 AudioFormat.Builder()
                     .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-                    .setSampleRate(SAMPLE_RATE)
+                    .setSampleRate(sampleRate)
                     .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
                     .build()
             )
@@ -131,7 +138,7 @@ class FeedbackManager(context: Context) {
     }
 
     companion object {
-        const val SAMPLE_RATE = 44_100
+        const val DEFAULT_SAMPLE_RATE = 48_000
         private const val AMPLITUDE = 0.6
         private const val FADE_MS = 5
 
@@ -139,7 +146,7 @@ class FeedbackManager(context: Context) {
          * Renders [tones] to 16-bit mono PCM. Each segment fades in and out over a few
          * milliseconds to avoid audible clicks at tone boundaries.
          */
-        fun synthesize(tones: List<Tone>, sampleRate: Int = SAMPLE_RATE): ShortArray {
+        fun synthesize(tones: List<Tone>, sampleRate: Int = DEFAULT_SAMPLE_RATE): ShortArray {
             val out = ArrayList<Short>()
             tones.forEach { tone ->
                 val count = sampleRate * tone.durationMs / 1000
@@ -158,5 +165,12 @@ class FeedbackManager(context: Context) {
             }
             return out.toShortArray()
         }
+
+        private fun nativeOutputSampleRate(context: Context): Int =
+            context.getSystemService(AudioManager::class.java)
+                ?.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE)
+                ?.toIntOrNull()
+                ?.takeIf { it > 0 }
+                ?: DEFAULT_SAMPLE_RATE
     }
 }

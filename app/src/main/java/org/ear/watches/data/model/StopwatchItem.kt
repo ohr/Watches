@@ -139,8 +139,14 @@ data class StopwatchItem(
     /**
      * Performs an immutable state transition when starting or resuming timing.
      *
-     * Creates a new [RunSession] if none exists or if the last run was finished, or updates the start timestamp
-     * of the last run if resuming. Sets [isRunning] to `true`. Optionally assigns a custom session [sessionName].
+     * - No run yet: creates run 1.
+     * - Last run stopped ([RunSession.isFinished]): resumes it, so time and laps continue where they
+     *   stopped. Its start is shifted forward by the paused interval, which keeps elapsed and lap totals
+     *   (both measured from [RunSession.startTimeNanos]) free of the pause. A new run only begins after
+     *   [reset].
+     * - Last run prepared by [reset] (unstarted): starts it.
+     *
+     * Sets [isRunning] to `true`. Optionally assigns a custom session [sessionName].
      *
      * @param nowNanos Current system monotonic timestamp in nanoseconds (System.nanoTime()).
      * @param nowMillis Current wall-clock timestamp in milliseconds (System.currentTimeMillis()).
@@ -161,13 +167,13 @@ data class StopwatchItem(
         } else {
             val lastRun = runs.last()
             if (lastRun.isFinished) {
-                val runIndex = runs.size + 1
-                runs + RunSession(
-                    runIndex = runIndex,
-                    startTimeNanos = nowNanos,
-                    startTimeMillis = nowMillis,
-                    name = sessionName
+                val resumedRun = lastRun.copy(
+                    // Must stay > 0: a start time of 0 marks an unstarted run.
+                    startTimeNanos = (nowNanos - lastRun.accumulatedNanos).coerceAtLeast(1L),
+                    endTimeNanos = 0L,
+                    name = sessionName ?: lastRun.name
                 )
+                runs.dropLast(1) + resumedRun
             } else {
                 val updatedLastRun = lastRun.copy(
                     startTimeNanos = nowNanos,

@@ -38,6 +38,7 @@ import org.ear.watches.util.LocaleController
 import org.ear.watches.util.StopwatchBackupHelper
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Primary ViewModel for the application, responsible for maintaining the state of all stopwatches,
@@ -135,7 +136,7 @@ class StopwatchViewModel(
         _uiState
             .map { it.toPersistedState() }
             .distinctUntilChanged()
-            .debounce(persistDebounceMillis)
+            .debounce(persistDebounceMillis.milliseconds)
             .collect { store.save(it) }
     }
 

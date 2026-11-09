@@ -16,6 +16,7 @@ import org.ear.watches.data.repository.StopwatchStateRepository
 import org.ear.watches.service.StopwatchService
 import org.ear.watches.ui.viewmodel.StopwatchViewModel
 import org.ear.watches.util.AppCompatLocaleController
+import org.ear.watches.util.FeedbackManager
 
 /**
  * Application container. Owns the single, process-wide [StopwatchViewModel] so that the UI and
@@ -40,6 +41,13 @@ class WatchesApplication : Application(), ViewModelStoreOwner {
             }
         )[StopwatchViewModel::class.java]
     }
+
+    /**
+     * Sound and vibration feedback. One instance for the whole process: Android only grants a few
+     * low-latency ("fast") audio tracks system-wide, and an instance per activity would hold a
+     * second set while an activity is being recreated, pushing the sounds onto the slow path.
+     */
+    val feedbackManager: FeedbackManager by lazy { FeedbackManager(this) }
 
     override fun onCreate() {
         super.onCreate()

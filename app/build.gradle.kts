@@ -19,12 +19,15 @@ plugins {
 }
 
 aboutLibraries {
-    // Exclude test-related libraries from generated definitions
-    exclusionPatterns = listOf(
-        ".*hamcrest.*".toPattern(),
-        ".*junit.*".toPattern(),
-        ".*test.*".toPattern(),
-        ".*mock.*".toPattern())
+    library {
+        // Exclude test-related libraries from generated definitions
+        exclusionPatterns.addAll(
+            ".*hamcrest.*".toPattern(),
+            ".*junit.*".toPattern(),
+            ".*test.*".toPattern(),
+            ".*mock.*".toPattern()
+        )
+    }
 }
 
 android {
@@ -68,10 +71,6 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            optimization {
-                enable = true
-                packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
-            }
         }
     }
     compileOptions {
@@ -93,23 +92,12 @@ android {
     testOptions {
         unitTests.isReturnDefaultValues = true
     }
-    sourceSets {
-        getByName("main") {
-            assets.directories.add(file("build/generated/aboutLibraries").path)
-        }
-    }
-}
-
-tasks.matching {
-    it.name.contains("lint", ignoreCase = true) || (it.name.startsWith("merge") && it.name.endsWith("Assets"))
-}.configureEach {
-    dependsOn("exportLibraryDefinitions")
-    dependsOn("collectDependencies")
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
-    dependsOn("exportLibraryDefinitions")
+    // AboutLibrariesTest checks the generated license definitions.
+    dependsOn("prepareLibraryDefinitionsDebug")
 }
 
 androidComponents {
@@ -125,7 +113,6 @@ dependencies {
     implementation(libs.aboutlibraries.compose.m3)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.ui)
@@ -138,14 +125,11 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.kotlinx.coroutines.android)
-    implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.kotlinx.serialization.core)
     implementation(libs.kotlinx.serialization.json)
-    testImplementation(libs.androidx.core)
     testImplementation(libs.junit.jupiter.api)
     testRuntimeOnly(libs.junit.jupiter.engine)
     testImplementation(libs.junit.jupiter.params)
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)

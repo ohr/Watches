@@ -117,7 +117,7 @@ fun MainStopwatchScreen(
                 onSuccess = { count ->
                     Toast.makeText(
                         context,
-                        resources.getString(R.string.import_success_toast, count),
+                        resources.getQuantityString(R.plurals.import_success_toast, count, count),
                         Toast.LENGTH_SHORT
                     ).show()
                 },
@@ -478,7 +478,6 @@ fun MainStopwatchScreen(
             onToggleHaptics = { viewModel.toggleHaptics() },
             onToggleHardwareKeys = { viewModel.toggleHardwareKeys() },
             onSetAutoSortOption = { viewModel.setAutoSortOption(it) },
-            onToggleAutoSort = { viewModel.toggleAutoSort() },
             onToggleKeepScreenOn = { viewModel.toggleKeepScreenOn() },
             onToggleRunningNotification = { viewModel.toggleRunningNotification() },
             onToggleDynamicColor = { viewModel.toggleDynamicColor() },
@@ -549,7 +548,7 @@ fun MainStopwatchScreen(
                 viewModel.confirmImportReplace()
                 Toast.makeText(
                     context,
-                    resources.getString(R.string.import_success_toast, count),
+                    resources.getQuantityString(R.plurals.import_success_toast, count, count),
                     Toast.LENGTH_SHORT
                 ).show()
             },
@@ -558,7 +557,7 @@ fun MainStopwatchScreen(
                 viewModel.confirmImportAppend()
                 Toast.makeText(
                     context,
-                    resources.getString(R.string.import_success_toast, count),
+                    resources.getQuantityString(R.plurals.import_success_toast, count, count),
                     Toast.LENGTH_SHORT
                 ).show()
             },

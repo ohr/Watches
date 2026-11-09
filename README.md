@@ -15,13 +15,13 @@ In fast-paced race environments, coaches need to measure precise timing for mult
 - **Hardware Volume Keys with Smart Focus**: Volume Up starts all watches, then records a lap for the highlighted watch. Volume Down stops it; when nothing is running, *holding* Volume Down resets all watches (a short press only shows a hint). Focus automatically moves to the watch expected to finish its next lap soonest, also across staggered starts.
 - **Running Notification**: While a watch runs, a foreground service keeps timing alive in the background and shows an ongoing notification with a live timer and Lap / Stop / Stop all actions. Can be switched off in the settings.
 - **Persistent Timing State**: Stopwatches, laps and run history survive app restarts and process death. After a device reboot, running watches are stopped with their duration estimated from wall-clock time.
-- **Multi-Session Run Tracking**: Group timing into named runs/sessions to organize history and splits.
+- **Multi-Session Run Tracking**: Group timing into named runs/sessions to organize history and splits. Stop and Start continue the current run; a short Reset begins the next run.
 - **Long-Press Reset**: A short press on Reset clears the current time; a long press clears the full history.
 - **Detail View, Sharing & CSV Export**: Per-stopwatch lap breakdown; share results as text or CSV spreadsheet.
 - **Backup Export & Import**: Export all stopwatches as a `*.watches.json` file and import it again via the in-app import or by opening the file from another app.
 - **Localization**: English, German and French; integrates with the Android 13+ per-app language setting.
 - **Theme & Text Scaling**: Material 3 with light/dark/system theme, optional dynamic colors and adjustable text size.
-- **Accessibility**: All controls are labelled and operable with TalkBack and Switch Access (including the long-press actions); tile colors meet WCAG AA contrast.
+- **Accessibility**: All controls are labeled and operable with TalkBack and Switch Access (including the long-press actions); tile colors meet WCAG AA contrast.
 
 ---
 

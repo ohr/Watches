@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- AboutLibraries loads its generated definitions by name (getIdentifier), which the resource
+     shrinker cannot see: keep them so the About dialog lists licenses in release builds. -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@raw/aboutlibraries" />

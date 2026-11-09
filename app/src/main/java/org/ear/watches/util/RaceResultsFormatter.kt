@@ -97,7 +97,7 @@ object RaceResultsFormatter {
                             sb.appendLine("     $bestLapText")
                         }
 
-                        val lapBreakdownText = getString(context, R.string.report_lap_breakdown_format, laps.size)
+                        val lapBreakdownText = context?.resources?.getQuantityString(R.plurals.report_lap_breakdown_format, laps.size, laps.size)
                             ?: "Lap Breakdown (${laps.size} laps):"
                         sb.appendLine("     $lapBreakdownText")
 
@@ -151,8 +151,7 @@ object RaceResultsFormatter {
 
     fun formatAsCsv(
         stopwatches: List<StopwatchItem>,
-        precision: AppPrecision = AppPrecision.HUNDREDTHS,
-        nowNanos: Long = 0L
+        precision: AppPrecision = AppPrecision.HUNDREDTHS
     ): String {
         val sb = StringBuilder()
         sb.appendLine("\"Athlete\",\"Run Session\",\"Lap Number\",\"Lap Time\",\"Total Time\"")
@@ -176,5 +175,5 @@ object RaceResultsFormatter {
         watch: StopwatchItem,
         precision: AppPrecision = AppPrecision.HUNDREDTHS,
         nowNanos: Long = 0L
-    ): String = formatAsCsv(listOf(watch), precision, nowNanos)
+    ): String = formatAsCsv(listOf(watch), precision)
 }

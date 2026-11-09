@@ -1,15 +1,14 @@
 package org.ear.watches
 
-import org.ear.watches.data.model.AppPrecision
-import org.ear.watches.ui.viewmodel.StopwatchViewModel
-import org.ear.watches.util.RaceResultsFormatter
-import org.ear.watches.viewmodel.TestTimeProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.ear.watches.data.model.AppPrecision
+import org.ear.watches.ui.viewmodel.StopwatchViewModel
+import org.ear.watches.util.RaceResultsFormatter
+import org.ear.watches.viewmodel.TestTimeProvider
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse

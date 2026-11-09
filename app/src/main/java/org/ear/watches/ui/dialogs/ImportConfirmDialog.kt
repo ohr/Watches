@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -48,7 +49,7 @@ fun ImportConfirmDialog(
         },
         text = {
             Text(
-                text = stringResource(R.string.import_dialog_message, stopwatchCount),
+                text = pluralStringResource(R.plurals.import_dialog_message, stopwatchCount, stopwatchCount),
                 style = MaterialTheme.typography.bodyMedium
             )
         },
