@@ -6,8 +6,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -21,12 +25,15 @@ import org.ear.watches.data.model.AppLanguage
 import org.ear.watches.data.model.AppPrecision
 import org.ear.watches.data.model.AppSettings
 import org.ear.watches.data.model.AppThemeMode
+import org.ear.watches.data.model.PersistedStopwatchState
 import org.ear.watches.data.model.StopwatchBackupPayload
 import org.ear.watches.data.model.StopwatchItem
 import org.ear.watches.data.model.StopwatchUiState
 import org.ear.watches.data.repository.SettingsRepository
+import org.ear.watches.data.repository.StopwatchStateStore
 import org.ear.watches.data.util.SystemTimeProvider
 import org.ear.watches.data.util.TimeProvider
+import org.ear.watches.util.LocaleController
 import org.ear.watches.util.StopwatchBackupHelper
 import java.util.UUID
 
@@ -38,7 +45,10 @@ import java.util.UUID
 class StopwatchViewModel(
     private val settingsRepository: SettingsRepository? = null,
     private val timeProvider: TimeProvider = SystemTimeProvider(),
-    private val dispatcher: CoroutineDispatcher = Dispatchers.Main
+    private val dispatcher: CoroutineDispatcher = Dispatchers.Main,
+    private val stateStore: StopwatchStateStore? = null,
+    private val persistDebounceMillis: Long = PERSIST_DEBOUNCE_MILLIS,
+    private val localeController: LocaleController? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(StopwatchUiState())
@@ -49,19 +59,89 @@ class StopwatchViewModel(
 
     private var tickerJob: Job? = null
 
+    /**
+     * Whether any UI is visible. The high-frequency ticker only runs while visible, so a
+     * background session (kept alive by the foreground service) does not burn CPU for redraws.
+     */
+    @Volatile
+    private var isUiVisible = true
+
+    fun setUiVisible(visible: Boolean) {
+        if (isUiVisible == visible) return
+        isUiVisible = visible
+        if (visible) _tickerFlow.value = timeProvider.currentTimeNanos()
+        checkTicker()
+    }
+
+    private val _isRestored = MutableStateFlow(stateStore == null)
+
+    /** `true` once persisted stopwatches have been restored (immediately if persistence is disabled). */
+    val isRestored: StateFlow<Boolean> = _isRestored.asStateFlow()
+
+    private val restoreJob: Job?
+
     init {
         syncFocusState()
         observeSettings()
+        restoreJob = stateStore?.let { store ->
+            viewModelScope.launch(dispatcher) {
+                restorePersistedState(store)
+                _isRestored.value = true
+                checkTicker()
+                observeAndPersist(store)
+            }
+        }
+    }
+
+    private suspend fun restorePersistedState(store: StopwatchStateStore) {
+        val restored = store.load() ?: return
+        if (restored.stopwatches.isEmpty()) return
+        _uiState.update { state ->
+            // Keep anything the user created while the restore was in flight.
+            val restoredIds = restored.stopwatches.mapTo(HashSet()) { it.id }
+            val combined = restored.stopwatches + state.stopwatches.filterNot { it.id in restoredIds }
+            val focusedId = restored.focusedWatchId?.takeIf { id -> combined.any { it.id == id } }
+                ?: state.activeFocusedWatchId
+            state.copy(stopwatches = combined, activeFocusedWatchId = focusedId)
+                .applyFocusAndSort(newFocusedId = focusedId)
+        }
+    }
+
+    private fun StopwatchUiState.toPersistedState() = PersistedStopwatchState(
+        focusedWatchId = activeFocusedWatchId,
+        stopwatches = stopwatches
+    )
+
+    @OptIn(FlowPreview::class)
+    private suspend fun observeAndPersist(store: StopwatchStateStore) {
+        _uiState
+            .map { it.toPersistedState() }
+            .distinctUntilChanged()
+            .debounce(persistDebounceMillis)
+            .collect { store.save(it) }
+    }
+
+    /**
+     * Saves the current timing state immediately, bypassing the debounce.
+     * Call when the app goes to the background, where the process may be killed at any time.
+     */
+    fun persistNow() {
+        val store = stateStore ?: return
+        if (!_isRestored.value) return
+        val snapshot = _uiState.value.toPersistedState()
+        viewModelScope.launch(dispatcher) { store.save(snapshot) }
     }
 
     private fun observeSettings() {
         if (settingsRepository != null) {
             viewModelScope.launch(dispatcher) {
-                settingsRepository.settingsFlow.collect {
+                settingsRepository.settingsFlow.collect { stored ->
+                    val language = localeController?.resolve(stored.language) ?: stored.language
                     _uiState.update { state ->
-                        state.copy(settings = it)
+                        state.copy(settings = stored.copy(language = language))
                             .applyFocusAndSort()
                     }
+                    if (language != stored.language) settingsRepository.setAppLanguage(language)
                 }
             }
         }
@@ -69,11 +149,11 @@ class StopwatchViewModel(
 
     private fun checkTicker() {
         val anyRunning = _uiState.value.stopwatches.any { watch -> watch.isRunning }
-        if (anyRunning) {
+        if (anyRunning && isUiVisible) {
             if (tickerJob?.isActive != true) {
                 tickerJob = viewModelScope.launch(Dispatchers.Default) {
                     while (coroutineContext.isActive) {
-                        if (!_uiState.value.stopwatches.any { it.isRunning }) break
+                        if (!isUiVisible || !_uiState.value.stopwatches.any { it.isRunning }) break
                         _uiState.value.settings.runningDisplayPrecision.delayRefresh()
                         _tickerFlow.value = timeProvider.currentTimeNanos()
                     }
@@ -91,13 +171,8 @@ class StopwatchViewModel(
         val determinedFocusedId = newFocusedId
             ?: StopwatchItem.calculateNextFocusedWatchId(stopwatches, activeFocusedWatchId)
 
-        val sortedWatchList = StopwatchItem.sortStopwatches(stopwatches, settings.autoSortOption)
-        val updatedWatchList = sortedWatchList.map {
-            it.copy(isFocused = (it.id == determinedFocusedId))
-        }
-
         return copy(
-            stopwatches = updatedWatchList,
+            stopwatches = StopwatchItem.sortStopwatches(stopwatches, settings.autoSortOption),
             activeFocusedWatchId = determinedFocusedId
         )
     }
@@ -283,28 +358,40 @@ class StopwatchViewModel(
             return
         }
 
-        val runningWatches = stopwatches.filter { it.isRunning }
-        if (runningWatches.isEmpty()) return
-
-        val targetWatchId = StopwatchItem.calculateNextFocusedWatchId(stopwatches) ?: runningWatches.first().id
-
-        lapStopwatch(targetWatchId)
+        // Lap the highlighted watch if it is running, otherwise the predicted next one.
+        targetWatchId(state)?.let { lapStopwatch(it) }
     }
 
-    fun handleVolumeDown() {
-        val state = _uiState.value
-        val stopwatches = state.stopwatches
-        if (stopwatches.none { it.isRunning }) {
-            resetAll()
-            return
-        }
+    /**
+     * The running watch that single-button controls (volume keys, notification actions) act on,
+     * or `null` if nothing is running. See [StopwatchItem.resolveTargetWatchId].
+     */
+    fun targetWatchId(state: StopwatchUiState = _uiState.value): String? =
+        StopwatchItem.resolveTargetWatchId(state.stopwatches, state.activeFocusedWatchId)
 
-        val focusedRunningWatch = stopwatches.find { (it.id == state.activeFocusedWatchId) && it.isRunning }
-        val watchToStop = focusedRunningWatch ?: stopwatches.firstOrNull { it.isRunning }
+    /**
+     * Short press of Volume-Down: stops the target watch (see [targetWatchId]).
+     *
+     * Resetting is deliberately not done here (see [handleVolumeDownLongPress]) so a single
+     * accidental press can never wipe the timing data.
+     *
+     * @return `true` if a watch was stopped, `false` if nothing was running.
+     */
+    fun handleVolumeDown(): Boolean {
+        val watchToStop = targetWatchId() ?: return false
+        pauseStopwatch(watchToStop)
+        return true
+    }
 
-        watchToStop?.let {
-            pauseStopwatch(it.id)
-        }
+    /**
+     * Long press of Volume-Down while nothing is running: resets all watches (history is kept).
+     *
+     * @return `true` if the reset was performed, `false` if a watch is still running.
+     */
+    fun handleVolumeDownLongPress(): Boolean {
+        if (_uiState.value.stopwatches.any { it.isRunning }) return false
+        resetAll()
+        return true
     }
 
     fun toggleSound() {
@@ -392,6 +479,14 @@ class StopwatchViewModel(
         }
     }
 
+    fun toggleRunningNotification() {
+        val enabled = !_uiState.value.settings.showRunningNotification
+        _uiState.update { it.copy(settings = it.settings.copy(showRunningNotification = enabled)) }
+        viewModelScope.launch(dispatcher) {
+            settingsRepository?.setShowRunningNotification(enabled)
+        }
+    }
+
     fun toggleDynamicColor() {
         val newValue = !_uiState.value.settings.useDynamicColor
         setUseDynamicColor(newValue)
@@ -433,6 +528,7 @@ class StopwatchViewModel(
 
     fun setLanguage(language: AppLanguage) {
         _uiState.update { it.copy(settings = it.settings.copy(language = language)) }
+        localeController?.apply(language)
         viewModelScope.launch(dispatcher) {
             settingsRepository?.setAppLanguage(language)
         }
@@ -518,6 +614,20 @@ class StopwatchViewModel(
         }
     }
 
+    /**
+     * Re-reads the applied language, e.g. after the user changed it in the Android 13+ system
+     * settings (which recreates the activity but keeps this app-scoped ViewModel).
+     */
+    fun refreshLanguage() {
+        val controller = localeController ?: return
+        val current = controller.current()
+        if (current == _uiState.value.settings.language) return
+        _uiState.update { it.copy(settings = it.settings.copy(language = current)) }
+        viewModelScope.launch(dispatcher) {
+            settingsRepository?.setAppLanguage(current)
+        }
+    }
+
     fun dismissHelpDialog() {
         _uiState.update { it.copy(showHelpDialog = false) }
     }
@@ -592,6 +702,8 @@ class StopwatchViewModel(
         onError: (String) -> Unit = {}
     ) {
         viewModelScope.launch(Dispatchers.IO) {
+            // Decide between "replace silently" and "ask" only after persisted watches are back.
+            restoreJob?.join()
             val result = StopwatchBackupHelper.parseBackupFromUri(context, uri)
             result.onSuccess { payload ->
                 withContext(dispatcher) {
@@ -640,14 +752,14 @@ class StopwatchViewModel(
             } else {
                 StopwatchItem.calculateNextFocusedWatchId(updatedWatches, state.activeFocusedWatchId)
             }
-            val sortedWatchList = StopwatchItem.sortStopwatches(updatedWatches, state.settings.autoSortOption)
-            val refreshedWatchList = sortedWatchList.map {
-                it.copy(isFocused = (it.id == activeFocusedWatchId))
-            }
             state.copy(
-                stopwatches = refreshedWatchList,
+                stopwatches = StopwatchItem.sortStopwatches(updatedWatches, state.settings.autoSortOption),
                 activeFocusedWatchId = activeFocusedWatchId
             )
         }
+    }
+
+    companion object {
+        const val PERSIST_DEBOUNCE_MILLIS = 300L
     }
 }

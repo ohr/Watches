@@ -4,13 +4,17 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.mutablePreferencesOf
 import org.ear.watches.data.model.AppAutoSortOption
 import org.ear.watches.data.model.AppFontSize
 import org.ear.watches.data.model.AppLanguage
 import org.ear.watches.data.model.AppPrecision
 import org.ear.watches.data.model.AppSettings
 import org.ear.watches.data.model.AppThemeMode
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -190,17 +194,22 @@ class SettingsRepositoryTest {
     }
 
     @Test
-    fun fallbackFromLegacyPreferences_worksWhenJsonKeyIsMissing() = testScope.runTest {
-        dataStore.edit { preferences ->
-            preferences[SettingsRepository.LEGACY_SOUND_HAPTICS_ENABLED] = false
-            preferences[SettingsRepository.HARDWARE_KEYS_ENABLED] = true
-            preferences[SettingsRepository.RUNNING_DISPLAY_PRECISION] = AppPrecision.SECONDS.name
-            preferences[SettingsRepository.TIME_PRECISION] = AppPrecision.HUNDREDTHS.name
-            preferences[SettingsRepository.AUTO_SORT_ENABLED] = true
-            preferences[SettingsRepository.APP_LANGUAGE] = AppLanguage.GERMAN.name
-        }
+    fun legacyMigration_withoutJson_buildsSettingsFromLegacyKeysAndRemovesThem() = testScope.runTest {
+        val legacy = mutablePreferencesOf(
+            SettingsLegacyMigration.LEGACY_SOUND_HAPTICS_ENABLED to false,
+            SettingsLegacyMigration.HARDWARE_KEYS_ENABLED to true,
+            SettingsLegacyMigration.RUNNING_DISPLAY_PRECISION to AppPrecision.SECONDS.name,
+            SettingsLegacyMigration.TIME_PRECISION to AppPrecision.HUNDREDTHS.name,
+            SettingsLegacyMigration.AUTO_SORT_ENABLED to true,
+            SettingsLegacyMigration.APP_LANGUAGE to AppLanguage.GERMAN.name
+        )
+        assertTrue(SettingsLegacyMigration.shouldMigrate(legacy))
 
-        val settings = repository.settingsFlow.first()
+        val migrated = SettingsLegacyMigration.migrate(legacy)
+
+        assertEquals(setOf(SettingsRepository.APP_SETTINGS_JSON), migrated.asMap().keys)
+        assertFalse(SettingsLegacyMigration.shouldMigrate(migrated))
+        val settings = SettingsRepository.decodeSettings(migrated)
         assertFalse(settings.soundEnabled)
         assertFalse(settings.hapticsEnabled)
         assertTrue(settings.hardwareVolumeKeysEnabled)
@@ -215,19 +224,65 @@ class SettingsRepositoryTest {
     }
 
     @Test
-    fun migrationFromLegacyAutoSortEnabled_mapsTrueToByFastestLapAndFalseToNone() = testScope.runTest {
-        dataStore.edit { preferences ->
-            preferences[SettingsRepository.AUTO_SORT_ENABLED] = true
-        }
-        var settings = repository.settingsFlow.first()
-        assertEquals(AppAutoSortOption.BY_FASTEST_LAP, settings.autoSortOption)
+    fun legacyMigration_mapsAutoSortEnabledTrueToByFastestLapAndFalseToNone() = testScope.runTest {
+        val enabled = SettingsLegacyMigration.migrate(mutablePreferencesOf(SettingsLegacyMigration.AUTO_SORT_ENABLED to true))
+        assertEquals(AppAutoSortOption.BY_FASTEST_LAP, SettingsRepository.decodeSettings(enabled).autoSortOption)
 
-        dataStore.edit { preferences ->
-            preferences.clear()
-            preferences[SettingsRepository.AUTO_SORT_ENABLED] = false
+        val disabled = SettingsLegacyMigration.migrate(mutablePreferencesOf(SettingsLegacyMigration.AUTO_SORT_ENABLED to false))
+        assertEquals(AppAutoSortOption.NONE, SettingsRepository.decodeSettings(disabled).autoSortOption)
+    }
+
+    @Test
+    fun legacyMigration_jsonFieldsWin_missingJsonFieldsComeFromLegacyKeys() = testScope.runTest {
+        // JSON from an older version without soundEnabled/useDynamicColor/autoSortOption.
+        val oldJson = """{"hapticsEnabled":true,"timePrecision":"SECONDS","autoSortEnabled":true}"""
+        val legacy = mutablePreferencesOf(
+            SettingsRepository.APP_SETTINGS_JSON to oldJson,
+            SettingsLegacyMigration.SOUND_ENABLED to false,
+            SettingsLegacyMigration.HAPTICS_ENABLED to false,
+            SettingsLegacyMigration.USE_DYNAMIC_COLOR to false,
+            SettingsLegacyMigration.TIME_PRECISION to AppPrecision.HUNDREDTHS.name
+        )
+
+        val settings = SettingsRepository.decodeSettings(SettingsLegacyMigration.migrate(legacy))
+
+        assertFalse(settings.soundEnabled) // absent in JSON -> legacy key
+        assertTrue(settings.hapticsEnabled) // present in JSON -> JSON wins
+        assertFalse(settings.useDynamicColor)
+        assertEquals(AppPrecision.SECONDS, settings.timePrecision)
+        assertEquals(AppAutoSortOption.BY_FASTEST_LAP, settings.autoSortOption)
+    }
+
+    @Test
+    fun legacyMigration_runsAutomaticallyOnDataStoreWithMigrations() = runTest {
+        val file = File(tempDir, "legacy.preferences_pb")
+        // An old app version wrote individual keys.
+        val oldScope = CoroutineScope(Job() + testDispatcher)
+        PreferenceDataStoreFactory.create(scope = oldScope, produceFile = { file }).edit {
+            it[SettingsLegacyMigration.SOUND_ENABLED] = false
+            it[SettingsLegacyMigration.APP_LANGUAGE] = AppLanguage.FRENCH.name
         }
-        settings = repository.settingsFlow.first()
-        assertEquals(AppAutoSortOption.NONE, settings.autoSortOption)
+        oldScope.cancel()
+        oldScope.coroutineContext[Job]!!.join()
+
+        val migratingStore = PreferenceDataStoreFactory.create(
+            migrations = listOf(SettingsLegacyMigration),
+            scope = backgroundScope,
+            produceFile = { file }
+        )
+        val settings = SettingsRepository(migratingStore).settingsFlow.first()
+
+        assertFalse(settings.soundEnabled)
+        assertEquals(AppLanguage.FRENCH, settings.language)
+        assertEquals(setOf(SettingsRepository.APP_SETTINGS_JSON), migratingStore.data.first().asMap().keys)
+    }
+
+    @Test
+    fun writes_storeOnlyTheJsonBlob() = testScope.runTest {
+        repository.setSoundEnabled(false)
+        repository.setAppLanguage(AppLanguage.GERMAN)
+
+        assertEquals(setOf(SettingsRepository.APP_SETTINGS_JSON), dataStore.data.first().asMap().keys)
     }
 
     @Test

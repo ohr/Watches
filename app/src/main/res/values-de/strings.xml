@@ -188,9 +188,9 @@
     <string name="cd_help">Hilfe</string>
     <string name="dialog_help_title">Hilfe &amp; Kurzanleitung</string>
     <string name="help_vol_keys_title">Lautstärketasten</string>
-    <string name="help_vol_keys_desc">Lauter = Alle starten / Rundenzeit für fokussierte Stoppuhr\nLeiser = Fokussierte Stoppuhr stoppen / Alle zurücksetzen, wenn gestoppt</string>
+    <string name="help_vol_keys_desc">Lauter = Alle starten / Rundenzeit für fokussierte Stoppuhr\nLeiser = Fokussierte Stoppuhr stoppen / Gedrückt halten, um alle zurückzusetzen, wenn gestoppt</string>
     <string name="help_hardware_keys_title">Lautstärketasten</string>
-    <string name="help_hardware_keys_desc">Lauter = Alle starten / Rundenzeit für fokussierte Stoppuhr\nLeiser = Fokussierte Stoppuhr stoppen / Alle zurücksetzen, wenn gestoppt</string>
+    <string name="help_hardware_keys_desc">Lauter = Alle starten / Rundenzeit für fokussierte Stoppuhr\nLeiser = Fokussierte Stoppuhr stoppen / Gedrückt halten, um alle zurückzusetzen, wenn gestoppt</string>
     <string name="help_reset_title">Zurücksetzen-Steuerung</string>
     <string name="help_reset_desc">Kurz drücken: Setzt die Anzeigezeit auf 0 zurück und bereitet einen neuen Lauf vor (Lauf 1, Lauf 2, …).\nLange drücken: Löscht alle Läufe und den Rundenverlauf vollständig.</string>
     <string name="help_reset_button_title">Zurücksetzen-Steuerung</string>
@@ -225,4 +225,14 @@
     <string name="about_community_note">Entwickelt mit Leidenschaft für Trainer. Fehlerberichte, Verbesserungsvorschläge und Pull Requests (PRs) sind herzlich willkommen!</string>
     <string name="about_licenses_header">Drittanbieter Open-Source-Lizenzen</string>
     <string name="about_licenses_unavailable">Bibliotheks-Lizenzinformationen sind nicht verfügbar.</string>
+    <string name="hint_hold_volume_down_to_reset">Leiser-Taste gedrückt halten, um alle zurückzusetzen</string>
+    <string name="notification_channel_running">Laufende Stoppuhren</string>
+    <string name="notification_channel_running_desc">Zeigt laufende Stoppuhren mit Runden- und Stopp-Steuerung</string>
+    <string name="notification_running_count">%1$d von %2$d laufen</string>
+    <string name="notification_last_lap">Runde %1$d: %2$s</string>
+    <string name="notification_action_lap">Runde</string>
+    <string name="notification_action_stop">Stopp</string>
+    <string name="notification_action_stop_all">Alle stoppen</string>
+    <string name="setting_running_notification">Benachrichtigung bei laufender Zeit</string>
+    <string name="setting_running_notification_desc">Laufende Stoppuhren mit Runden-/Stopp-Steuerung in einer Benachrichtigung anzeigen und die Zeitmessung im Hintergrund aktiv halten</string>
 </resources>

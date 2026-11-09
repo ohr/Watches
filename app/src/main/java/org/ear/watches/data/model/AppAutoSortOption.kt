@@ -13,10 +13,9 @@ enum class AppAutoSortOption(
     NONE("none"),
     BY_FASTEST_LAP(
         "fastest_lap",
-        compareBy { watch ->
-            if (watch.currentRunLaps.isEmpty()) 0L
-            else watch.calculateExpectedNextLapTime()
-        }
+        // Zero-lap watches first, then by absolute expected next-lap time so that
+        // watches started at different times are compared on the same timeline.
+        compareBy { watch -> watch.calculateExpectedNextLapAtNanos() ?: Long.MIN_VALUE }
     ),
     BY_NAME(
         "by_name",

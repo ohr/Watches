@@ -43,6 +43,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -84,6 +85,8 @@ fun MainStopwatchScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    // Configuration-aware (e.g. language changes), unlike context.resources.
+    val resources = LocalResources.current
     val defaultPrefix = stringResource(R.string.default_athlete_prefix)
 
     val haptics = feedbackManager ?: remember(context) { FeedbackManager(context) }
@@ -114,7 +117,7 @@ fun MainStopwatchScreen(
                 onSuccess = { count ->
                     Toast.makeText(
                         context,
-                        context.getString(R.string.import_success_toast, count),
+                        resources.getString(R.string.import_success_toast, count),
                         Toast.LENGTH_SHORT
                     ).show()
                 },
@@ -401,6 +404,7 @@ fun MainStopwatchScreen(
 
                         StopwatchTile(
                             watch = watch,
+                            isFocused = watch.id == uiState.activeFocusedWatchId,
                             timePrecision = uiState.settings.timePrecision,
                             runningDisplayPrecision = uiState.settings.runningDisplayPrecision,
                             tickerFlow = viewModel.tickerFlow,
@@ -476,6 +480,7 @@ fun MainStopwatchScreen(
             onSetAutoSortOption = { viewModel.setAutoSortOption(it) },
             onToggleAutoSort = { viewModel.toggleAutoSort() },
             onToggleKeepScreenOn = { viewModel.toggleKeepScreenOn() },
+            onToggleRunningNotification = { viewModel.toggleRunningNotification() },
             onToggleDynamicColor = { viewModel.toggleDynamicColor() },
             onSetPrecision = { viewModel.setPrecision(it) },
             onSetRunningDisplayPrecision = { viewModel.setRunningDisplayPrecision(it) },
@@ -544,7 +549,7 @@ fun MainStopwatchScreen(
                 viewModel.confirmImportReplace()
                 Toast.makeText(
                     context,
-                    context.getString(R.string.import_success_toast, count),
+                    resources.getString(R.string.import_success_toast, count),
                     Toast.LENGTH_SHORT
                 ).show()
             },
@@ -553,7 +558,7 @@ fun MainStopwatchScreen(
                 viewModel.confirmImportAppend()
                 Toast.makeText(
                     context,
-                    context.getString(R.string.import_success_toast, count),
+                    resources.getString(R.string.import_success_toast, count),
                     Toast.LENGTH_SHORT
                 ).show()
             },

@@ -63,6 +63,7 @@ fun SettingsDialog(
     onSetAutoSortOption: (AppAutoSortOption) -> Unit = {},
     onToggleAutoSort: () -> Unit = {},
     onToggleKeepScreenOn: () -> Unit = {},
+    onToggleRunningNotification: () -> Unit = {},
     onToggleDynamicColor: () -> Unit = {},
     onSetPrecision: (AppPrecision) -> Unit,
     onSetRunningDisplayPrecision: (AppPrecision) -> Unit = {},
@@ -197,6 +198,16 @@ fun SettingsDialog(
                     description = stringResource(R.string.setting_keep_screen_on_desc),
                     checked = settings.keepScreenOnWhileRunning,
                     onToggle = onToggleKeepScreenOn
+                )
+
+                HorizontalDivider()
+
+                // Running-notification / background service switch
+                SettingSwitchRow(
+                    title = stringResource(R.string.setting_running_notification),
+                    description = stringResource(R.string.setting_running_notification_desc),
+                    checked = settings.showRunningNotification,
+                    onToggle = onToggleRunningNotification
                 )
 
                 HorizontalDivider()

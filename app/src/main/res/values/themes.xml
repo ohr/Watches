@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.Watches" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.Watches" parent="Theme.AppCompat.DayNight.NoActionBar" />
 
     <!-- Splash Screen Theme using androidx.core:core-splashscreen -->
     <style name="Theme.Watches.Starting" parent="Theme.SplashScreen">

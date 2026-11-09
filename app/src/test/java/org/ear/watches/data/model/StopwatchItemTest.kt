@@ -235,4 +235,47 @@ class StopwatchItemTest {
 
         assertEquals(listOf("Alice", "bob", "charlie"), sorted.map { it.name })
     }
+
+    @Test
+    fun repeatedShortResets_doNotGrowRunHistory() {
+        var watch = StopwatchItem(name = "A", pastelColorHex = 1L)
+            .start(1_000_000_000L, 1L)
+            .pause(2_000_000_000L)
+        repeat(5) { watch = watch.reset(3_000_000_000L + it) }
+
+        // One finished run plus a single prepared (unstarted) run, regardless of how often reset is pressed.
+        assertEquals(2, watch.runs.size)
+        assertTrue(watch.runs.last().isUnstarted)
+
+        // Starting reuses the prepared run instead of appending another one.
+        watch = watch.start(4_000_000_000L, 2L)
+        assertEquals(2, watch.runs.size)
+        assertEquals(4_000_000_000L, watch.activeRun!!.startTimeNanos)
+    }
+
+    @Test
+    fun lap_onStoppedWatch_isNoOp() {
+        val idle = StopwatchItem(name = "A", pastelColorHex = 1L)
+        assertEquals(idle, idle.lap(5_000_000_000L))
+
+        val paused = idle.start(1_000_000_000L, 1L).pause(2_000_000_000L)
+        assertEquals(paused, paused.lap(5_000_000_000L))
+    }
+
+    @Test
+    fun defaultPalette_containsOnlyPastelColors() {
+        // Every channel of a pastel tone is reasonably light (guards against typos like 0xFFF48F11).
+        StopwatchItem.DEFAULT_PASTEL_COLORS.forEach { argb ->
+            val channels = listOf((argb shr 16) and 0xFF, (argb shr 8) and 0xFF, argb and 0xFF)
+            assertTrue(channels.min() >= 0x80, "Not pastel: ${argb.toString(16)}")
+        }
+    }
+
+    @Test
+    fun legacyJsonWithIsFocusedField_stillDecodes() {
+        val legacy = """{"id":"x","name":"Old","pastelColorHex":1,"isRunning":false,"runs":[],"isFocused":true}"""
+        val decoded = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+            .decodeFromString(StopwatchItem.serializer(), legacy)
+        assertEquals("Old", decoded.name)
+    }
 }

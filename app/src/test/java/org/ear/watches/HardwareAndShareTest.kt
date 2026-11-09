@@ -73,13 +73,15 @@ class HardwareAndShareTest {
         viewModel.lapStopwatch(watch1Id)
         assertEquals(1, viewModel.uiState.value.stopwatches[1].currentRunLaps.size)
 
-        // 3. Now all watches have laps: next volume up cycles round-robin from Runner 1 (index 1) to Runner 0 (index 0)
+        // 3. The user explicitly highlights Runner 1: Volume Up laps the highlighted watch,
+        //    even though Runner 0 is predicted to finish its next lap sooner.
         viewModel.setFocusedWatch(watch1Id)
         timeProvider.advanceTimeBy(4_000_000_000L)
         viewModel.handleVolumeUp()
 
-        val watch0Laps2 = viewModel.uiState.value.stopwatches[0].currentRunLaps
-        assertEquals(2, watch0Laps2.size)
+        val state = viewModel.uiState.value
+        assertEquals(2, state.stopwatches.first { it.id == watch1Id }.currentRunLaps.size)
+        assertEquals(1, state.stopwatches.first { it.id != watch1Id }.currentRunLaps.size)
     }
 
     @Test
@@ -99,8 +101,9 @@ class HardwareAndShareTest {
         viewModel.handleVolumeDown()
         assertFalse(viewModel.uiState.value.stopwatches[1].isRunning)
 
-        // Volume Down when all stopped -> Resets all
-        viewModel.handleVolumeDown()
+        // Volume Down when all stopped -> short press does nothing, long press resets all
+        assertFalse(viewModel.handleVolumeDown())
+        assertTrue(viewModel.handleVolumeDownLongPress())
         val now = timeProvider.currentTimeNanos()
         assertEquals(0L, viewModel.uiState.value.stopwatches[0].getElapsedMillis(now))
         assertEquals(0L, viewModel.uiState.value.stopwatches[1].getElapsedMillis(now))

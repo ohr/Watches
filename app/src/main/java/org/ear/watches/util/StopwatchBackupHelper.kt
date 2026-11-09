@@ -43,7 +43,6 @@ object StopwatchBackupHelper {
         val normalized = stopwatches.map { watch ->
             watch.copy(
                 isRunning = false,
-                isFocused = false,
                 runs = watch.runs.map { run ->
                     if (run.isRunning) {
                         run.copy(
@@ -154,7 +153,6 @@ object StopwatchBackupHelper {
                     pastelColorHex = safeColor,
                     isRunning = false,
                     runs = sanitizedRuns,
-                    isFocused = false,
                 )
             }
 

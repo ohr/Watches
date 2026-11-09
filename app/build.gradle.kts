@@ -4,7 +4,6 @@ import java.io.FileInputStream
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.google.devtools.ksp)
     alias(libs.plugins.jetbrains.kotlin.plugin.serialization)
     alias(libs.plugins.aboutlibraries)
 }
@@ -45,7 +44,7 @@ android {
     defaultConfig {
         applicationId = "org.ear.watches"
         minSdk = 30
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0.0"
         resValue("string", "app_version", "\"${versionName}\"")
@@ -68,6 +67,13 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+    bundle {
+        language {
+            // Ship all translations: the in-app language picker needs them even if the
+            // device's system language differs (otherwise Play only installs the system one).
+            enableSplit = false
+        }
     }
     buildFeatures {
         compose = true
@@ -107,9 +113,7 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.aboutlibraries.compose.m3)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.compose.adaptive)
-    implementation(libs.androidx.compose.adaptive.layout)
-    implementation(libs.androidx.compose.adaptive.navigation3)
+    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.compose.material3)
@@ -122,11 +126,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
-    implementation(libs.androidx.navigation3.runtime)
-    implementation(libs.androidx.navigation3.ui)
-    implementation(libs.androidx.room.ktx)
-    implementation(libs.androidx.room.runtime)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.core)
@@ -145,5 +144,4 @@ dependencies {
     androidTestImplementation(libs.androidx.runner)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
-    "ksp"(libs.androidx.room.compiler)
 }

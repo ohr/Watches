@@ -9,13 +9,8 @@
 -keep class kotlinx.serialization.** { *; }
 
 # Keeping models for Moshi or Retrofit if needed
--keepclassmembers class * {
-    @com.squareup.moshi.Json *;
-}
--keep class com.squareup.moshi.** { *; }
 
 # Keep navigation rules
--keep class androidx.navigation.** { *; }
 
 # Keep ViewModel rules
 -keep class androidx.lifecycle.ViewModel { *; }

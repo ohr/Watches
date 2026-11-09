@@ -59,6 +59,7 @@ fun StopwatchTile(
     onOpenDetails: (StopwatchItem) -> Unit,
     onSelectFocus: (String) -> Unit,
     modifier: Modifier = Modifier,
+    isFocused: Boolean = false,
     runningDisplayPrecision: AppPrecision = timePrecision,
     onFullReset: (String) -> Unit = onReset,
     onNameSession: (String) -> Unit = {},
@@ -66,7 +67,6 @@ fun StopwatchTile(
 ) {
     var showCurrentLapTime by rememberSaveable { mutableStateOf(false) }
 
-    val isFocused = watch.isFocused
     val animatedBorderWidth by animateDpAsState(
         targetValue = if (isFocused) StopwatchTileDefaults.FocusBorderWidth else 1.dp,
         label = "animatedBorderWidth"
@@ -140,6 +140,7 @@ fun StopwatchTile(
         ) {
             StopwatchTileHeader(
                 watch = watch,
+                isFocused = isFocused,
                 darkContentColor = darkContentColor,
                 autoSortOption = autoSortOption,
                 onEdit = onEdit,
@@ -187,11 +188,11 @@ fun StopwatchTilePreview() {
     WatchesTheme {
         Box(modifier = Modifier.padding(16.dp)) {
             StopwatchTile(
+                isFocused = true,
                 watch = StopwatchItem(
                     name = "Runner 1",
                     pastelColorHex = 0xFF90CAF9L,
                     isRunning = true,
-                    isFocused = true,
                     runs = listOf(
                         RunSession(
                             runIndex = 1,

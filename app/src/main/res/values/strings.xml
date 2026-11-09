@@ -188,9 +188,9 @@
     <string name="cd_help">Help</string>
     <string name="dialog_help_title">Help &amp; Quick Guide</string>
     <string name="help_vol_keys_title">Hardware Volume Buttons</string>
-    <string name="help_vol_keys_desc">Volume+ = Start All / Lap split for focused watch\nVolume- = Stop focused watch / Reset all when stopped</string>
+    <string name="help_vol_keys_desc">Volume+ = Start All / Lap split for focused watch\nVolume- = Stop focused watch / Hold to reset all when stopped</string>
     <string name="help_hardware_keys_title">Hardware Volume Buttons</string>
-    <string name="help_hardware_keys_desc">Volume+ = Start All / Lap split for focused watch\nVolume- = Stop focused watch / Reset all when stopped</string>
+    <string name="help_hardware_keys_desc">Volume+ = Start All / Lap split for focused watch\nVolume- = Stop focused watch / Hold to reset all when stopped</string>
     <string name="help_reset_title">Reset Button Controls</string>
     <string name="help_reset_desc">Short tap: Resets display time to 0 and prepares a new run session (Run 1, Run 2, …).\nLong press: Performs a complete wipe of all run sessions and lap history.</string>
     <string name="help_reset_button_title">Reset Button Controls</string>
@@ -225,4 +225,14 @@
     <string name="about_community_note">Built with passion for coaches. Bug reports, feature suggestions, and Pull Requests (PRs) are always welcome!</string>
     <string name="about_licenses_header">Third-Party Open Source Libraries</string>
     <string name="about_licenses_unavailable">Library license information is unavailable.</string>
+    <string name="hint_hold_volume_down_to_reset">Hold Volume− to reset all watches</string>
+    <string name="notification_channel_running">Running stopwatches</string>
+    <string name="notification_channel_running_desc">Shows running stopwatches with Lap and Stop controls</string>
+    <string name="notification_running_count">%1$d of %2$d running</string>
+    <string name="notification_last_lap">Lap %1$d: %2$s</string>
+    <string name="notification_action_lap">Lap</string>
+    <string name="notification_action_stop">Stop</string>
+    <string name="notification_action_stop_all">Stop all</string>
+    <string name="setting_running_notification">Running Notification</string>
+    <string name="setting_running_notification_desc">Show running stopwatches with Lap/Stop controls in a notification and keep timing alive in the background</string>
 </resources>

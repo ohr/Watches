@@ -16,8 +16,7 @@ data class StopwatchItem(
     val name: String,
     val pastelColorHex: Long,
     val isRunning: Boolean = false,
-    val runs: List<RunSession> = emptyList(),
-    val isFocused: Boolean = false
+    val runs: List<RunSession> = emptyList()
 ) {
     /**
      * Retrieves the current or latest active [RunSession], or `null` if no runs exist.
@@ -120,6 +119,21 @@ data class StopwatchItem(
         val lastTotalTime = currentRunLaps.last().totalTimeNanos
         val lapCount = currentRunLaps.size
         return lastTotalTime + (lastTotalTime / lapCount)
+    }
+
+    /**
+     * Predicts the absolute monotonic timestamp (in nanoseconds, same clock as [RunSession.startTimeNanos])
+     * at which the next lap of the active run is expected to complete.
+     *
+     * Unlike [calculateExpectedNextLapTime], which is relative to the start of each watch's own run, this
+     * value is comparable across watches that were started at different times (staggered starts).
+     *
+     * @return The expected absolute completion timestamp, or `null` if the active run has no laps yet.
+     */
+    fun calculateExpectedNextLapAtNanos(): Long? {
+        val run = activeRun ?: return null
+        if (run.laps.isEmpty()) return null
+        return run.startTimeNanos + calculateExpectedNextLapTime()
     }
 
     /**
@@ -239,12 +253,8 @@ data class StopwatchItem(
      * @return A new [StopwatchItem] instance containing the newly recorded lap.
      */
     fun lap(nowNanos: Long): StopwatchItem {
-        if (!isRunning) return this
-        val currentRun = activeRun ?: RunSession(
-            runIndex = 1,
-            startTimeNanos = nowNanos,
-            startTimeMillis = nowNanos / 1_000_000L
-        )
+        // A running watch always has an active run (created by start()).
+        val currentRun = activeRun?.takeIf { isRunning } ?: return this
         val currentRunTime = (nowNanos - currentRun.startTimeNanos).coerceAtLeast(0L)
         val lastLap = currentRun.laps.lastOrNull()
         val lastTotalTime = lastLap?.totalTimeNanos ?: 0L
@@ -258,12 +268,7 @@ data class StopwatchItem(
         )
         val updatedLaps = currentRun.laps + newLap
         val updatedRun = currentRun.copy(laps = updatedLaps)
-        val newRuns = if (runs.isNotEmpty()) {
-            runs.dropLast(1) + updatedRun
-        } else {
-            listOf(updatedRun)
-        }
-        return copy(runs = newRuns)
+        return copy(runs = runs.dropLast(1) + updatedRun)
     }
 
     /**
@@ -334,7 +339,7 @@ data class StopwatchItem(
             0xFFCE93D8L, // Pastel Purple
             0xFF80CBC4L, // Pastel Teal
             0xFFFFAB91L, // Pastel Orange
-            0xFFF48F11L, // Pastel Coral
+            0xFFF48FB1L, // Pastel Pink
             0xFFB0BEC5L, // Pastel Blue Grey
             0xFFB39DDBL  // Pastel Deep Purple
         )
@@ -343,7 +348,8 @@ data class StopwatchItem(
          * Calculates focus selection based on running status, lap history, and predictive next-lap completion algorithms.
          *
          * Prioritizes currently running stopwatches, favoring those with zero recorded laps.
-         * For watches with laps recorded, selects the watch with the lowest expected next-lap completion time.
+         * For watches with laps recorded, selects the watch whose next lap is expected to complete soonest
+         * (absolute time, see [calculateExpectedNextLapAtNanos]).
          *
          * @param stopwatches List of stopwatches to evaluate.
          * @param currentFocusedId Currently focused stopwatch ID, if any.
@@ -368,10 +374,27 @@ data class StopwatchItem(
             }
 
             val bestWatch = candidates.minByOrNull { watch ->
-                watch.calculateExpectedNextLapTime()
+                watch.calculateExpectedNextLapAtNanos() ?: Long.MAX_VALUE
             }
 
             return bestWatch?.id ?: currentFocusedId ?: stopwatches.firstOrNull()?.id
+        }
+
+        /**
+         * Resolves the running watch that a single "lap"/"stop" control (volume keys, notification
+         * actions) should act on: the focused watch if it is running, otherwise the running watch
+         * predicted to lap next, otherwise the first running watch.
+         *
+         * @return The target watch ID, or `null` if no watch is running.
+         */
+        fun resolveTargetWatchId(
+            stopwatches: List<StopwatchItem>,
+            focusedId: String?
+        ): String? {
+            fun String.ifRunning() = takeIf { id -> stopwatches.any { it.id == id && it.isRunning } }
+            return focusedId?.ifRunning()
+                ?: calculateNextFocusedWatchId(stopwatches, focusedId)?.ifRunning()
+                ?: stopwatches.firstOrNull { it.isRunning }?.id
         }
 
         /**

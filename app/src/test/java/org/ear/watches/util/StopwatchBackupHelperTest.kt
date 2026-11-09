@@ -20,7 +20,6 @@ class StopwatchBackupHelperTest {
             name = "Runner Alpha",
             pastelColorHex = 0xFFEF9A9AL,
             isRunning = true,
-            isFocused = true,
             runs = listOf(
                 RunSession(
                     runIndex = 1,
@@ -63,7 +62,6 @@ class StopwatchBackupHelperTest {
         assertEquals("Runner Alpha", restoredWatch.name)
         assertEquals(0xFFEF9A9AL, restoredWatch.pastelColorHex)
         assertFalse(restoredWatch.isRunning)
-        assertFalse(restoredWatch.isFocused)
         assertEquals(1, restoredWatch.runs.size)
 
         val restoredRun = restoredWatch.runs[0]

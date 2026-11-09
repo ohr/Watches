@@ -22,6 +22,7 @@ data class AppSettings(
     val fontSizeScale: AppFontSize = AppFontSize.NORMAL,
     val keepScreenOnWhileRunning: Boolean = true,
     val useDynamicColor: Boolean = true,
+    val showRunningNotification: Boolean = true,
     val proposedAthleteNames: List<String> = emptyList(),
     val proposedSessionNames: List<String> = emptyList()
 )

@@ -78,7 +78,6 @@ class StopwatchViewModelTest {
         val watch = state.stopwatches.first()
         assertEquals("Athlete 1", watch.name)
         assertEquals(watch.id, state.activeFocusedWatchId)
-        assertTrue(watch.isFocused)
     }
 
     @Test
@@ -92,8 +91,6 @@ class StopwatchViewModelTest {
         assertEquals("Runner 3", state.stopwatches[2].name)
 
         assertEquals(state.stopwatches[0].id, state.activeFocusedWatchId)
-        assertTrue(state.stopwatches[0].isFocused)
-        assertFalse(state.stopwatches[1].isFocused)
     }
 
     @Test
@@ -219,7 +216,6 @@ class StopwatchViewModelTest {
         val state2 = viewModel.uiState.value
         assertEquals(1, state2.stopwatches.size)
         assertEquals(id1, state2.activeFocusedWatchId)
-        assertTrue(state2.stopwatches.first().isFocused)
     }
 
     @Test
@@ -394,10 +390,11 @@ class StopwatchViewModelTest {
         timeProvider.advanceTimeBy(40_000_000_000L)
         viewModel.lapStopwatch(aliceId)
 
-        // Reset Bob and record lap at earlier time (20s)
+        // Restart Bob 40s later and record a 15s lap: expected next lap at 40+30 = 70s,
+        // i.e. before Alice's (expected at 80s) on the shared timeline.
         viewModel.resetStopwatchFull(bobId)
         viewModel.startStopwatch(bobId)
-        timeProvider.advanceTimeBy(20_000_000_000L)
+        timeProvider.advanceTimeBy(15_000_000_000L)
         viewModel.lapStopwatch(bobId)
 
         // Set auto-sort BY_FASTEST_LAP
@@ -407,8 +404,8 @@ class StopwatchViewModelTest {
         var sortedList = viewModel.uiState.value.stopwatches
         assertEquals(3, sortedList.size)
         // 1st: Charlie (0-lap watch at top)
-        // 2nd: Bob (1 lap, expected next 40s)
-        // 3rd: Alice (1 lap, expected next 80s)
+        // 2nd: Bob (1 lap, expected next at 70s)
+        // 3rd: Alice (1 lap, expected next at 80s)
         assertEquals(charlieId, sortedList[0].id)
         assertEquals(bobId, sortedList[1].id)
         assertEquals(aliceId, sortedList[2].id)
@@ -444,9 +441,11 @@ class StopwatchViewModelTest {
         viewModel.handleVolumeDown()
         assertFalse(viewModel.uiState.value.stopwatches.find { it.id == id1 }!!.isRunning)
 
-        // Now all stopped. Volume Down resets all
+        // Now all stopped. A short press does nothing, a long press resets all
         timeProvider.advanceTimeBy(5_000_000_000L)
-        viewModel.handleVolumeDown()
+        assertFalse(viewModel.handleVolumeDown())
+        assertTrue(viewModel.uiState.value.stopwatches.all { it.allLaps.isEmpty() && it.runs.isNotEmpty() })
+        assertTrue(viewModel.handleVolumeDownLongPress())
         val now = timeProvider.currentTimeNanos()
         assertEquals(0L, viewModel.uiState.value.stopwatches[0].getElapsedMillis(now))
         assertEquals(0L, viewModel.uiState.value.stopwatches[1].getElapsedMillis(now))
@@ -792,7 +791,6 @@ class StopwatchViewModelTest {
         assertEquals("Charlie", state.stopwatches[2].name)
 
         assertEquals(state.stopwatches[0].id, state.activeFocusedWatchId)
-        assertTrue(state.stopwatches[0].isFocused)
     }
 
     @Test

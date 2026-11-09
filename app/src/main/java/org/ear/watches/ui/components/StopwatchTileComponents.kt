@@ -86,6 +86,7 @@ internal object StopwatchTileDefaults {
 @Composable
 internal fun StopwatchTileHeader(
     watch: StopwatchItem,
+    isFocused: Boolean,
     darkContentColor: Color,
     autoSortOption: AppAutoSortOption,
     onEdit: (StopwatchItem) -> Unit,
@@ -108,6 +109,7 @@ internal fun StopwatchTileHeader(
 
         TileHeaderActionGroup(
             watch = watch,
+            isFocused = isFocused,
             darkContentColor = darkContentColor,
             onOpenDetails = onOpenDetails,
             onDelete = onDelete
@@ -158,12 +160,13 @@ private fun TileTitleGroup(
 @Composable
 private fun TileHeaderActionGroup(
     watch: StopwatchItem,
+    isFocused: Boolean,
     darkContentColor: Color,
     onOpenDetails: (StopwatchItem) -> Unit,
     onDelete: (String) -> Unit
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        if (watch.isFocused) {
+        if (isFocused) {
             FocusBadge()
             Spacer(modifier = Modifier.width(4.dp))
         }
